@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import '../../../core/utils/message_handler.dart';
+import '../../../core/utils/snackbar_message_model.dart';
 import '../../../core/values/routes.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 import 'auth_storage_controller.dart';
@@ -9,28 +11,32 @@ class AuthController extends GetxController {
       Get.find<AuthStorageController>();
 
   final isLoading = false.obs;
-  final message = ''.obs;
-  final stateMessage = ''.obs;
-
-  String get messageValue => message.value;
-  String get stateMessageValue => stateMessage.value;
+  final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
   AuthController(this.repository);
+
+  @override
+  void onInit() {
+    super.onInit();
+    MessageHandler.setupSnackbarListener(message);
+  }
 
   Future<void> login(String email, String password) async {
     try {
       isLoading.value = true;
-      message.value = '';
-      stateMessage.value = '';
 
       final response = await repository.login(email, password);
 
       await _authStorageController.saveAuthResponse(response);
 
+      Get.closeAllSnackbars();
       Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
     } catch (e) {
-      message.value = e.toString().replaceAll("Exception:", "");
-      stateMessage.value = 'error';
+
+      message.update((val) {
+        val?.message = e.toString().replaceAll("Exception:", "");
+        val?.state = 'error';
+      });
     } finally {
       isLoading.value = false;
     }
@@ -39,25 +45,21 @@ class AuthController extends GetxController {
   Future<void> forgotPassword(String email) async {
     try {
       isLoading.value = true;
-      message.value = '';
-      stateMessage.value = '';
 
       await repository.forgotPassword(email);
 
-      // message.value =
-      //     'Se envio un E-Mail con indicaciones para restablecer la contraseña.';
-      // stateMessage.value = 'success';
+      message.update((val) {
+        val?.message = 'Se envio un E-Mail con indicaciones para restablecer la contraseña.';
+        val?.state = 'success';
+      });
 
     } catch (e) {
-      message.value = e.toString().replaceAll("Exception:", "");
-      stateMessage.value = 'error';
+      message.update((val) {
+        val?.message = e.toString().replaceAll("Exception:", "");
+        val?.state = 'error';
+      });
     } finally {
       isLoading.value = false;
     }
-  }
-
-  void deleteMessage() {
-    message.value = '';
-    stateMessage.value = '';
   }
 }

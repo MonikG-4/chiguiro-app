@@ -17,10 +17,10 @@ class AuthRepository implements IAuthRepository {
         throw Exception(error?.message ?? 'Error desconocido');
       }
 
-      if (result.data == null || result.data!['login'] == null) {
+      if (result.data == null || result.data!['pollsterLogin'] == null) {
         throw Exception('Datos de login inválidos');
       }
-      return AuthResponse.fromJson(result.data!['login']);
+      return AuthResponse.fromJson(result.data!['pollsterLogin']);
     } catch (e) {
       throw Exception('Error en el login: $e');
     }
