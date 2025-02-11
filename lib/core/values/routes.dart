@@ -3,7 +3,7 @@ class Routes {
   static const DASHBOARD_SURVEYOR = '/dashboard-surveyor';
   static const SURVEY_DETAIL = '/survey-detail';
   static const SURVEY_WITHOUT_RESPONSE = '/survey-without-response';
-  static const SURVEY_QUESTIONS = '/survey-questions';
+  static const SURVEY = '/survey';
 
   // All Roles
   static const LOGIN = '/login';

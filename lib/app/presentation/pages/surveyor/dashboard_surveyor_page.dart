@@ -11,10 +11,25 @@ import 'widgets/surveyor_balance_card.dart';
 import 'widgets/profile_header.dart';
 
 class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
-  const DashboardSurveyorPage({super.key});
+  DashboardSurveyorPage({super.key});
+
+  final storageController = Get.find<AuthStorageController>();
 
   @override
   Widget build(BuildContext context) {
+
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+      final int projectId = storageController.authResponse.value?.projectId ?? 0;
+
+      if (projectId == 0) {
+        Text("Error: No se encontró el Project ID");
+      }
+
+      controller.fetchSurveys(projectId);
+    });
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(178.0),
@@ -50,7 +65,8 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   }
 
   Widget _buildAppBarBackground(BuildContext context) {
-    final authController = Get.find<AuthStorageController>();
+    final name = storageController.authResponse.value?.name ?? '';
+    final surname = storageController.authResponse.value?.surname ?? '';
 
     return Container(
       decoration: const BoxDecoration(
@@ -61,9 +77,8 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
         title: ProfileHeader(
-          name:
-              'Hola ${authController.user?.name ?? ''} ${authController.user?.surname ?? ''}',
-          role: controller.surveyor.value?.role ?? '',
+          name: 'Hola $name $surname',
+          role: 'Encuestador',
           avatarPath: 'assets/images/icons/Male.png',
           onSettingsTap: () => _showSettingsModal(context),
         ),
@@ -94,7 +109,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
                   _buildSectionHeader('Historial de encuestas'),
                   const SizedBox(height: 16),
                   _buildSurveysList(
-                    controller.activeSurveys,
+                    controller.historicalSurveys,
                     isHistorical: true,
                   ),
                 ],
@@ -143,6 +158,22 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   }
 
   Widget _buildSurveysList(List<Survey> surveys, {bool isHistorical = false}) {
+    if (surveys.isEmpty) {
+      return const Center(
+        child: Card(
+          color: Colors.white,
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              "No hay encuestas disponibles",
+              style: TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Column(
       children: surveys.map((survey) {
         return SurveyCard(
@@ -155,10 +186,10 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   }
 
   void _redirectToSurvey(Survey survey) {
-    if (survey.responses > 0) {
+    if (survey.entriesCount > 0) {
       Get.toNamed(Routes.SURVEY_DETAIL, arguments: survey);
     } else {
-      Get.toNamed(Routes.SURVEY_WITHOUT_RESPONSE);
+      Get.toNamed(Routes.SURVEY_WITHOUT_RESPONSE, arguments: survey);
     }
   }
 
