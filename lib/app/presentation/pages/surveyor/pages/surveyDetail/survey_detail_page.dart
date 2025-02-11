@@ -1,67 +1,25 @@
-import 'package:chiguiro_front_app/app/presentation/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../../core/values/app_colors.dart';
+import '../../../../../../core/values/routes.dart';
 import '../../../../../domain/entities/survey.dart';
+import '../../../../controllers/detail_survey_controller.dart';
+import '../../../../widgets/primary_button.dart';
 import '../../widgets/ResponseStatusList.dart';
 import '../../widgets/profile_header.dart';
 import '../../widgets/survey_detail_card.dart';
 
-class SurveyDetail extends GetView {
+class SurveyDetailPage extends GetView<DetailSurveyController> {
   final Survey? survey;
 
-  SurveyDetail({super.key}) : survey = Get.arguments;
-  final items = [
-    ResponseStatus(
-      date: DateTime(2025, 12, 15),
-      responsePercentage: 0.4625,
-      isComplete: false,
-    ),
-    ResponseStatus(
-      date: DateTime(2025, 12, 15),
-      responsePercentage: 0.4625,
-      isComplete: true,
-    ),
-    ResponseStatus(
-      date: DateTime(2025, 12, 15),
-      responsePercentage: 0.4625,
-      isComplete: false,
-    ),
-    ResponseStatus(
-      date: DateTime(2024, 12, 13),
-      responsePercentage: 0.4625,
-      isComplete: false,
-    ),
-    ResponseStatus(
-      date: DateTime(2024, 12, 12),
-      responsePercentage: 0.4625,
-      isComplete: true,
-    ),
-    ResponseStatus(
-      date: DateTime(2025, 12, 15),
-      responsePercentage: 0.4625,
-      isComplete: true,
-    ),
-    ResponseStatus(
-      date: DateTime(2025, 12, 15),
-      responsePercentage: 0.4625,
-      isComplete: false,
-    ),
-    ResponseStatus(
-      date: DateTime(2025, 12, 13),
-      responsePercentage: 0.4625,
-      isComplete: false,
-    ),
-    ResponseStatus(
-      date: DateTime(2025, 12, 12),
-      responsePercentage: 0.4625,
-      isComplete: true,
-    ),
-  ];
+  SurveyDetailPage({super.key}) : survey = Get.arguments;
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fecthDetailSurvey(survey!.id);
+    });
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(260.0),
@@ -74,7 +32,7 @@ class SurveyDetail extends GetView {
               left: 16.0,
               right: 16.0,
               child: SurveyDetailCard(
-                responses: survey!.responses,
+                responses: survey!.entriesCount,
                 lastSurveyDate: '06. ene. 2025',
               ),
             ),
@@ -88,6 +46,8 @@ class SurveyDetail extends GetView {
   }
 
   Widget _buildAppBarBackground(BuildContext context) {
+    var logoUrl = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFe4BEwG37Mv0M724WYCTjsNP2UojEL3Oa0Q&s';
+
     return Container(
       decoration: const BoxDecoration(
         gradient: AppColors.backgroundSecondary,
@@ -99,11 +59,11 @@ class SurveyDetail extends GetView {
           icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        titleSpacing: -15, // Reduce el espacio entre el icono y el título
+        titleSpacing: -15,
         title: ProfileHeader(
           name: survey!.name,
-          role: 'Cierra el ${_formatDate(survey!.closeDate)}',
-          avatarPath: survey!.logoUrl!,
+          role: survey!.active ? 'En proceso' : 'Finazalida xxxx',
+          avatarPath: logoUrl,
         ),
       ),
     );
@@ -169,9 +129,9 @@ class SurveyDetail extends GetView {
                     ),
                   ),
                   const Divider(height: 1, color: Color(0xFFE8EDF4)),
-                  ResponseStatusList(items: items),
+                  ResponseStatusList(),
                   PrimaryButton(
-                    onPressed: null,
+                    onPressed: (() => Get.toNamed(Routes.SURVEY, arguments: survey)),
                     isLoading: false,
                     child: 'Iniciar encuesta',
                   ),
@@ -183,7 +143,7 @@ class SurveyDetail extends GetView {
     );
   }
 
-  Widget _buildSectionHeader(String title, {bool isActive = false}) {
+  Widget _buildSectionHeader(String title) {
     return Row(
       children: [
         Text(

@@ -36,17 +36,19 @@ class SurveyCard extends StatelessWidget {
   }
 
   Widget _buildLeadingIcon() {
-    return survey.logoUrl != null
-        ? Image.network(
-      survey.logoUrl!,
-      width: 60,
-      height: 60,
-      errorBuilder: (_, __, ___) => const Icon(
-        Icons.business,
-        size: 40,
-      ),
-    )
-        : const Icon(Icons.business, size: 40);
+    var logoUrl =
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFe4BEwG37Mv0M724WYCTjsNP2UojEL3Oa0Q&s';
+    return logoUrl.isEmpty
+        ? const Icon(Icons.business, size: 40)
+        : Image.network(
+            logoUrl,
+            width: 60,
+            height: 60,
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.business,
+              size: 40,
+            ),
+          );
   }
 
   Widget _buildTitle() {
@@ -65,7 +67,7 @@ class SurveyCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Cierra el ${_formatDate(survey.closeDate)}',
+          survey.active ? 'En proceso' : 'Finalizada',
           style: const TextStyle(
             fontSize: 14,
             color: AppColors.secondary,
@@ -86,7 +88,7 @@ class SurveyCard extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          '${survey.responses} respuestas',
+          '${survey.entriesCount} respuestas',
           style: TextStyle(
             fontSize: 12,
             color: isHistorical ? AppColors.secondary : AppColors.successText,
@@ -98,8 +100,18 @@ class SurveyCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     const months = [
-      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-      'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic'
     ];
     return '${date.day}. ${months[date.month - 1]}. ${date.year}';
   }
