@@ -2,10 +2,8 @@ import 'package:chiguiro_front_app/app/presentation/widgets/custom_text_button_r
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../core/values/app_colors.dart';
 import '../../../../core/values/routes.dart';
 import '../../controllers/auth_controller.dart';
-import '../../widgets/alerts_message.dart';
 import '../../widgets/bottom_pages.dart';
 import '../../widgets/custom_view_form.dart';
 import '../../widgets/primary_button.dart';
@@ -53,13 +51,7 @@ class ForgotPasswordPage extends GetView<AuthController> {
             ),
           ],
         ),
-        message: Obx(() {
-          return controller.message.value.isNotEmpty
-              ? AlertMessage<AuthController>(
-                  controller: controller,
-                )
-              : const SizedBox(height: 48);
-        }),
+
         textButton: Obx(() => Column(
               children: [
                 const SizedBox(height: 64),
@@ -82,7 +74,7 @@ class ForgotPasswordPage extends GetView<AuthController> {
   }
 
   void _handleBackNavigation() {
-    controller.deleteMessage();
+    Get.closeAllSnackbars();
     Get.offAllNamed(Routes.LOGIN);
   }
 }

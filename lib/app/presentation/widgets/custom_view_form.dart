@@ -47,12 +47,8 @@ class CustomViewForm extends StatelessWidget {
                     textAlign: TextAlign.left,
                   ),
                 ],
+                const SizedBox(height: 32),
 
-                if (message != null ) ...[
-                  const SizedBox(height: 4),
-                  message!,
-                  const SizedBox(height: 4),
-                ],
                 form,
 
                 if (textButton != null) ...[

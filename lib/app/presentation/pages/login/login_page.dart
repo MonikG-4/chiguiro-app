@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 
 import '../../../../core/values/routes.dart';
 import '../../controllers/auth_controller.dart';
-import '../../widgets/alerts_message.dart';
 import '../../widgets/bottom_pages.dart';
 import '../../widgets/custom_text_button_redirect.dart';
 import 'widgets/login_form.dart';
@@ -64,19 +63,11 @@ class LoginPage extends GetView<AuthController> {
             ],
           ),
         ),
-        message: Obx(() {
-          return controller.message.value.isNotEmpty
-              ? AlertMessage<AuthController>(
-                  controller: controller,
-                )
-              : const SizedBox(height: 32);
-        }),
         textButton: Column(
           children: [
             const SizedBox(height: 12),
             CustomTextButtonRedirect(
               onPressed: () {
-                controller.deleteMessage();
                 Get.toNamed(Routes.FORGOT_PASSWORD);
               },
               label: '¿Olvidaste la contraseña?',
