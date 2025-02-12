@@ -6,8 +6,8 @@ import '../../domain/entities/auth_response.dart';
 class AuthStorageController extends GetxController {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  var _cachedAuthResponse = Rx<AuthResponse?>(null);
-  var _cachedToken = Rx<String?>(null);
+  final _cachedAuthResponse = Rx<AuthResponse?>(null);
+  final _cachedToken = Rx<String?>(null);
   var isInitialized = false.obs;
 
   Rx<AuthResponse?> get authResponse => _cachedAuthResponse;
@@ -27,7 +27,6 @@ class AuthStorageController extends GetxController {
         _cachedToken.value = _cachedAuthResponse.value?.accessToken;
       }
 
-      print('AuthResponse: $_cachedAuthResponse');
     } finally {
       isInitialized.value = true;
     }
