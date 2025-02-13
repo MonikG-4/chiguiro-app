@@ -23,8 +23,7 @@ class DashboardSurveyorRepository implements IDashboardSurveyorRepository {
       }
 
       return [
-        Survey.fromJson(Map<String, dynamic>.from(result.data!['project'])
-          ..remove('__typename'))
+        Survey.fromJson(Map<String, dynamic>.from(result.data!['project']))
       ];
     } catch (e) {
       throw Exception('Error al obtener las encuestas: $e');

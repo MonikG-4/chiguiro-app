@@ -1,13 +1,16 @@
-import 'package:chiguiro_front_app/app/presentation/widgets/custom_text_button_redirect.dart';
-import 'package:chiguiro_front_app/app/presentation/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../../core/values/app_colors.dart';
 import '../../../../../../core/values/routes.dart';
+import '../../../../../domain/entities/survey.dart';
+import '../../../../widgets/custom_text_button_redirect.dart';
+import '../../../../widgets/primary_button.dart';
 
-class SurveyWithoutResponses extends GetView {
-  const SurveyWithoutResponses({super.key});
+class SurveyWithoutResponsesPage extends GetView {
+  final Survey? survey;
+
+  SurveyWithoutResponsesPage({super.key}) : survey = Get.arguments;
 
   @override
   Widget build(BuildContext context) {
@@ -46,8 +49,8 @@ class SurveyWithoutResponses extends GetView {
                   ),
                 ),
                 const SizedBox(height: 64),
-                const PrimaryButton(
-                    onPressed: null,
+                PrimaryButton(
+                    onPressed: (() => Get.toNamed(Routes.SURVEY, arguments: survey)),
                     isLoading: false,
                     child: 'Iniciar encuesta'
                 ),

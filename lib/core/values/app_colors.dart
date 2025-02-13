@@ -28,8 +28,6 @@ class AppColors {
   static const Color warningBackground = Color(0xFFFFF4E5);
   static const Color errorBackground = Color(0xFFFFF1F2);
 
-
-
   //Borde
   static const Color inputs = Color(0xFF748299);
   static const Color errorInputs = Color(0xFFB91C1C);
@@ -37,4 +35,10 @@ class AppColors {
   static const Color successBorder = Color(0xFF26D87B);
   static const Color warningBorder = Color(0xFFFACC15);
   static const Color errorBorder = Color(0xFFEF4444);
+
+
+  //Preguntas
+  static const Color progressBar = Color(0xFF57E9B4);
+  static const Color star = Color(0xFFF8B84E);
+  static const Color scale = Color(0xFFBEF6E1 );
 }
