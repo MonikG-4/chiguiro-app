@@ -121,9 +121,9 @@ class SurveyController extends GetxController {
       'finishedOn': DateTime.now().toString()
     };
 
-    String jsonString = JsonEncoder.withIndent('  ').convert(entryInput);
+    String jsonString = const JsonEncoder.withIndent('  ').convert(entryInput);
 
-    const int chunkSize = 800; // Tamaño del fragmento
+    const int chunkSize = 800;
     for (int i = 0; i < jsonString.length; i += chunkSize) {
       print(jsonString.substring(
           i,

@@ -38,7 +38,7 @@ class DetailSurveyController extends GetxController {
     isLoadingAnswerSurvey.value = true;
 
     try {
-      final newItems = await repository.getSurveyDetail(
+      final newItems = await repository.fetchSurveyDetail(
           surveyId, currentPage.value, pageSize);
 
       if (newItems.isEmpty) {

@@ -7,7 +7,7 @@ class DetailSurveyProvider {
 
   DetailSurveyProvider(this.client);
 
-  Future<QueryResult> getSurveyDetail(
+  Future<QueryResult> fetchSurveyDetail(
       int surveyId, int pageIndex, int pageSize) async {
     try {
       final QueryOptions options = QueryOptions(

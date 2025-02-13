@@ -6,7 +6,7 @@ import '../../../../../../core/values/routes.dart';
 import '../../../../../domain/entities/survey.dart';
 import '../../../../controllers/detail_survey_controller.dart';
 import '../../../../widgets/primary_button.dart';
-import '../../widgets/ResponseStatusList.dart';
+import 'widgets/response_status_list.dart';
 import '../../widgets/profile_header.dart';
 import '../../widgets/survey_detail_card.dart';
 

@@ -22,11 +22,6 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
 
       final int projectId = storageController.authResponse.value?.projectId ?? 0;
-
-      if (projectId == 0) {
-        Text("Error: No se encontró el Project ID");
-      }
-
       controller.fetchSurveys(projectId);
     });
 

@@ -9,7 +9,7 @@ class DashboardSurveyorProvider {
 
   DashboardSurveyorProvider(this.client);
 
-  Future<QueryResult> getActiveSurveys(int projectId) async {
+  Future<QueryResult> fetchActiveSurveys(int projectId) async {
     try {
       final QueryOptions options = QueryOptions(
         document: gql(SurveyQuery.project),

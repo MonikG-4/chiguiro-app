@@ -9,9 +9,9 @@ class DashboardSurveyorRepository implements IDashboardSurveyorRepository {
   DashboardSurveyorRepository(this.provider);
 
   @override
-  Future<List<Survey>> getActiveSurveys(int projectId) async {
+  Future<List<Survey>> fetchActiveSurveys(int projectId) async {
     try {
-      final result = await provider.getActiveSurveys(projectId);
+      final result = await provider.fetchActiveSurveys(projectId);
 
       if (result.hasException) {
         final error = result.exception?.graphqlErrors.first;

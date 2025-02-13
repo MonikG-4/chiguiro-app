@@ -8,9 +8,9 @@ class DetailSurveyRepository implements IDetailSurveyRepository {
   DetailSurveyRepository(this.provider);
 
   @override
-  Future<List<DetailSurvey>> getSurveyDetail(int surveyId, int pageIndex, int pageSize) async {
+  Future<List<DetailSurvey>> fetchSurveyDetail(int surveyId, int pageIndex, int pageSize) async {
     try {
-      final result = await provider.getSurveyDetail(surveyId, pageIndex, pageSize);
+      final result = await provider.fetchSurveyDetail(surveyId, pageIndex, pageSize);
 
       if (result.hasException) {
         final error = result.exception?.graphqlErrors.first;

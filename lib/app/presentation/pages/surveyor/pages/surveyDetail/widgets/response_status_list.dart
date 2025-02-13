@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../domain/entities/detail_survey.dart';
-import '../../../controllers/detail_survey_controller.dart';
+
+import '../../../../../../domain/entities/detail_survey.dart';
+import '../../../../../controllers/detail_survey_controller.dart';
 
 class ResponseStatusList extends StatelessWidget {
   final DetailSurveyController controller = Get.find();

@@ -29,7 +29,7 @@ class DashboardSurveyorController extends GetxController {
     isLoading.value = true;
     try {
       final futures = await Future.wait([
-        repository.getActiveSurveys(projectId),
+        repository.fetchActiveSurveys(projectId),
         repository.getHistoricalSurveys(),
         repository.getSurveyorProfile(),
       ]);
