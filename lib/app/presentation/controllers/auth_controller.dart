@@ -21,6 +21,7 @@ class AuthController extends GetxController {
     MessageHandler.setupSnackbarListener(message);
   }
 
+
   Future<void> login(String email, String password) async {
     try {
       isLoading.value = true;

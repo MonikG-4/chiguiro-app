@@ -14,7 +14,7 @@ class DetailSurveyController extends GetxController {
   final detailSurvey = <DetailSurvey>[].obs;
 
   var isLoadingAnswerSurvey = false.obs;
-  var currentPage = 1.obs;
+  var currentPage = 0.obs;
   var isLastPage = false.obs;
   final int pageSize = 10;
 
@@ -35,14 +35,16 @@ class DetailSurveyController extends GetxController {
     projectId = surveyId;
     if (isLoadingAnswerSurvey.value || isLastPage.value) return;
 
-    isLoadingAnswerSurvey.value = true;
 
     try {
+      isLoadingAnswerSurvey.value = true;
+
       final newItems = await repository.fetchSurveyDetail(
           surveyId, currentPage.value, pageSize);
 
       if (newItems.isEmpty) {
         isLastPage.value = true;
+        isLoadingAnswerSurvey.value = false;
       } else {
         detailSurvey.addAll(newItems);
         currentPage.value++;

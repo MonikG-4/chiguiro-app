@@ -1,5 +1,6 @@
-import '../entities/survey_question.dart';
+import '../entities/sections.dart';
 
 abstract class ISurveyRepository {
-  Future<List<SurveyQuestion>> fetchSurveyQuestions(int surveyId);
+  Future<List<Sections>> fetchSurveyQuestions(int surveyId);
+  Future<void> saveSurveyResults(Map<String, dynamic> entryInput, String token);
 }

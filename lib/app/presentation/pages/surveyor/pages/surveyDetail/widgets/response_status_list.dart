@@ -14,7 +14,7 @@ class ResponseStatusList extends StatelessWidget {
     return Expanded(
       child: Obx(() => ListView.separated(
         controller: controller.scrollController,
-        itemCount: controller.detailSurvey.length + 1,
+        itemCount: _getItemCount(),
         separatorBuilder: (context, index) => const Divider(
           height: 1,
           color: Color(0xFFE8EDF4),
@@ -28,6 +28,13 @@ class ResponseStatusList extends StatelessWidget {
         },
       )),
     );
+  }
+
+  int _getItemCount() {
+    if (controller.currentPage.value == 1 && controller.detailSurvey.length < controller.pageSize) {
+      return controller.detailSurvey.length;
+    }
+    return controller.detailSurvey.length + (controller.isLastPage.value ? 0 : 1);
   }
 
   Widget _buildLoadingIndicator() {

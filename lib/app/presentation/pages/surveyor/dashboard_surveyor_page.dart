@@ -99,7 +99,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
                 children: [
                   _buildSectionHeader('Mis encuestas', isActive: true),
                   const SizedBox(height: 16),
-                  _buildSurveysList(controller.activeSurveys),
+                  _buildSurveysList(controller.activeSurvey.value != null ? [controller.activeSurvey.value!] : []),
                   const SizedBox(height: 24),
                   _buildSectionHeader('Historial de encuestas'),
                   const SizedBox(height: 16),

@@ -9,7 +9,7 @@ class DashboardSurveyorRepository implements IDashboardSurveyorRepository {
   DashboardSurveyorRepository(this.provider);
 
   @override
-  Future<List<Survey>> fetchActiveSurveys(int projectId) async {
+  Future<Survey> fetchActiveSurveys(int projectId) async {
     try {
       final result = await provider.fetchActiveSurveys(projectId);
 
@@ -22,9 +22,7 @@ class DashboardSurveyorRepository implements IDashboardSurveyorRepository {
         throw Exception('No se encontraron encuestas');
       }
 
-      return [
-        Survey.fromJson(Map<String, dynamic>.from(result.data!['project']))
-      ];
+      return Survey.fromJson(result.data!['project']);
     } catch (e) {
       throw Exception('Error al obtener las encuestas: $e');
     }
