@@ -1,8 +1,8 @@
 class SurveyQuestion {
   final String id;
   final String question;
+  final String? description;
   final int sort;
-  final bool active;
   final String type;
   final bool mandatory;
   final List<String> meta;
@@ -15,8 +15,8 @@ class SurveyQuestion {
   SurveyQuestion({
     required this.id,
     required this.question,
+    this.description,
     required this.sort,
-    required this.active,
     required this.type,
     required this.mandatory,
     required this.meta,
@@ -31,8 +31,8 @@ class SurveyQuestion {
     return SurveyQuestion(
       id: json['id'],
       question: json['question'],
+      description: json['description'],
       sort: json['sort'],
-      active: json['active'],
       type: json['type'],
       mandatory: json['mandatory'],
       meta: List<String>.from(json['meta']),

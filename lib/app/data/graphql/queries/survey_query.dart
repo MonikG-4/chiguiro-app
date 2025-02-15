@@ -6,33 +6,36 @@ class SurveyQuery {
         name
         active
         entriesCount
+        geoLocation
+        voiceRecorder
       }
     }
   ''';
 
-  static String questions = r'''
-    query Questions($projectId: Long!) {
-      questions(projectId: $projectId) {
+  static String sections = r'''
+    query Sections($projectId: Long!) {
+      sections(projectId: $projectId) {
         id
-        question
-        section{
-          id
-          name
-          sort
-        }
+        name
+        description
         sort
-        active
-        type
-        mandatory
-        meta
-        meta2
-        anchorMax
-        anchorMin
-        scaleMax
-        scaleMin
-        jumpers {
-          value
-          questionNumber
+        questions{
+          id
+          question
+          description
+          sort
+          type
+          mandatory
+          meta
+          meta2
+          anchorMax
+          anchorMin
+          scaleMax
+          scaleMin
+          jumpers {
+            value
+            questionNumber
+          }
         }
       }
     }

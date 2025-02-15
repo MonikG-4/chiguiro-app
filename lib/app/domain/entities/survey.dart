@@ -5,6 +5,8 @@ class Survey {
   final DateTime? closeDate;
   final int entriesCount;
   final String? logoUrl;
+  final bool geoLocation;
+  final bool voiceRecorder;
 
   Survey({
     required this.id,
@@ -13,6 +15,8 @@ class Survey {
     this.closeDate,
     required this.entriesCount,
     this.logoUrl,
+    required this.geoLocation,
+    required this.voiceRecorder,
   });
 
   factory Survey.fromJson(Map<String, dynamic> json) {
@@ -23,6 +27,8 @@ class Survey {
       closeDate: json['closeDate'],
       entriesCount: json['entriesCount'],
       logoUrl: json['logoUrl'],
+      geoLocation: json['geoLocation'],
+      voiceRecorder: json['voiceRecorder'],
     );
   }
 
@@ -34,6 +40,8 @@ class Survey {
       'closeDate': closeDate,
       'entriesCount': entriesCount,
       'logoUrl': logoUrl,
+      'geoLocation': geoLocation,
+      'voiceRecorder': voiceRecorder,
     };
   }
 
