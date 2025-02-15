@@ -10,6 +10,7 @@ import 'core/values/routes.dart';
 
 void main() async {
   await initHiveForFlutter();
+
   await Get.putAsync<AuthStorageController>(() async {
     final controller = AuthStorageController();
     await controller.initialize();

@@ -38,7 +38,12 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.16
   flutter_secure_storage: ^9.2.3
-  fl_chart: ^0.70.1
+  geolocator: ^13.0.2
+  flutter_sound: ^9.23.1
+  path_provider: ^2.1.5
+  permission_handler: ^11.3.1
+  intl: ^0.20.2
+
 
 dev_dependencies:
   flutter_test:
