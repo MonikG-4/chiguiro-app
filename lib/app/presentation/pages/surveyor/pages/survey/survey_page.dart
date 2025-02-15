@@ -6,59 +6,125 @@ import '../../../../../domain/entities/auth_response.dart';
 import '../../../../../domain/entities/survey.dart';
 import '../../../../../presentation/controllers/survey_controller.dart';
 import '../../../../controllers/auth_storage_controller.dart';
+import '../../../../services/audio_service.dart';
+import 'widgets/audio_location_panel.dart';
 import 'widgets/custom_progress_bar.dart';
 import 'widgets/keep_alive_survey_question.dart';
 import 'widgets/question_widget_factory.dart';
 
-class SurveyPage extends StatelessWidget {
+class SurveyPage extends StatefulWidget {
   final Survey survey;
   final AuthResponse authResponse;
-  final SurveyController controller = Get.find();
 
   SurveyPage({super.key})
       : survey = Get.arguments,
         authResponse = Get.find<AuthStorageController>().authResponse.value!;
 
+  @override
+  _SurveyPageState createState() => _SurveyPageState();
+}
+
+class _SurveyPageState extends State<SurveyPage> {
+  final SurveyController controller = Get.find();
+  final audioService = Get.find<AudioService>();
   final _formKey = GlobalKey<FormState>();
 
   @override
-  Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => controller.fetchSurveyQuestions(survey.id));
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchSurveyQuestions(widget.survey.id);
+      controller.isGeoLocation = widget.survey.geoLocation;
+      controller.isVoiceRecorder = widget.survey.voiceRecorder;
 
+      if (widget.survey.voiceRecorder) {
+        audioService.startRecording();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    if (audioService.isRecording.value) {
+      audioService.stopRecording();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(survey.name),
+        title: Text(widget.survey.name),
         backgroundColor: Colors.transparent,
       ),
       backgroundColor: AppColors.background,
-      body: Obx(
-            () => controller.isLoading.value
-            ? const Center(child: CircularProgressIndicator())
-            : Stack(
-          children: [
-            _buildQuestionsForm(),
-            _buildProgressBar(),
-            _buildSubmitButton(context),
-          ],
-        ),
-      ),
+      body: Obx(() => controller.isLoading.value
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.only(top: 5.0),
+              child: Stack(
+                children: [
+                  (controller.isVoiceRecorder || controller.isGeoLocation)
+                      ? AudioLocationPanel(
+                          showLocation: widget.survey.geoLocation,
+                          showAudioRecorder: widget.survey.voiceRecorder,
+                        )
+                      : const SizedBox.shrink(),
+                  _buildQuestionsForm(),
+                  _buildProgressBar(),
+                  _buildSubmitButton(context),
+                ],
+              ),
+            )),
     );
   }
 
   Widget _buildQuestionsForm() {
     return Padding(
-      padding: const EdgeInsets.only(top: 80.0, left: 16.0, right: 16.0, bottom: 80.0),
+      padding: EdgeInsets.only(
+        top: (controller.isVoiceRecorder || controller.isGeoLocation)
+            ? 80.0
+            : 40.0,
+        left: 16.0,
+        right: 16.0,
+        bottom: 80.0,
+      ),
       child: Form(
         key: _formKey,
         child: ListView.builder(
-          itemCount: controller.questions.length,
-          itemBuilder: (context, index) {
-            final question = controller.questions[index];
-            return KeepAliveSurveyQuestion(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: QuestionWidgetFactory.createQuestionWidget(question),
-              ),
+          itemCount: controller.sections.length,
+          itemBuilder: (context, sectionIndex) {
+            final section = controller.sections[sectionIndex];
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(vertical: 8.0),
+                  padding: const EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    color: AppColors.section,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Text(
+                    section.name,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                ...section.surveyQuestion.map((question) {
+                  return KeepAliveSurveyQuestion(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child:
+                          QuestionWidgetFactory.createQuestionWidget(question),
+                    ),
+                  );
+                }),
+              ],
             );
           },
         ),
@@ -68,35 +134,27 @@ class SurveyPage extends StatelessWidget {
 
   Widget _buildProgressBar() {
     return Positioned(
-      top: 0,
+      top: (controller.isVoiceRecorder || controller.isGeoLocation) ? 50 : 0,
       left: 0,
       right: 0,
       child: Obx(
-            () {
-              final totalQuestions = controller.questions.length;
-              final answeredQuestions = controller.responses.length;
-              final progress =
+        () {
+          final totalQuestions = controller.sections.fold(
+            0,
+            (sum, section) => sum + section.surveyQuestion.length,
+          );
+          final answeredQuestions = controller.responses.length;
+          final progress =
               totalQuestions > 0 ? answeredQuestions / totalQuestions : 0.0;
 
-              return Container(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             color: AppColors.background,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 8.0),
-                Stack(
-                  children: [
-                    Container(
-                      height: 24,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.grey[300],
-                      ),
-                    ),
-                    CustomProgressBar(progress: progress),
-                  ],
-                ),
+                CustomProgressBar(progress: progress),
               ],
             ),
           );
@@ -121,9 +179,18 @@ class SurveyPage extends StatelessWidget {
     );
   }
 
-  void _submitSurvey() {
+  Future<void> _submitSurvey() async {
+    controller.saveSurveyResults(widget.survey.id, widget.authResponse.id);
+
     if (_validateAllQuestions()) {
-      controller.getSurveyResults(survey.id, authResponse.id);
+      String? audioBase64;
+      if (audioService.isRecording.value) {
+        audioBase64 = await audioService.stopRecording();
+      }
+      audioService.playRecording();
+
+      controller.setAudioBase64 = audioBase64;
+      controller.saveSurveyResults(widget.survey.id, widget.authResponse.id);
     } else {
       Get.snackbar(
         'Error',
@@ -137,14 +204,16 @@ class SurveyPage extends StatelessWidget {
   bool _validateAllQuestions() {
     if (!_formKey.currentState!.validate()) return false;
 
-    for (var question in controller.questions) {
-      final response = controller.responses[question.id];
-      if (response == null) return false;
+    for (var section in controller.sections) {
+      for (var question in section.surveyQuestion) {
+        final response = controller.responses[question.id];
+        if (response == null) return false;
 
-      if (question.type == 'Matrix') {
-        final value = response['value'] as List;
-        final subQuestions = question.meta.length;
-        if (value.length < subQuestions) return false;
+        if (question.type == 'Matrix') {
+          final value = response['value'] as List;
+          final subQuestions = question.meta.length;
+          if (value.length < subQuestions) return false;
+        }
       }
     }
     return true;

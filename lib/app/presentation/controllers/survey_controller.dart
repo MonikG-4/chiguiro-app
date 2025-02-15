@@ -1,67 +1,104 @@
 import 'dart:convert';
-
 import 'package:get/get.dart';
-
+import 'package:intl/intl.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
+import '../../domain/entities/sections.dart';
 import '../../domain/entities/survey_question.dart';
 import '../../domain/repositories/i_survey_repository.dart';
+import '../services/location_service.dart';
+import 'auth_storage_controller.dart';
 
 class SurveyController extends GetxController {
-  final ISurveyRepository repository;
-  final questions = <SurveyQuestion>[].obs;
-  var responses = <String, dynamic>{}.obs;
-  var entryInput = <String, dynamic>{}.obs;
-  var timeAnswerStart = ''.obs;
-  final isLoading = false.obs;
-
-
-
+  final ISurveyRepository _repository;
+  final LocationService _locationService = Get.find<LocationService>();
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
-  SurveyController(this.repository);
+  // Estado de la Encuesta
+  final sections = <Sections>[].obs;
+  final responses = <String, dynamic>{}.obs;
+  final isLoading = false.obs;
+
+  // Variables de Control
+  late bool isGeoLocation;
+  late bool isVoiceRecorder;
+  String? audioBase64;
+  final timeAnswerStart = DateTime.now().obs;
+
+  SurveyController(this._repository);
 
   @override
   void onInit() {
     super.onInit();
     MessageHandler.setupSnackbarListener(message);
-    timeAnswerStart.value = DateTime.now().toString();
   }
+
+  set setAudioBase64(String? value) => audioBase64 = value;
 
   Future<void> fetchSurveyQuestions(int surveyId) async {
     try {
       isLoading.value = true;
-      final response = await repository.fetchSurveyQuestions(surveyId);
-
-      questions.assignAll(response);
+      final fetchedSections = await _repository.fetchSurveyQuestions(surveyId);
+      fetchedSections.sort((a, b) => a.sort.compareTo(b.sort));
+      sections.assignAll(fetchedSections);
     } catch (e) {
-      message.update((val) {
-        val?.message = e.toString().replaceAll("Exception:", "");
-        val?.state = 'error';
-      });
+      _handleError(e);
     } finally {
       isLoading.value = false;
     }
   }
 
+  /// Validador genérico para preguntas obligatorias
   String? Function(dynamic value) validatorMandatory(SurveyQuestion question) {
     return (value) {
-      if (question.mandatory && (value == null || value.isEmpty)) {
-        return 'Este campo es obligatorio';
+      if (!question.mandatory) return null;
+
+      final responseValue = responses[question.id]?['value'];
+
+      if (responseValue == null ||
+          (responseValue is String && responseValue.isEmpty) ||
+          (responseValue is List && responseValue.isEmpty) ||
+          (question.type == 'Location' && responseValue.length < 3)) {
+        return 'Esta pregunta es obligatoria';
       }
+
       return null;
     };
   }
 
-  List<Map<String, dynamic>> saveSurveyResults(int projectId) {
-    List<Map<String, dynamic>> answers = [];
+  Future<void> saveSurveyResults(int projectId, int pollsterId) async {
+    final token = Get.find<AuthStorageController>().token;
+    final position = isGeoLocation ? await _locationService.getCurrentLocation() : null;
 
-    responses.forEach((questionId, value) {
-      Map<String, dynamic> answer = {};
+    final entryInput = {
+      'projectId': projectId,
+      'answers': _buildAnswers(),
+      if (isGeoLocation && position != null) ...{
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+      },
+      'pollsterId': pollsterId,
+      if (isVoiceRecorder) 'audio': audioBase64,
+      'startedOn': timeAnswerStart.value.toIso8601String(),
+      'finishedOn': DateTime.now().toIso8601String(),
+    };
 
-      answer['questionId'] = questionId;
+    try {
+      await _repository.saveSurveyResults(entryInput, token!);
+    } catch (e) {
+      _handleError(e);
+    }
 
-      String questionType = value['type'];
+    _printEntryInput(entryInput);
+  }
+
+  List<Map<String, dynamic>> _buildAnswers() {
+    return responses.entries.map((entry) {
+      final questionId = int.parse(entry.key);
+      final responseValue = entry.value['value'];
+      final questionType = entry.value['type'];
+
+      final Map<String, dynamic> answer = {'questionId': questionId};
 
       switch (questionType) {
         case 'Boolean':
@@ -72,64 +109,66 @@ class SurveyController extends GetxController {
         case 'Double':
         case 'Star':
         case 'Scale':
-          answer['answer'] = value['value'].toString();
+          answer['answer'] = responseValue.toString();
           break;
 
         case 'Check':
-          if (value['value'] is List) {
-            answer['checkResults'] =
-                value['value'].map((item) => item.toString()).toList();
-          }
+        case 'Location':
+          answer['checkResults'] = List<String>.from(responseValue);
+          break;
+
+        case 'Date':
+          answer['dateAnswer'] = DateFormat('yyyy-MM-dd').format(responseValue);
           break;
 
         case 'Matrix':
-          if (value['value'] is List) {
-            List<Map<String, dynamic>> matrixResults = [];
-
-            for (var subQuestion in value['value']) {
-              subQuestion.forEach((meta, result) {
-                matrixResults.add({
-                  'meta': meta,
-                  'result': result.toString(),
-                });
-              });
-            }
-
-            answer['matrixResults'] = matrixResults;
-          }
+          answer['matrixResults'] = _buildMatrixResults(responseValue);
           break;
 
-        default:
+        case 'MatrixTime':
+        case 'MatrixDouble':
+          answer['matrixResults'] = _buildMatrixTimeResults(responseValue);
           break;
       }
 
-      answers.add(answer);
-    });
-
-    return answers;
+      return answer;
+    }).toList();
   }
 
-  void getSurveyResults(int projectId, int pollsterId) {
-    Map<String, dynamic> entryInput = {
-      'projectId': projectId,
-      'answers': saveSurveyResults(projectId),
-      // 'latitude': '',
-      // 'longitude': '',
-      'pollsterId': pollsterId,
-      // 'audio': '',
-      'startedOn': timeAnswerStart.value,
-      'finishedOn': DateTime.now().toString()
-    };
+  List<Map<String, String>> _buildMatrixResults(List<dynamic> responseValue) {
+    final matrixResults = <Map<String, String>>[];
 
-    String jsonString = const JsonEncoder.withIndent('  ').convert(entryInput);
+    for (var subQuestion in responseValue) {
+      subQuestion.forEach((meta, result) {
+        matrixResults.add({'meta': meta, 'result': result.toString()});
+      });
+    }
 
+    return matrixResults;
+  }
+
+  List<Map<String, String>> _buildMatrixTimeResults(List<dynamic> responseValue) {
+    return responseValue
+        .map<Map<String, String>>((subQuestion) => {
+      'meta2': subQuestion['columna'],
+      'meta': subQuestion['fila'],
+      'result': subQuestion['respuesta'].toString(),
+    })
+        .toList();
+  }
+
+  void _handleError(Object e) {
+    message.update((val) {
+      val?.message = e.toString().replaceAll("Exception:", "");
+      val?.state = 'error';
+    });
+  }
+
+  void _printEntryInput(Map<String, dynamic> entryInput) {
+    final jsonString = const JsonEncoder.withIndent('  ').convert(entryInput);
     const int chunkSize = 800;
     for (int i = 0; i < jsonString.length; i += chunkSize) {
-      print(jsonString.substring(
-          i,
-          i + chunkSize > jsonString.length
-              ? jsonString.length
-              : i + chunkSize));
+      print(jsonString.substring(i, i + chunkSize > jsonString.length ? jsonString.length : i + chunkSize));
     }
   }
 }
