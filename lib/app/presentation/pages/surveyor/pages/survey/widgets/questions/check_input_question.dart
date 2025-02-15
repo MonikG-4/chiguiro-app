@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../../../../../../core/values/app_colors.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
+import '../custom_input.dart';
 
 class CheckInputQuestion extends StatelessWidget {
   final SurveyQuestion question;
@@ -61,55 +62,44 @@ class CheckInputQuestion extends StatelessWidget {
                   state.validate();
                 }
 
-                return GestureDetector(
+                return  CustomInput(
+                  hasError: state.hasError,
+                  hasValue: controller.responses[question.id] != null,
                   onTap: toggleSelection,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4.0),
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppColors.successBackground : Colors.transparent,
-                      border: Border.all(
-                        color: isSelected ? AppColors.successBorder : Colors.grey[300]!,
+                  isSelected: isSelected,
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          option.toString(),
+                          style: TextStyle(
+                              color: isSelected ? Colors.black : Colors.grey,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600),
+                          softWrap: true,
+                          overflow: TextOverflow.visible,
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(8.0),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Text(
-                              option.toString(),
-                              style: TextStyle(
-                                  color: isSelected ? Colors.black : Colors.grey,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600),
-                              softWrap: true,
-                              overflow: TextOverflow.visible,
-                            ),
-                          ),
-                        ),
-                        Checkbox(
-                          value: isSelected,
-                          onChanged: (_) => toggleSelection(),
-                          activeColor: AppColors.successText,
-                          fillColor: WidgetStateProperty.resolveWith<Color>(
-                                (Set<WidgetState> states) {
-                              return isSelected ? AppColors.successText : Colors.transparent;
-                            },
-                          ),
-                          side: WidgetStateBorderSide.resolveWith(
-                                (Set<WidgetState> states) {
-                              return BorderSide(
-                                color: isSelected ? AppColors.successText : Colors.grey,
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+                    Checkbox(
+                      value: isSelected,
+                      onChanged: (_) => toggleSelection(),
+                      activeColor: AppColors.successText,
+                      fillColor: WidgetStateProperty.resolveWith<Color>(
+                            (Set<WidgetState> states) {
+                          return isSelected ? AppColors.successText : Colors.transparent;
+                        },
+                      ),
+                      side: WidgetStateBorderSide.resolveWith(
+                            (Set<WidgetState> states) {
+                          return BorderSide(
+                            color: isSelected ? AppColors.successText : Colors.grey,
+                          );
+                        },
+                      ),
                     ),
-                  ),
+                  ],
                 );
               });
             }),
