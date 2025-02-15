@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../../../../../../core/values/app_colors.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
+import '../custom_input.dart';
 
 class RadioInputQuestion extends StatelessWidget {
   final SurveyQuestion question;
@@ -24,38 +25,31 @@ class RadioInputQuestion extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ...question.meta.map<Widget>((option) => Obx(() {
-              bool isSelected = controller.responses[question.id]?['value'] == option;
+                  bool isSelected =
+                      controller.responses[question.id]?['value'] == option;
 
-              void toggleSelection(String option) {
-                bool isSelected = controller.responses[question.id]?['value'] == option;
-                if (isSelected) {
-                  controller.responses.remove(question.id);
-                } else {
-                  controller.responses[question.id] = {
-                    'question': question.question,
-                    'type': question.type,
-                    'value': option,
-                  };
-                }
-                state.didChange(controller.responses[question.id]?['value']?.toString());
-                state.validate();
-              }
+                  void toggleSelection(String option) {
+                    bool isSelected =
+                        controller.responses[question.id]?['value'] == option;
+                    if (isSelected) {
+                      controller.responses.remove(question.id);
+                    } else {
+                      controller.responses[question.id] = {
+                        'question': question.question,
+                        'type': question.type,
+                        'value': option,
+                      };
+                    }
+                    state.didChange(controller.responses[question.id]?['value']
+                        ?.toString());
+                    state.validate();
+                  }
 
-
-              return GestureDetector(
-                onTap: () => toggleSelection(option),
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 4.0),
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.successBackground : Colors.transparent,
-                    border: Border.all(
-                      color: isSelected ? AppColors.successBorder : Colors.grey[300]!,
-                    ),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  return CustomInput(
+                    hasError: state.hasError,
+                    hasValue: controller.responses[question.id] != null,
+                    onTap: () => toggleSelection(option),
+                    isSelected: isSelected,
                     children: [
                       Expanded(
                         child: Padding(
@@ -78,17 +72,18 @@ class RadioInputQuestion extends StatelessWidget {
                         onChanged: (value) => toggleSelection(option),
                         activeColor: AppColors.successText,
                         fillColor: WidgetStateProperty.resolveWith<Color>(
-                              (Set<WidgetState> states) {
-                            return isSelected ? AppColors.successText : Colors.grey;
+                          (Set<WidgetState> states) {
+                            return isSelected
+                                ? AppColors.successText
+                                : Colors.grey;
                           },
                         ),
                       ),
                     ],
-                  ),
-                ),
-              );
-            })),
-            if (state.hasError && !controller.responses.containsKey(question.id))
+                  );
+                })),
+            if (state.hasError &&
+                !controller.responses.containsKey(question.id))
               Text(
                 state.errorText!,
                 style: const TextStyle(color: Colors.red),
