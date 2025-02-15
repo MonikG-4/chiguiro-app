@@ -180,42 +180,16 @@ class _SurveyPageState extends State<SurveyPage> {
   }
 
   Future<void> _submitSurvey() async {
-    controller.saveSurveyResults(widget.survey.id, widget.authResponse.id);
-
-    if (_validateAllQuestions()) {
-      String? audioBase64;
-      if (audioService.isRecording.value) {
-        audioBase64 = await audioService.stopRecording();
-      }
-      audioService.playRecording();
-
-      controller.setAudioBase64 = audioBase64;
-      controller.saveSurveyResults(widget.survey.id, widget.authResponse.id);
-    } else {
-      Get.snackbar(
-        'Error',
-        'Por favor responde todas las preguntas obligatorias',
-        backgroundColor: Colors.red[100],
-        colorText: Colors.red[900],
-      );
+    String? audioBase64;
+    if (audioService.isRecording.value) {
+      audioBase64 = await audioService.stopRecording();
     }
+
+    controller.saveSurveyResults(
+      projectId: widget.survey.id,
+      pollsterId: widget.authResponse.id,
+      audioBase64: audioBase64,
+    );
   }
 
-  bool _validateAllQuestions() {
-    if (!_formKey.currentState!.validate()) return false;
-
-    for (var section in controller.sections) {
-      for (var question in section.surveyQuestion) {
-        final response = controller.responses[question.id];
-        if (response == null) return false;
-
-        if (question.type == 'Matrix') {
-          final value = response['value'] as List;
-          final subQuestions = question.meta.length;
-          if (value.length < subQuestions) return false;
-        }
-      }
-    }
-    return true;
-  }
 }

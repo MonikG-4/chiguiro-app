@@ -32,7 +32,7 @@ class SurveyRepository implements ISurveyRepository {
   }
 
   @override
-  Future<void> saveSurveyResults(Map<String, dynamic> entryInput, String token) async {
+  Future<bool> saveSurveyResults(Map<String, dynamic> entryInput, String token) async {
     try {
       final result = await provider.saveSurveyResults(entryInput, token);
 
@@ -41,7 +41,12 @@ class SurveyRepository implements ISurveyRepository {
         throw Exception(error?.message ?? 'Error desconocido');
       }
 
-      print(result.data);
+      if (result.data == null || result.data!['entry'] == null) {
+        throw Exception('No se logro enviar la encuesta, intente nuevamente');
+      }
+
+      return result.data!['entry'].isNotEmpty;
+
     } catch (e) {
       throw Exception('Error al guardar las respuestas de la encuesta: $e');
     }

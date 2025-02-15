@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
+import '../../../core/values/routes.dart';
 import '../../domain/entities/sections.dart';
 import '../../domain/entities/survey_question.dart';
 import '../../domain/repositories/i_survey_repository.dart';
@@ -66,31 +67,54 @@ class SurveyController extends GetxController {
     };
   }
 
-  Future<void> saveSurveyResults(int projectId, int pollsterId) async {
+  Future<void> saveSurveyResults({
+    required int projectId,
+    required int pollsterId,
+    String? audioBase64,
+  }) async {
+    if (!validateAllQuestions()) {
+      message.update((val) {
+        val?.message = 'Por favor responde todas las preguntas obligatorias';
+        val?.state = 'error';
+      });
+      return;
+    }
+
     final token = Get.find<AuthStorageController>().token;
-    final position = isGeoLocation ? await _locationService.getCurrentLocation() : null;
+    final position =
+    isGeoLocation ? await _locationService.getCurrentLocation() : null;
 
     final entryInput = {
       'projectId': projectId,
+      'pollsterId': pollsterId,
       'answers': _buildAnswers(),
       if (isGeoLocation && position != null) ...{
         'latitude': position.latitude,
         'longitude': position.longitude,
       },
-      'pollsterId': pollsterId,
       if (isVoiceRecorder) 'audio': audioBase64,
       'startedOn': timeAnswerStart.value.toIso8601String(),
       'finishedOn': DateTime.now().toIso8601String(),
     };
 
     try {
-      await _repository.saveSurveyResults(entryInput, token!);
+      final isSuccess = await _repository.saveSurveyResults(entryInput, token!);
+      if (isSuccess) {
+        message.update((val) {
+          val?.message =
+          'Encuesta enviada, tus respuestas han sido enviadas correctamente';
+          val?.state = 'success';
+        });
+
+        Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
+      }
     } catch (e) {
       _handleError(e);
     }
 
-    _printEntryInput(entryInput);
+    //_printEntryInput(entryInput);
   }
+
 
   List<Map<String, dynamic>> _buildAnswers() {
     return responses.entries.map((entry) {
@@ -147,13 +171,14 @@ class SurveyController extends GetxController {
     return matrixResults;
   }
 
-  List<Map<String, String>> _buildMatrixTimeResults(List<dynamic> responseValue) {
+  List<Map<String, String>> _buildMatrixTimeResults(
+      List<dynamic> responseValue) {
     return responseValue
         .map<Map<String, String>>((subQuestion) => {
-      'meta2': subQuestion['columna'],
-      'meta': subQuestion['fila'],
-      'result': subQuestion['respuesta'].toString(),
-    })
+              'meta2': subQuestion['columna'],
+              'meta': subQuestion['fila'],
+              'result': subQuestion['respuesta'].toString(),
+            })
         .toList();
   }
 
@@ -164,11 +189,37 @@ class SurveyController extends GetxController {
     });
   }
 
+  bool validateAllQuestions() {
+    for (var section in sections) {
+      for (var question in section.surveyQuestion) {
+        final response = responses[question.id];
+
+        if (response == null) {
+          return false;
+        }
+
+        if (question.type == 'Matrix') {
+          final value = response['value'] as List;
+          final subQuestions = question.meta.length;
+          if (value.length < subQuestions) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+
   void _printEntryInput(Map<String, dynamic> entryInput) {
     final jsonString = const JsonEncoder.withIndent('  ').convert(entryInput);
     const int chunkSize = 800;
     for (int i = 0; i < jsonString.length; i += chunkSize) {
-      print(jsonString.substring(i, i + chunkSize > jsonString.length ? jsonString.length : i + chunkSize));
+      print(jsonString.substring(
+          i,
+          i + chunkSize > jsonString.length
+              ? jsonString.length
+              : i + chunkSize));
     }
   }
 }

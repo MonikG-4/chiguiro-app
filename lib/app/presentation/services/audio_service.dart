@@ -17,14 +17,11 @@ class AudioService extends GetxService {
   Timer? _timer;
   final RxDouble amplitude = 0.0.obs;
 
-  final RxBool isPlaying = false.obs; // 🔹 Estado de reproducción
-  final FlutterSoundPlayer _audioPlayer = FlutterSoundPlayer(); // 🔹 Agregar el player
 
   @override
   Future<void> onInit() async {
     super.onInit();
     await _initializeRecorder();
-    await _audioPlayer.openPlayer(); // 🔹 Inicializa el player
 
   }
 
@@ -75,36 +72,6 @@ class AudioService extends GetxService {
     }
   }
 
-  Future<void> playRecording() async {
-    if (recordingPath.value.isEmpty) {
-      print('❌ No hay grabación disponible.');
-      return;
-    }
-
-    try {
-      isPlaying.value = true;
-      await _audioPlayer.startPlayer(
-        fromURI: recordingPath.value,
-        codec: Codec.aacADTS, // Mismo codec de la grabación
-        whenFinished: () {
-          isPlaying.value = false;
-        },
-      );
-      print('▶️ Reproduciendo audio: ${recordingPath.value}');
-    } catch (e) {
-      print('⚠️ Error al reproducir el audio: $e');
-    }
-  }
-
-  Future<void> stopPlayback() async {
-    try {
-      await _audioPlayer.stopPlayer();
-      isPlaying.value = false;
-      print('⏹️ Reproducción detenida');
-    } catch (e) {
-      print('⚠️ Error al detener la reproducción: $e');
-    }
-  }
 
   Future<void> startRecording() async {
     if (!isInitialized.value) {
@@ -129,7 +96,6 @@ class AudioService extends GetxService {
       isRecording.value = true;
       recordingDuration.value = 0;
 
-      // 🔹 Timer para actualizar la duración
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         recordingDuration.value++;
       });
@@ -169,7 +135,6 @@ class AudioService extends GetxService {
   @override
   void onClose() async {
     await _audioRecorder.closeRecorder();
-    await _audioPlayer.closePlayer(); // 🔹 Cerrar player al salir
 
     super.onClose();
   }
