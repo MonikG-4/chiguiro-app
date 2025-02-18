@@ -32,9 +32,9 @@ class SurveyRepository implements ISurveyRepository {
   }
 
   @override
-  Future<bool> saveSurveyResults(Map<String, dynamic> entryInput, String token) async {
+  Future<bool> saveSurveyResults(Map<String, dynamic> entryInput) async {
     try {
-      final result = await provider.saveSurveyResults(entryInput, token);
+      final result = await provider.saveSurveyResults(entryInput);
 
       if (result.hasException) {
         final error = result.exception?.graphqlErrors.first;

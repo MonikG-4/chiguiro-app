@@ -53,12 +53,13 @@ class _QuestionHeader extends StatelessWidget {
               TextSpan(
                 text: 'Pregunta ${question.sort}',
                 style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
             ],
           ),
         ),
-        Text(question.question),
+        Text(question.question, style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text(question.description!),
       ],
     );
   }

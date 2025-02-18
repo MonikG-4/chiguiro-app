@@ -26,6 +26,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
     });
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(178.0),
         child: Obx(() {
@@ -85,30 +86,27 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
     return Column(
       children: [
         Expanded(
-          child: Container(
-            color: AppColors.background,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(
-                top: 64,
-                left: 16,
-                right: 16,
-                bottom: 16,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionHeader('Mis encuestas', isActive: true),
-                  const SizedBox(height: 16),
-                  _buildSurveysList(controller.activeSurvey.value != null ? [controller.activeSurvey.value!] : []),
-                  const SizedBox(height: 24),
-                  _buildSectionHeader('Historial de encuestas'),
-                  const SizedBox(height: 16),
-                  _buildSurveysList(
-                    controller.historicalSurveys,
-                    isHistorical: true,
-                  ),
-                ],
-              ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(
+              top: 64,
+              left: 16,
+              right: 16,
+              bottom: 16,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionHeader('Mis encuestas', isActive: true),
+                const SizedBox(height: 16),
+                _buildSurveysList(controller.activeSurvey.value != null ? [controller.activeSurvey.value!] : []),
+                const SizedBox(height: 24),
+                _buildSectionHeader('Historial de encuestas'),
+                const SizedBox(height: 16),
+                _buildSurveysList(
+                  controller.historicalSurveys,
+                  isHistorical: true,
+                ),
+              ],
             ),
           ),
         ),

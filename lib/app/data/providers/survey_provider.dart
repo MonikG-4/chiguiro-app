@@ -23,7 +23,7 @@ class SurveyProvider {
     }
   }
 
-  Future<QueryResult> saveSurveyResults(Map<String, dynamic> entryInput, String token) async {
+  Future<QueryResult> saveSurveyResults(Map<String, dynamic> entryInput) async {
     try {
       final MutationOptions options = MutationOptions(
         document: gql(SurveyMutation.entry),

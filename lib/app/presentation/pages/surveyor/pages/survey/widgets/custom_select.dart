@@ -61,12 +61,16 @@ class CustomSelect extends StatelessWidget {
         }
       },
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Text(
-            value ?? 'Selecciona $label',
-            style: TextStyle(
-              color: value != null ? Colors.black : Colors.grey,
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              value ?? 'Selecciona $label',
+              style: TextStyle(
+                color: value != null ? Colors.black : Colors.grey,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
             ),
           ),
         ),
