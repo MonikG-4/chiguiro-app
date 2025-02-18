@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../../core/values/routes.dart';
@@ -8,21 +9,22 @@ import '../../domain/entities/sections.dart';
 import '../../domain/entities/survey_question.dart';
 import '../../domain/repositories/i_survey_repository.dart';
 import '../services/location_service.dart';
-import 'auth_storage_controller.dart';
 
 class SurveyController extends GetxController {
   final ISurveyRepository _repository;
   final LocationService _locationService = Get.find<LocationService>();
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
-  // Estado de la Encuesta
   final sections = <Sections>[].obs;
   final responses = <String, dynamic>{}.obs;
-  final isLoading = false.obs;
+  final hiddenQuestions = <String>{}.obs;
 
-  // Variables de Control
-  late bool isGeoLocation;
-  late bool isVoiceRecorder;
+  final isLoadingQuestion = false.obs;
+  final isLoadingSendSurvey = false.obs;
+
+  final isGeoLocation  = false.obs;
+  final isVoiceRecorder  = false.obs;
+
   String? audioBase64;
   final timeAnswerStart = DateTime.now().obs;
 
@@ -38,18 +40,17 @@ class SurveyController extends GetxController {
 
   Future<void> fetchSurveyQuestions(int surveyId) async {
     try {
-      isLoading.value = true;
+      isLoadingQuestion.value = true;
       final fetchedSections = await _repository.fetchSurveyQuestions(surveyId);
       fetchedSections.sort((a, b) => a.sort.compareTo(b.sort));
       sections.assignAll(fetchedSections);
     } catch (e) {
       _handleError(e);
     } finally {
-      isLoading.value = false;
+      isLoadingQuestion.value = false;
     }
   }
 
-  /// Validador genérico para preguntas obligatorias
   String? Function(dynamic value) validatorMandatory(SurveyQuestion question) {
     return (value) {
       if (!question.mandatory) return null;
@@ -72,33 +73,27 @@ class SurveyController extends GetxController {
     required int pollsterId,
     String? audioBase64,
   }) async {
-    if (!validateAllQuestions()) {
-      message.update((val) {
-        val?.message = 'Por favor responde todas las preguntas obligatorias';
-        val?.state = 'error';
-      });
-      return;
-    }
 
-    final token = Get.find<AuthStorageController>().token;
+    isLoadingSendSurvey.value = true;
     final position =
-    isGeoLocation ? await _locationService.getCurrentLocation() : null;
+    isGeoLocation.value ? await _locationService.getCurrentLocation() : null;
 
     final entryInput = {
+
       'projectId': projectId,
       'pollsterId': pollsterId,
       'answers': _buildAnswers(),
-      if (isGeoLocation && position != null) ...{
-        'latitude': position.latitude,
-        'longitude': position.longitude,
+      if (isGeoLocation.value && position != null) ...{
+        'latitude': position.latitude.toString(),
+        'longitude': position.longitude.toString(),
       },
-      if (isVoiceRecorder) 'audio': audioBase64,
+      if (isVoiceRecorder.value) 'audio': audioBase64,
       'startedOn': timeAnswerStart.value.toIso8601String(),
       'finishedOn': DateTime.now().toIso8601String(),
     };
 
     try {
-      final isSuccess = await _repository.saveSurveyResults(entryInput, token!);
+      final isSuccess = await _repository.saveSurveyResults(entryInput);
       if (isSuccess) {
         message.update((val) {
           val?.message =
@@ -110,9 +105,11 @@ class SurveyController extends GetxController {
       }
     } catch (e) {
       _handleError(e);
+    } finally {
+      isLoadingSendSurvey.value = false;
     }
 
-    //_printEntryInput(entryInput);
+    _printEntryInput(entryInput);
   }
 
 
@@ -192,9 +189,17 @@ class SurveyController extends GetxController {
   bool validateAllQuestions() {
     for (var section in sections) {
       for (var question in section.surveyQuestion) {
+        if (hiddenQuestions.contains(question.id)) {
+          continue;
+        }
+
         final response = responses[question.id];
 
         if (response == null) {
+          message.update((val) {
+            val?.message = 'Por favor responde todas las preguntas obligatorias';
+            val?.state = 'error';
+          });
           return false;
         }
 
@@ -202,12 +207,49 @@ class SurveyController extends GetxController {
           final value = response['value'] as List;
           final subQuestions = question.meta.length;
           if (value.length < subQuestions) {
+            message.update((val) {
+              val?.message = 'Por favor responde todas las preguntas obligatorias';
+              val?.state = 'error';
+            });
             return false;
           }
         }
       }
     }
     return true;
+  }
+
+
+  void handleJumper(SurveyQuestion question, String selectedValue) {
+    final jumper = question.jumpers?.firstWhereOrNull((j) => j.value == selectedValue);
+
+    final startSort = question.sort;
+    final endSort = jumper?.questionNumber ?? double.infinity;
+
+    final questionsToHide = <String>{};
+
+    for (var section in sections) {
+      for (var q in section.surveyQuestion) {
+        if (q.sort > startSort && q.sort < endSort) {
+          questionsToHide.add(q.id);
+          responses.remove(q.id);
+        }
+      }
+    }
+
+    if (jumper != null) {
+      // Si el jumper es válido, ocultamos las preguntas
+      hiddenQuestions.addAll(questionsToHide);
+    } else {
+      // Si cambió la respuesta y no es un jumper, mostramos las preguntas ocultas por este bloque
+      for (var section in sections) {
+        for (var q in section.surveyQuestion) {
+          if (q.sort > startSort && hiddenQuestions.contains(q.id)) {
+            hiddenQuestions.remove(q.id);
+          }
+        }
+      }
+    }
   }
 
 

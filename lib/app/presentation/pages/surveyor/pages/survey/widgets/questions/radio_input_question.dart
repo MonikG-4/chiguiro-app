@@ -29,8 +29,7 @@ class RadioInputQuestion extends StatelessWidget {
                       controller.responses[question.id]?['value'] == option;
 
                   void toggleSelection(String option) {
-                    bool isSelected =
-                        controller.responses[question.id]?['value'] == option;
+                    bool isSelected = controller.responses[question.id]?['value'] == option;
                     if (isSelected) {
                       controller.responses.remove(question.id);
                     } else {
@@ -40,6 +39,9 @@ class RadioInputQuestion extends StatelessWidget {
                         'value': option,
                       };
                     }
+
+                    controller.handleJumper(question, isSelected ? '' : option);
+                    controller.update();
                     state.didChange(controller.responses[question.id]?['value']
                         ?.toString());
                     state.validate();

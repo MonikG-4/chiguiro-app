@@ -1,3 +1,5 @@
+import 'jumper.dart';
+
 class SurveyQuestion {
   final String id;
   final String question;
@@ -11,6 +13,7 @@ class SurveyQuestion {
   final String? anchorMax;
   final int? scaleMin;
   final int? scaleMax;
+  final List<Jumper>? jumpers;
 
   SurveyQuestion({
     required this.id,
@@ -25,6 +28,7 @@ class SurveyQuestion {
     this.anchorMax,
     this.scaleMin,
     this.scaleMax,
+    this.jumpers,
   });
 
   factory SurveyQuestion.fromJson(Map<String, dynamic> json) {
@@ -41,6 +45,11 @@ class SurveyQuestion {
       anchorMax: json['anchorMax'],
       scaleMin: json['scaleMin'],
       scaleMax: json['scaleMax'],
+      jumpers: json['jumpers'] != null
+          ? (json['jumpers'] as List)
+          .map((e) => Jumper.fromJson(e))
+          .toList()
+          : null,
     );
   }
 }

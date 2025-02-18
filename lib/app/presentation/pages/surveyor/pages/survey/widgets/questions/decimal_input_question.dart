@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 import '../../../../../../../../core/values/app_colors.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
@@ -21,45 +21,49 @@ class DecimalInputQuestion extends StatefulWidget {
 }
 
 class _DecimalInputQuestionState extends State<DecimalInputQuestion> {
-  late TextEditingController _textController;
+  late final TextEditingController _textController;
+  String? _lastValue;
 
   @override
   void initState() {
     super.initState();
     final initialValue = widget.controller.responses[widget.question.id]?['value'];
-    _textController = TextEditingController(
-      text: initialValue != null && initialValue != 0.0 ? initialValue.toString() : '',
-    );
+    _lastValue = initialValue != null && initialValue != 0.0
+        ? initialValue.toString()
+        : '';
 
-    _textController.addListener(() {
-      final value = _parseDecimal(_textController.text);
-      if (value != null && value != 0.0) {
-        widget.controller.responses[widget.question.id] = {
-          'question': widget.question.question,
-          'type': widget.question.type,
-          'value': value,
-        };
-      } else {
-        widget.controller.responses.remove(widget.question.id);
-      }
-      setState(() {});
-    });
+    _textController = TextEditingController(text: _lastValue);
+    _textController.addListener(_onTextChanged);
+  }
+
+  @override
+  void dispose() {
+    _textController.removeListener(_onTextChanged);
+    _textController.dispose();
+    super.dispose();
+  }
+
+  void _onTextChanged() {
+    final value = _parseDecimal(_textController.text);
+
+    if (_lastValue == _textController.text) return;
+
+    if (value != null && value != 0.0) {
+      widget.controller.responses[widget.question.id] = {
+        'question': widget.question.question,
+        'type': widget.question.type,
+        'value': double.tryParse(value.toString()),
+      };
+    } else {
+      widget.controller.responses.remove(widget.question.id);
+    }
+
+    _lastValue = _textController.text;
   }
 
   double? _parseDecimal(String value) {
     String cleanValue = value.replaceAll(',', '');
     return double.tryParse(cleanValue);
-  }
-
-  @override
-  void didUpdateWidget(covariant DecimalInputQuestion oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final currentValue = widget.controller.responses[widget.question.id]?['value'];
-    final currentText = currentValue != null && currentValue != 0.0 ? currentValue.toString() : '';
-
-    if (_textController.text != currentText) {
-      _textController.text = currentText;
-    }
   }
 
   @override
