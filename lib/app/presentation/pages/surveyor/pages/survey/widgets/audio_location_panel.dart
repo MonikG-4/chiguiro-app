@@ -43,25 +43,52 @@ class _AudioLocationPanelState extends State<AudioLocationPanel> {
       child: Row(
         children: [
           if (widget.showLocation)
-            Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: AppColors.successBorder),
-                borderRadius: BorderRadius.circular(12),
+            if (widget.showAudioRecorder)
+              Container(
+                margin: const EdgeInsets.only(bottom: 8, right: 8),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: AppColors.successBorder),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.location_on_outlined,
+                  color: AppColors.successBorder,
+                ),
+              )
+            else
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: AppColors.successBorder),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        color: AppColors.successBorder,
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          "Esta encuesta usa geolocalización",
+                          style: TextStyle(color: AppColors.successBorder),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              child: const Icon(
-                Icons.location_on_outlined,
-                color: AppColors.successBorder,
-              ),
-            ),
           if (widget.showAudioRecorder)
             Expanded(
               child: Container(
-                margin: const EdgeInsets.only(left: 8),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(8),
@@ -86,7 +113,6 @@ class _AudioLocationPanelState extends State<AudioLocationPanel> {
                     Expanded(
                       child: Row(
                         children: [
-
                           Expanded(
                             child: Container(
                               height: 32,
@@ -106,8 +132,7 @@ class _AudioLocationPanelState extends State<AudioLocationPanel> {
                           Obx(() {
                             final audioService = Get.find<AudioService>();
                             return Text(
-                              _formatDuration(
-                                  audioService.recordingDuration.value),
+                              _formatDuration(audioService.recordingDuration.value),
                               style: const TextStyle(fontSize: 16),
                             );
                           }),
@@ -129,7 +154,8 @@ class AnimatedWave extends StatefulWidget {
   _AnimatedWaveState createState() => _AnimatedWaveState();
 }
 
-class _AnimatedWaveState extends State<AnimatedWave> with TickerProviderStateMixin {
+class _AnimatedWaveState extends State<AnimatedWave>
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _amplitudeAnimation;
 
@@ -147,7 +173,9 @@ class _AnimatedWaveState extends State<AnimatedWave> with TickerProviderStateMix
     );
 
     // Iniciar la animación de amplitud
-    _animationController.repeat(reverse: true); // Repite la animación (puedes cambiar esto según el caso)
+    _animationController.repeat(
+        reverse:
+            true); // Repite la animación (puedes cambiar esto según el caso)
   }
 
   @override

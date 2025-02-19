@@ -7,6 +7,9 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../core/utils/message_handler.dart';
+import '../../../core/utils/snackbar_message_model.dart';
+
 class AudioService extends GetxService {
   final FlutterSoundRecorder _audioRecorder = FlutterSoundRecorder();
 
@@ -17,10 +20,12 @@ class AudioService extends GetxService {
   Timer? _timer;
   final RxDouble amplitude = 0.0.obs;
 
+  final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
   @override
   Future<void> onInit() async {
     super.onInit();
+    MessageHandler.setupSnackbarListener(message);
     await _initializeRecorder();
 
   }
@@ -32,8 +37,10 @@ class AudioService extends GetxService {
       await _audioRecorder.openRecorder();
       isInitialized.value = true;
     } catch (e) {
-      print('Error al inicializar el grabador: $e');
-      Get.snackbar('Error', 'No se pudo inicializar el grabador');
+      message.update((val) {
+        val?.message = 'No se pudo inicializar el grabador';
+        val?.state = 'error';
+      });
     }
   }
 
@@ -101,7 +108,10 @@ class AudioService extends GetxService {
       });
 
     } catch (e) {
-      print('Error al iniciar la grabación: $e');
+      message.update((val) {
+        val?.message = 'No se pudo iniciar la grabación';
+        val?.state = 'error';
+      });
     }
   }
 
@@ -126,7 +136,10 @@ class AudioService extends GetxService {
         return base64String;
       }
     } catch (e) {
-      print('Error al detener la grabación: $e');
+      message.update((val) {
+        val?.message = 'No se pudo detener la grabación';
+        val?.state = 'error';
+      });
     }
     return null;
   }
@@ -135,7 +148,6 @@ class AudioService extends GetxService {
   @override
   void onClose() async {
     await _audioRecorder.closeRecorder();
-
     super.onClose();
   }
 }
