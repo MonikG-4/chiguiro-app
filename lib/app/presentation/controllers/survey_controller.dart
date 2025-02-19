@@ -18,12 +18,14 @@ class SurveyController extends GetxController {
   final sections = <Sections>[].obs;
   final responses = <String, dynamic>{}.obs;
   final hiddenQuestions = <String>{}.obs;
+  final RxMap<int, Set<String>> jumperHiddenQuestions =
+      <int, Set<String>>{}.obs;
 
   final isLoadingQuestion = false.obs;
   final isLoadingSendSurvey = false.obs;
 
-  final isGeoLocation  = false.obs;
-  final isVoiceRecorder  = false.obs;
+  final isGeoLocation = false.obs;
+  final isVoiceRecorder = false.obs;
 
   String? audioBase64;
   final timeAnswerStart = DateTime.now().obs;
@@ -73,13 +75,12 @@ class SurveyController extends GetxController {
     required int pollsterId,
     String? audioBase64,
   }) async {
-
     isLoadingSendSurvey.value = true;
-    final position =
-    isGeoLocation.value ? await _locationService.getCurrentLocation() : null;
+    final position = isGeoLocation.value
+        ? await _locationService.getCurrentLocation()
+        : null;
 
     final entryInput = {
-
       'projectId': projectId,
       'pollsterId': pollsterId,
       'answers': _buildAnswers(),
@@ -97,7 +98,7 @@ class SurveyController extends GetxController {
       if (isSuccess) {
         message.update((val) {
           val?.message =
-          'Encuesta enviada, tus respuestas han sido enviadas correctamente';
+              'Encuesta enviada, tus respuestas han sido enviadas correctamente';
           val?.state = 'success';
         });
 
@@ -109,9 +110,8 @@ class SurveyController extends GetxController {
       isLoadingSendSurvey.value = false;
     }
 
-    _printEntryInput(entryInput);
+    printEntryInput(entryInput);
   }
-
 
   List<Map<String, dynamic>> _buildAnswers() {
     return responses.entries.map((entry) {
@@ -197,7 +197,8 @@ class SurveyController extends GetxController {
 
         if (response == null) {
           message.update((val) {
-            val?.message = 'Por favor responde todas las preguntas obligatorias';
+            val?.message =
+                'Por favor responde todas las preguntas obligatorias';
             val?.state = 'error';
           });
           return false;
@@ -208,7 +209,8 @@ class SurveyController extends GetxController {
           final subQuestions = question.meta.length;
           if (value.length < subQuestions) {
             message.update((val) {
-              val?.message = 'Por favor responde todas las preguntas obligatorias';
+              val?.message =
+                  'Por favor responde todas las preguntas obligatorias';
               val?.state = 'error';
             });
             return false;
@@ -219,13 +221,33 @@ class SurveyController extends GetxController {
     return true;
   }
 
+  void handleJumper(SurveyQuestion question, String? selectedValue) {
+    final int startSort = question.sort;
+    final jumper =
+        question.jumpers?.firstWhereOrNull((j) => j.value == selectedValue);
+    final int? endSort = jumper?.questionNumber;
 
-  void handleJumper(SurveyQuestion question, String selectedValue) {
-    final jumper = question.jumpers?.firstWhereOrNull((j) => j.value == selectedValue);
+    if (selectedValue == null || jumper == null) {
+      _showQuestionsFromJumper(startSort);
+      jumperHiddenQuestions.remove(startSort);
+      _rebuildHiddenQuestions();
+      return;
+    }
 
-    final startSort = question.sort;
-    final endSort = jumper?.questionNumber ?? double.infinity;
+    _hideQuestionsFromJumper(startSort, endSort!);
+  }
 
+  void _rebuildHiddenQuestions() {
+    final allHiddenQuestions = <String>{};
+
+    for (var hiddenSet in jumperHiddenQuestions.values) {
+      allHiddenQuestions.addAll(hiddenSet);
+    }
+
+    hiddenQuestions.value = allHiddenQuestions;
+  }
+
+  void _hideQuestionsFromJumper(int startSort, int endSort) {
     final questionsToHide = <String>{};
 
     for (var section in sections) {
@@ -237,24 +259,29 @@ class SurveyController extends GetxController {
       }
     }
 
-    if (jumper != null) {
-      // Si el jumper es válido, ocultamos las preguntas
-      hiddenQuestions.addAll(questionsToHide);
-    } else {
-      // Si cambió la respuesta y no es un jumper, mostramos las preguntas ocultas por este bloque
-      for (var section in sections) {
-        for (var q in section.surveyQuestion) {
-          if (q.sort > startSort && hiddenQuestions.contains(q.id)) {
-            hiddenQuestions.remove(q.id);
-          }
-        }
-      }
-    }
+    jumperHiddenQuestions[startSort] = questionsToHide;
+    _rebuildHiddenQuestions();
   }
 
+  void _showQuestionsFromJumper(int startSort) {
+    jumperHiddenQuestions.remove(startSort);
+    _rebuildHiddenQuestions();
+  }
 
-  void _printEntryInput(Map<String, dynamic> entryInput) {
-    final jsonString = const JsonEncoder.withIndent('  ').convert(entryInput);
+  void printEntryInput(Map<String, dynamic> entryInput) {
+    final jsonString = const JsonEncoder.withIndent('  ').convert(
+      entryInput.map((key, value) {
+        if (value is DateTime) {
+          return MapEntry(key, value.toIso8601String());
+        } else if (value is Map) {
+          return MapEntry(
+              key, _convertDateTimeInMap(value.cast<String, dynamic>()));
+        } else if (value is List) {
+          return MapEntry(key, _convertDateTimeInList(value));
+        }
+        return MapEntry(key, value);
+      }),
+    );
     const int chunkSize = 800;
     for (int i = 0; i < jsonString.length; i += chunkSize) {
       print(jsonString.substring(
@@ -263,5 +290,32 @@ class SurveyController extends GetxController {
               ? jsonString.length
               : i + chunkSize));
     }
+  }
+
+  Map<String, dynamic> _convertDateTimeInMap(Map<String, dynamic> map) {
+    return map.map((key, value) {
+      if (value is DateTime) {
+        return MapEntry(key, value.toIso8601String());
+      } else if (value is Map) {
+        return MapEntry(
+            key, _convertDateTimeInMap(value.cast<String, dynamic>()));
+      } else if (value is List) {
+        return MapEntry(key, _convertDateTimeInList(value));
+      }
+      return MapEntry(key, value);
+    });
+  }
+
+  List<dynamic> _convertDateTimeInList(List<dynamic> list) {
+    return list.map((value) {
+      if (value is DateTime) {
+        return value.toIso8601String();
+      } else if (value is Map) {
+        return _convertDateTimeInMap(value.cast<String, dynamic>());
+      } else if (value is List) {
+        return _convertDateTimeInList(value);
+      }
+      return value;
+    }).toList();
   }
 }

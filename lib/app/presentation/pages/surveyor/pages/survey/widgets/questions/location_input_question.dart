@@ -19,11 +19,11 @@ class LocationInputQuestion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GlobalKey countryKey =
-        GlobalKey(debugLabel: '${question.id}_country');
+    GlobalKey(debugLabel: '${question.id}_country');
     final GlobalKey departmentKey =
-        GlobalKey(debugLabel: '${question.id}_department');
+    GlobalKey(debugLabel: '${question.id}_department');
     final GlobalKey municipalityKey =
-        GlobalKey(debugLabel: '${question.id}_municipality');
+    GlobalKey(debugLabel: '${question.id}_municipality');
 
     final countries = LocationData.getLocationData()['countries'] as List;
 
@@ -34,7 +34,9 @@ class LocationInputQuestion extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Obx(() {
-              final countryValue = getLocationValue(question.id, 0);
+              final selectedValues = getLocationValueList(question.id);
+              final countryValue = selectedValues.isNotEmpty ? selectedValues[0] : null;
+
               return CustomSelect(
                 keyDropdown: countryKey,
                 value: countryValue,
@@ -43,35 +45,36 @@ class LocationInputQuestion extends StatelessWidget {
                 state: state,
                 onSelected: (value) {
                   if (value == null) {
-                    controller.responses.remove(question.id);
+                    _clearAfterIndex(question.id, 0);
                   } else {
-                    final selectedCountry =
-                        countries.firstWhere((c) => c['name'] == value);
-                    controller.responses[question.id] = {
-                      'question': question.question,
-                      'type': question.type,
-                      'value': [value],
-                      'departments': selectedCountry['departments'],
-                    };
+                    _setLocationValueAt(question.id, 0, value);
+                    _clearAfterIndex(question.id, 1);
                   }
-                  state.didChange(controller.responses[question.id]?['value']);
-                  state.validate();
+                  _updateResponses(question, state);
                 },
               );
             }),
             const SizedBox(height: 8),
             Obx(() {
-              final selectedCountry = getLocationValue(question.id, 0);
-              if (selectedCountry == null) return const SizedBox.shrink();
+              final selectedValues = getLocationValueList(question.id);
+              if (selectedValues.isEmpty) return const SizedBox.shrink();
 
-              final departments =
-                  (controller.responses[question.id]?['departments'] as List)
-                      .map((d) => d['departamento'] as String)
-                      .toList();
+              final selectedCountry = selectedValues[0];
+              final countryData =
+              countries.firstWhereOrNull((c) => c['name'] == selectedCountry);
+
+              if (countryData == null) return const SizedBox.shrink();
+
+              final departments = (countryData['departments'] as List)
+                  .map((d) => d['departamento'] as String)
+                  .toList();
+
+              final departmentValue =
+              selectedValues.length > 1 ? selectedValues[1] : null;
 
               return CustomSelect(
                 keyDropdown: departmentKey,
-                value: getLocationValue(question.id, 1),
+                value: departmentValue,
                 items: departments,
                 label: 'Departamento',
                 state: state,
@@ -79,45 +82,49 @@ class LocationInputQuestion extends StatelessWidget {
                   if (value == null) {
                     _clearAfterIndex(question.id, 1);
                   } else {
-                    final selectedDepartment = (controller
-                            .responses[question.id]?['departments'] as List)
-                        .firstWhere((d) => d['departamento'] == value);
-                    final currentValue = getLocationValueList(question.id);
-                    currentValue.length < 2
-                        ? currentValue.add(value)
-                        : currentValue[1] = value;
-                    controller.responses[question.id]?['municipalities'] =
-                        selectedDepartment['ciudades'];
+                    _setLocationValueAt(question.id, 1, value);
+                    _clearAfterIndex(question.id, 2);
                   }
-                  state.didChange(controller.responses[question.id]?['value']);
-                  state.validate();
+                  _updateResponses(question, state);
                 },
               );
             }),
             const SizedBox(height: 8),
             Obx(() {
-              final selectedDepartment = getLocationValue(question.id, 1);
-              if (selectedDepartment == null) return const SizedBox.shrink();
+              final selectedValues = getLocationValueList(question.id);
+              if (selectedValues.length < 2) return const SizedBox.shrink();
+
+              final selectedCountry = selectedValues[0];
+              final selectedDepartment = selectedValues[1];
+
+              final countryData =
+              countries.firstWhereOrNull((c) => c['name'] == selectedCountry);
+
+              final departmentData = (countryData?['departments'] as List?)
+                  ?.firstWhereOrNull(
+                      (d) => d['departamento'] == selectedDepartment);
+
+              if (departmentData == null) return const SizedBox.shrink();
 
               final municipalities =
-                  (controller.responses[question.id]?['municipalities'] as List)
-                      .cast<String>();
+              (departmentData['ciudades'] as List).cast<String>();
+
+              final municipalityValue =
+              selectedValues.length > 2 ? selectedValues[2] : null;
 
               return CustomSelect(
                 keyDropdown: municipalityKey,
-                value: getLocationValue(question.id, 2),
+                value: municipalityValue,
                 items: municipalities,
                 label: 'Municipio',
                 state: state,
                 onSelected: (value) {
-                  if (value != null) {
-                    final currentValue = getLocationValueList(question.id);
-                    currentValue.length < 3
-                        ? currentValue.add(value)
-                        : currentValue[2] = value;
+                  if (value == null) {
+                    _clearAfterIndex(question.id, 2);
+                  } else {
+                    _setLocationValueAt(question.id, 2, value);
                   }
-                  state.didChange(controller.responses[question.id]?['value']);
-                  state.validate();
+                  _updateResponses(question, state);
                 },
               );
             }),
@@ -139,10 +146,48 @@ class LocationInputQuestion extends StatelessWidget {
       getLocationValueList(questionId).length > index
           ? getLocationValueList(questionId)[index]
           : null;
-  List<String> getLocationValueList(String questionId) =>
-      controller.responses[questionId]?['value'] as List<String>? ?? [];
 
-  void _clearAfterIndex(String questionId, int index) =>
-      controller.responses[questionId]?['value'] =
-          getLocationValueList(questionId).sublist(0, index);
+  List<String> getLocationValueList(String questionId) =>
+      (controller.responses[questionId]?['value'] as List<String>?) ?? [];
+
+  void _setLocationValueAt(String questionId, int index, String value) {
+    final currentValues = getLocationValueList(questionId);
+
+    // Ajustar el tamaño de la lista si es necesario
+    while (currentValues.length <= index) {
+      currentValues.add('');
+    }
+
+    currentValues[index] = value;
+
+    controller.responses[questionId] = {
+      'question': question.question,
+      'type': question.type,
+      'value': currentValues,
+    };
+  }
+
+
+  void _clearAfterIndex(String questionId, int index) {
+    final currentValues = getLocationValueList(questionId);
+    if (currentValues.length > index + 1) {
+      controller.responses[questionId]?['value'] = currentValues.sublist(0, index + 1);
+    }
+  }
+
+
+  void _updateResponses(SurveyQuestion question, FormFieldState<List<String>> state) {
+    final values = getLocationValueList(question.id);
+    if (values.isEmpty) {
+      controller.responses.remove(question.id);
+    } else {
+      controller.responses[question.id] = {
+        'question': question.question,
+        'type': question.type,
+        'value': values,
+      };
+    }
+    state.didChange(values);
+    state.validate();
+  }
 }

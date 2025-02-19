@@ -32,16 +32,16 @@ class RadioInputQuestion extends StatelessWidget {
                     bool isSelected = controller.responses[question.id]?['value'] == option;
                     if (isSelected) {
                       controller.responses.remove(question.id);
+                      controller.hiddenQuestions.clear();
                     } else {
                       controller.responses[question.id] = {
                         'question': question.question,
                         'type': question.type,
                         'value': option,
                       };
-                    }
+                      controller.handleJumper(question, option);
 
-                    controller.handleJumper(question, isSelected ? '' : option);
-                    controller.update();
+                    }
                     state.didChange(controller.responses[question.id]?['value']
                         ?.toString());
                     state.validate();

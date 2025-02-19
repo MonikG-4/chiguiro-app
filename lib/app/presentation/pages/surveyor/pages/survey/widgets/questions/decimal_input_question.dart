@@ -28,19 +28,23 @@ class _DecimalInputQuestionState extends State<DecimalInputQuestion> {
   void initState() {
     super.initState();
     final initialValue = widget.controller.responses[widget.question.id]?['value'];
-    _lastValue = initialValue != null && initialValue != 0.0
-        ? initialValue.toString()
-        : '';
-
-    _textController = TextEditingController(text: _lastValue);
+    _textController = TextEditingController(
+      text: initialValue != null && initialValue != 0 ? initialValue.toString() : '',
+    );
     _textController.addListener(_onTextChanged);
   }
 
   @override
-  void dispose() {
-    _textController.removeListener(_onTextChanged);
-    _textController.dispose();
-    super.dispose();
+  void didUpdateWidget(covariant DecimalInputQuestion oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final currentValue = widget.controller.responses[widget.question.id]?['value'];
+    final currentText = currentValue != null && currentValue != 0.0
+        ? currentValue.toString()
+        : '';
+
+    if (_textController.text != currentText) {
+      _textController.text = currentText;
+    }
   }
 
   void _onTextChanged() {
@@ -100,7 +104,7 @@ class _DecimalInputQuestionState extends State<DecimalInputQuestion> {
                 ),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                 ],
                 onChanged: (value) {
                   state.validate();

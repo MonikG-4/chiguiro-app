@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,10 +24,10 @@ class SurveyPage extends StatefulWidget {
         authResponse = Get.find<AuthStorageController>().authResponse.value!;
 
   @override
-  _SurveyPageState createState() => _SurveyPageState();
+  SurveyPageState createState() => SurveyPageState();
 }
 
-class _SurveyPageState extends State<SurveyPage> {
+class SurveyPageState extends State<SurveyPage> {
   final SurveyController controller = Get.find();
   final audioService = Get.find<AudioService>();
   final _formKey = GlobalKey<FormState>();
@@ -66,7 +68,8 @@ class _SurveyPageState extends State<SurveyPage> {
               padding: const EdgeInsets.only(top: 5.0),
               child: Stack(
                 children: [
-                  (controller.isVoiceRecorder.value || controller.isGeoLocation.value)
+                  (controller.isVoiceRecorder.value ||
+                          controller.isGeoLocation.value)
                       ? AudioLocationPanel(
                           showLocation: widget.survey.geoLocation,
                           showAudioRecorder: widget.survey.voiceRecorder,
@@ -84,9 +87,10 @@ class _SurveyPageState extends State<SurveyPage> {
   Widget _buildQuestionsForm(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        top: (controller.isVoiceRecorder.value || controller.isGeoLocation.value)
-            ? 80.0
-            : 40.0,
+        top:
+            (controller.isVoiceRecorder.value || controller.isGeoLocation.value)
+                ? 80.0
+                : 40.0,
         left: 16.0,
         right: 16.0,
         bottom: 80.0,
@@ -135,10 +139,10 @@ class _SurveyPageState extends State<SurveyPage> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child:
-                      QuestionWidgetFactory.createQuestionWidget(question),
+                          QuestionWidgetFactory.createQuestionWidget(question),
                     ),
                   );
-                }).toList(),
+                }),
               ],
             );
           }).toList();
@@ -153,19 +157,20 @@ class _SurveyPageState extends State<SurveyPage> {
     );
   }
 
-
-
   Widget _buildProgressBar() {
     return Positioned(
-      top: (controller.isVoiceRecorder.value || controller.isGeoLocation.value) ? 50 : 0,
+      top: (controller.isVoiceRecorder.value || controller.isGeoLocation.value)
+          ? 50
+          : 0,
       left: 0,
       right: 0,
       child: Obx(
         () {
           final totalQuestions = controller.sections.fold(
-            0,
-            (sum, section) => sum + section.surveyQuestion.length,
-          ) - controller.hiddenQuestions.length;
+                0,
+                (sum, section) => sum + section.surveyQuestion.length,
+              ) -
+              controller.hiddenQuestions.length;
           final answeredQuestions = controller.responses.length;
           final progress =
               totalQuestions > 0 ? answeredQuestions / totalQuestions : 0.0;
@@ -186,6 +191,125 @@ class _SurveyPageState extends State<SurveyPage> {
     );
   }
 
+  Future<void> _fillSurveyWithRandomResponses() async {
+    for (var section in controller.sections) {
+      for (var question in section.surveyQuestion) {
+        if (!controller.hiddenQuestions.contains(question.id)) {
+          switch (question.type) {
+            case 'Boolean':
+            case 'Radio':
+            case 'Select':
+              final option =
+                  question.meta[Random().nextInt(question.meta.length)];
+              controller.responses[question.id] = {
+                'question': question.question,
+                'type': question.type,
+                'value': option,
+              };
+              break;
+
+            case 'String':
+              controller.responses[question.id] = {
+                'question': question.question,
+                'type': question.type,
+                'value': 'Respuesta automática',
+              };
+              break;
+
+            case 'Integer':
+              controller.responses[question.id] = {
+                'question': question.question,
+                'type': question.type,
+                'value': Random().nextInt(100),
+              };
+              break;
+
+            case 'Double':
+              controller.responses[question.id] = {
+                'question': question.question,
+                'type': question.type,
+                'value': (Random().nextDouble() * 100),
+              };
+              break;
+
+            case 'Star':
+            case 'Scale':
+              controller.responses[question.id] = {
+                'question': question.question,
+                'type': question.type,
+                'value': Random().nextInt(5) + 1,
+              };
+              break;
+
+            case 'Check':
+              final randomSelections =
+                  question.meta.where((_) => Random().nextBool()).toList();
+
+              controller.responses[question.id] = {
+                'question': question.question,
+                'type': question.type,
+                'value': randomSelections,
+              };
+              break;
+
+            case 'Location':
+              controller.responses[question.id] = {
+                'question': question.question,
+                'type': question.type,
+                'value': ['Colombia', 'Meta', 'Villavicencio'],
+              };
+              break;
+
+            case 'Date':
+              controller.responses[question.id] = {
+                'question': question.question,
+                'type': question.type,
+                'value': DateTime.now(),
+              };
+              break;
+
+            case 'Matrix':
+              final matrixResults = question.meta.map((meta) {
+                return {
+                  meta: question.meta2?[Random().nextInt(question.meta2!.length)].toString()
+                };
+              }).toList();
+
+              controller.responses[question.id] = {
+                'question': question.question,
+                'type': question.type,
+                'value': matrixResults,
+              };
+              break;
+
+            case 'MatrixTime':
+            case 'MatrixDouble':
+              final matrixTimeResults = question.meta.map((meta) {
+                return {
+                  'fila': meta,
+                  'columna': question.meta2![Random().nextInt(question.meta2!.length)],
+                  'respuesta': Random().nextInt(100).toString()
+                };
+              }).toList();
+
+              controller.responses[question.id] = {
+                'question': question.question,
+                'type': question.type,
+                'value': matrixTimeResults,
+              };
+              break;
+
+            default:
+              break;
+          }
+        }
+      }
+    }
+
+    controller.responses.refresh();
+  }
+
+// Update the _buildSubmitButton method to include the new button
   Widget _buildSubmitButton(BuildContext context) {
     return Positioned(
       bottom: 0,
@@ -194,23 +318,32 @@ class _SurveyPageState extends State<SurveyPage> {
       child: Container(
         color: AppColors.background,
         padding: const EdgeInsets.all(16.0),
-        child: PrimaryButton(
-          onPressed: controller.isLoadingSendSurvey.value
-              ? null
-              : () => _submitSurvey(),
-          isLoading: controller.isLoadingSendSurvey.value,
-          child: 'Enviar Encuesta',
+        child: Column(
+          children: [
+            PrimaryButton(
+              onPressed: controller.isLoadingSendSurvey.value
+                  ? null
+                  : () => _submitSurvey(),
+              isLoading: controller.isLoadingSendSurvey.value,
+              child: 'Enviar Encuesta',
+            ),
+            const SizedBox(height: 8),
+            PrimaryButton(
+              isLoading: false,
+              onPressed: () async {
+                await _fillSurveyWithRandomResponses();
+                setState(() {}); // Para reflejar los cambios en los inputs
+              },
+              child: 'Responder Aleatoriamente',
+            ),
+          ],
         ),
-
       ),
     );
   }
 
   Future<void> _submitSurvey() async {
-
-
     if (_formKey.currentState!.validate() & controller.validateAllQuestions()) {
-
       String? audioBase64;
       if (audioService.isRecording.value) {
         audioBase64 = await audioService.stopRecording();
@@ -223,5 +356,4 @@ class _SurveyPageState extends State<SurveyPage> {
       );
     }
   }
-
 }

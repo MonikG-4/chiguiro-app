@@ -38,8 +38,8 @@ class AppColors {
 
 
   //Preguntas
-  static const Color section = Color(0xFFA9C3ED);
+  static const Color section = Color(0xFFC3AED6);
   static const Color progressBar = Color(0xFF57E9B4);
   static const Color star = Color(0xFFF8B84E);
-  static const Color scale = Color(0xFFBEF6E1 );
+  static const Color scale = Color(0xFFBEF6E1);
 }

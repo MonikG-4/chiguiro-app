@@ -20,16 +20,33 @@ class MatrixTimeQuestion extends StatelessWidget {
     final rows = question.meta;
     final columns = question.meta2 ?? [];
 
+    // Creamos un mapa de controladores para las celdas
+    final Map<String, TextEditingController> cellControllers = {};
+
     return MatrixTable(
       question: question,
       controller: controller,
       rows: rows,
       columns: columns,
-      cellBuilder: (rowLabel, colLabel, initialValue, onChanged) => MatrixCell(
-        initialValue: initialValue,
-        hinText: rowLabel,
-        onChanged: onChanged,
-      ),
+      cellBuilder: (rowLabel, colLabel, initialValue, onChanged) {
+        final cellKey = '$rowLabel-$colLabel';
+
+        // Si no existe, se crea el controlador con el valor inicial
+        if (!cellControllers.containsKey(cellKey)) {
+          cellControllers[cellKey] = TextEditingController(text: initialValue);
+        } else {
+          // Si el valor en `responses` cambia, actualizamos el texto del controlador
+          if (cellControllers[cellKey]!.text != initialValue) {
+            cellControllers[cellKey]!.text = initialValue;
+          }
+        }
+
+        return MatrixCell(
+          controller: cellControllers[cellKey]!,
+          hinText: rowLabel,
+          onChanged: onChanged,
+        );
+      },
     );
   }
 }

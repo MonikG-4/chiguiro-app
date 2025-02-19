@@ -16,10 +16,10 @@ class StringInputQuestion extends StatefulWidget {
   });
 
   @override
-  _StringInputQuestionState createState() => _StringInputQuestionState();
+  StringInputQuestionState createState() => StringInputQuestionState();
 }
 
-class _StringInputQuestionState extends State<StringInputQuestion> {
+class StringInputQuestionState extends State<StringInputQuestion> {
   late TextEditingController _textController;
 
   @override
@@ -56,6 +56,7 @@ class _StringInputQuestionState extends State<StringInputQuestion> {
   @override
   Widget build(BuildContext context) {
     return FormField(
+      key: ValueKey(widget.question.id),
       validator: (value) {
         final error = widget.controller.validatorMandatory(widget.question)(value);
         if (error != null && _textController.text.isNotEmpty) {

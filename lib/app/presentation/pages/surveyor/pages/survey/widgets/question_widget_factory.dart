@@ -58,8 +58,11 @@ class _QuestionHeader extends StatelessWidget {
             ],
           ),
         ),
-        Text(question.question, style: const TextStyle(fontWeight: FontWeight.w600)),
-        Text(question.description!),
+        Text(question.question,
+            style: const TextStyle(fontWeight: FontWeight.w600)),
+        question.description == null
+            ? const SizedBox.shrink()
+            : Text(question.description!),
       ],
     );
   }

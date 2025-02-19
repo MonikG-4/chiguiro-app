@@ -19,29 +19,64 @@ class MatrixDoubleQuestion extends StatelessWidget {
   Widget build(BuildContext context) {
     final rows = question.meta;
     final columns = question.meta2 ?? [];
+    final cellControllers = <String, TextEditingController>{};
 
-    return MatrixTable(
-      question: question,
-      controller: controller,
-      rows: rows,
-      columns: columns,
-      cellBuilder: (rowLabel, colLabel, initialValue, onChanged) {
+  return MatrixTable(
+    question: question,
+    controller: controller,
+    rows: rows,
+    columns: columns,
+    cellBuilder: (rowLabel, colLabel, initialValue, onChanged) {
+      final key = '$rowLabel-$colLabel';
+
+      if (!cellControllers.containsKey('${key}_1')) {
         final parts = initialValue.split('.');
-        final value1 = parts.isNotEmpty ? (parts[0].isNotEmpty ? parts[0][0] : '') : '';
-        final value2 = parts.isNotEmpty && parts[0].length > 1 ? parts[0][1] : '';
-        final value3 = parts.length > 1 ? parts[1] : '';
+        cellControllers['${key}_1'] = TextEditingController(text: parts.isNotEmpty && parts[0].isNotEmpty ? parts[0][0] : '');
+        cellControllers['${key}_2'] = TextEditingController(text: parts.isNotEmpty && parts[0].length > 1 ? parts[0][1] : '');
+        cellControllers['${key}_3'] = TextEditingController(text: parts.length > 1 ? parts[1] : '');
+      }
 
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            MatrixCell(initialValue: value1, hinText: '', onChanged: (v) => onChanged(_mergeParts(v, value2, value3))),
-            MatrixCell(initialValue: value2, hinText: '', onChanged: (v) => onChanged(_mergeParts(value1, v, value3))),
-            const Text('.'),
-            MatrixCell(initialValue: value3, hinText: '', onChanged: (v) => onChanged(_mergeParts(value1, value2, v))),
-          ],
-        );
-      },
-    );
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          MatrixCell(
+            controller: cellControllers['${key}_1']!,
+            hinText: '',
+            onChanged: (v) => onChanged(
+              _mergeParts(
+                v,
+                cellControllers['${key}_2']!.text,
+                cellControllers['${key}_3']!.text,
+              ),
+            ),
+          ),
+          MatrixCell(
+            controller: cellControllers['${key}_2']!,
+            hinText: '',
+            onChanged: (v) => onChanged(
+              _mergeParts(
+                cellControllers['${key}_1']!.text,
+                v,
+                cellControllers['${key}_3']!.text,
+              ),
+            ),
+          ),
+          const Text('.'),
+          MatrixCell(
+            controller: cellControllers['${key}_3']!,
+            hinText: '',
+            onChanged: (v) => onChanged(
+              _mergeParts(
+                cellControllers['${key}_1']!.text,
+                cellControllers['${key}_2']!.text,
+                v,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
   }
 
   String _mergeParts(String v1, String v2, String v3) {

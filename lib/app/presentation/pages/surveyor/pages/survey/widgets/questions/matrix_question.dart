@@ -5,7 +5,7 @@ import '../../../../../../../../core/values/app_colors.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
 
-class MatrixQuestion extends StatelessWidget {
+class MatrixQuestion extends StatefulWidget {
   final SurveyQuestion question;
   final SurveyController controller;
 
@@ -14,6 +14,21 @@ class MatrixQuestion extends StatelessWidget {
     required this.question,
     required this.controller,
   });
+
+  @override
+  MatrixQuestionState createState() => MatrixQuestionState();
+}
+
+class MatrixQuestionState extends State<MatrixQuestion> {
+
+  SurveyQuestion get question => widget.question;
+  SurveyController get controller => widget.controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +75,7 @@ class MatrixQuestion extends StatelessWidget {
                             child: Card(
                               color: isSelected
                                   ? AppColors.successBackground
-                                  : Colors.white,
+                                  : const Color(0xFFF8FAFC),
                               shape: RoundedRectangleBorder(
                                 side: BorderSide(
                                   color: isSelected
