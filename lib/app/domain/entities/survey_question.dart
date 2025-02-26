@@ -30,26 +30,4 @@ class SurveyQuestion {
     this.scaleMax,
     this.jumpers,
   });
-
-  factory SurveyQuestion.fromJson(Map<String, dynamic> json) {
-    return SurveyQuestion(
-      id: json['id'],
-      question: json['question'],
-      description: json['description'],
-      sort: json['sort'],
-      type: json['type'],
-      mandatory: json['mandatory'],
-      meta: List<String>.from(json['meta']),
-      meta2: List<String>.from(json['meta2']),
-      anchorMin: json['anchorMin'],
-      anchorMax: json['anchorMax'],
-      scaleMin: json['scaleMin'],
-      scaleMax: json['scaleMax'],
-      jumpers: json['jumpers'] != null
-          ? (json['jumpers'] as List)
-          .map((e) => Jumper.fromJson(e))
-          .toList()
-          : null,
-    );
-  }
 }
