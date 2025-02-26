@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../values/app_colors.dart';
 
 class AppTypography {
-  static const String defaultFontFamily = 'Inter Display';
+  static const String defaultFontFamily = 'Poppins';
 
   static const TextTheme textTheme = TextTheme(
     bodyMedium: TextStyle(
