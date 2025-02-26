@@ -1,43 +1,36 @@
 import '../../domain/entities/auth_response.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 import '../providers/auth_provider.dart';
+import 'base_repository.dart';
 
-class AuthRepository implements IAuthRepository {
+class AuthRepository extends BaseRepository implements IAuthRepository {
   final AuthProvider provider;
 
   AuthRepository(this.provider);
 
   @override
   Future<AuthResponse> login(String email, String password) async {
-    try {
-      final result = await provider.login(email, password);
+    final result = await processRequest(() => provider.login(email, password));
 
-      if (result.hasException) {
-        final error = result.exception?.graphqlErrors.first;
-        throw Exception(error?.message ?? 'Error desconocido');
-      }
-
-      if (result.data == null || result.data!['pollsterLogin'] == null) {
-        throw Exception('Datos de login inválidos');
-      }
-      return AuthResponse.fromJson(result.data!['pollsterLogin']);
-    } catch (e) {
-      throw Exception('Error en el login: $e');
+    if (result.hasException) {
+      final error = result.exception?.graphqlErrors.first;
+      throw Exception(error?.message ?? 'Error desconocido');
     }
+
+    if (result.data == null || result.data!['pollsterLogin'] == null) {
+      throw Exception('Datos de login inválidos');
+    }
+
+    return AuthResponse.fromJson(result.data!['pollsterLogin']);
   }
 
   @override
   Future<void> forgotPassword(String email) async {
-    try {
-      final result = await provider.forgotPassword(email);
+    final result = await processRequest(() => provider.forgotPassword(email));
 
-      if (result.hasException) {
-        final error = result.exception?.graphqlErrors.first;
-        throw Exception(error?.message ?? 'Error desconocido');
-      }
-
-    } catch (e) {
-      throw Exception('Error en el forgotPassword: $e');
+    if (result.hasException) {
+      final error = result.exception?.graphqlErrors.first;
+      throw Exception(error?.message ?? 'Error desconocido');
     }
   }
 }

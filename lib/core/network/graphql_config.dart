@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:get/get.dart';
 
-import '../../app/presentation/controllers/auth_storage_controller.dart';
+import '../services/cache_storage_service.dart';
+
 
 class GraphQLConfig {
 
   static ValueNotifier<GraphQLClient> initializeClient() {
-    final String? token = Get.find<AuthStorageController>().token;
+    final String? token = Get.find<CacheStorageService>().token;
     HttpLink httpLink = HttpLink(
       'https://chiguiro.proyen.co:7701/pond',
       defaultHeaders: {
