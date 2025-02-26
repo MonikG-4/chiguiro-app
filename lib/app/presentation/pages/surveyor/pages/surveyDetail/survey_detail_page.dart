@@ -1,3 +1,4 @@
+import 'package:chiguiro_front_app/app/domain/entities/survey_statistics.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,14 +13,14 @@ import '../../widgets/survey_detail_card.dart';
 
 class SurveyDetailPage extends GetView<DetailSurveyController> {
   final Survey? survey;
+  final SurveyStatistics? surveyStatistics;
 
-  SurveyDetailPage({super.key}) : survey = Get.arguments;
+  SurveyDetailPage({super.key})
+      : survey = Get.arguments['survey'],
+        surveyStatistics = Get.arguments['surveyStatistics'];
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fecthDetailSurvey(survey!.id);
-    });
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(260.0),
@@ -32,8 +33,10 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
               left: 16.0,
               right: 16.0,
               child: SurveyDetailCard(
-                responses: survey!.entriesCount,
+                responses: surveyStatistics?.totalEntries ?? 0,
                 lastSurveyDate: '06. ene. 2025',
+                values: [surveyStatistics?.totalCompleted ?? 0, surveyStatistics?.totalUncompleted ?? 0,],
+                weekDays: const ['Completas', 'Incompletas'],
               ),
             ),
           ],
@@ -86,11 +89,11 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
                 children: [
                   _buildSectionHeader('Mis respuestas'),
                   const Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 2,
+                          flex: 3,
                           child: Text(
                             'Fecha',
                             style: TextStyle(
@@ -131,7 +134,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
                   const Divider(height: 1, color: Color(0xFFE8EDF4)),
                   ResponseStatusList(),
                   PrimaryButton(
-                    onPressed: (() => Get.toNamed(Routes.SURVEY, arguments: survey)),
+                    onPressed: (() => Get.toNamed(Routes.SURVEY)),
                     isLoading: false,
                     child: 'Iniciar encuesta',
                   ),

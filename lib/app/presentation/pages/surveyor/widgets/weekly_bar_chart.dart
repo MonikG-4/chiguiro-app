@@ -4,27 +4,20 @@ import '../../../../../core/values/app_colors.dart';
 
 class WeeklyBarChart extends StatelessWidget {
   final List<double> values;
+  final List<String> weekDays;
   final double maxHeight;
   final Color barColor;
   final double spacing;
 
-  WeeklyBarChart({
+  const WeeklyBarChart({
     super.key,
     required this.values,
-    this.maxHeight = 200,
+    required this.weekDays,
+    this.maxHeight = 150,
     this.barColor = AppColors.successBorder,
     this.spacing = 1,
-  }) : assert(values.length == 7, 'Must provide exactly 7 values for the week');
+  });
 
-  final List<String> _weekDays = [
-    'Lun',
-    'Mar',
-    'Mie',
-    'Jue',
-    'Vie',
-    'Sab',
-    'Dom'
-  ];
 
   double _calculateNormalizedHeight(double value, double maxValue, double availableHeight) {
     double maxBarHeight = availableHeight - 30;
@@ -41,24 +34,28 @@ class WeeklyBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double maxValue = values.reduce((curr, next) => curr > next ? curr : next);
+    double total = values.fold(0, (sum, value) => sum + value);
 
     return LayoutBuilder(
       builder: (context, constraints) {
         double availableWidth = constraints.maxWidth;
-        double totalSpacing = spacing * 6;
-        double barWidth = (availableWidth - totalSpacing) / 7;
+        double totalSpacing = spacing * (values.length - 1);
+        double barWidth = (availableWidth - totalSpacing) / values.length;
 
         return SizedBox(
           width: availableWidth,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
-            children: List.generate(7, (index) {
+            children: List.generate(values.length, (index) {
               double normalizedHeight = _calculateNormalizedHeight(
                 values[index],
-                maxValue,
-                maxHeight,
+                maxValue == 0 ? 0 : maxValue,
+                maxValue == 0 ? 700 :  maxHeight ,
               );
+
+              double percentage = total == 0 ? 0 : (values[index] / total) * 100;
+
 
               return SizedBox(
                 width: barWidth,
@@ -76,11 +73,21 @@ class WeeklyBarChart extends StatelessWidget {
                               : AppColors.secondary,
                           borderRadius: BorderRadius.circular(8),
                         ),
+                        child: Center(
+                          child: Text(
+                            '${percentage.toStringAsFixed(1)}%',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _weekDays[index],
+                      weekDays[index],
                       style: const TextStyle(
                         color: Color(0xFF6C7A9C),
                         fontSize: 12,

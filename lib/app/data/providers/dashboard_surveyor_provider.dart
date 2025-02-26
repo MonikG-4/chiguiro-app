@@ -1,20 +1,20 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../../domain/entities/survey.dart';
-import '../../domain/entities/surveyor.dart';
 import '../graphql/queries/survey_query.dart';
+import '../graphql/queries/surveyor_query.dart';
 
 class DashboardSurveyorProvider {
   final GraphQLClient client;
 
   DashboardSurveyorProvider(this.client);
 
-  Future<QueryResult> fetchActiveSurveys(int projectId) async {
+  Future<QueryResult> fetchActiveSurveys(int surveyId) async {
     try {
       final QueryOptions options = QueryOptions(
         document: gql(SurveyQuery.project),
         variables: {
-          'id': projectId,
+          'id': surveyId,
         },
       );
       final result = await client.query(options);
@@ -56,15 +56,35 @@ class DashboardSurveyorProvider {
     return surveys;
   }
 
-  Future<Surveyor> getSurveyorProfile() async {
-    // Implement API call
-    return Surveyor(
-      name: 'Luz Alvarez',
-      role: 'Encuestador',
-      avatarUrl: '',
-      balance: 80.0,
-      responses: 12,
-      growthRate: 2.15,
-    );
+  Future<QueryResult> getSurveyorProfile(int surveyorId) async {
+    try {
+      final QueryOptions options = QueryOptions(
+        document: gql(SurveyorQuery.surveyor),
+        variables: {
+          'id': surveyorId,
+        },
+      );
+
+      final result = await client.query(options);
+      return result;
+    } catch (e) {
+      throw Exception('Error en la conexión: $e');
+    }
+  }
+
+  Future<QueryResult> fetchSurveyQuestions(int surveyId) async {
+    try {
+      final QueryOptions options = QueryOptions(
+        document: gql(SurveyQuery.sections),
+        variables: {
+          'projectId': surveyId,
+        },
+      );
+      final result = await client.query(options);
+
+      return result;
+    } catch (e) {
+      throw Exception('Error en la conexión: $e');
+    }
   }
 }

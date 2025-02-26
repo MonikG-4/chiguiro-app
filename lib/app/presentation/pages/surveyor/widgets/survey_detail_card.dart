@@ -7,11 +7,15 @@ import 'weekly_bar_chart.dart';
 class SurveyDetailCard extends StatefulWidget {
   final int responses;
   final String lastSurveyDate;
+  final List<String> weekDays;
+  final List<int> values;
 
   const SurveyDetailCard({
     super.key,
     required this.responses,
     required this.lastSurveyDate,
+    required this.weekDays,
+    required this.values,
   });
 
   @override
@@ -35,8 +39,8 @@ class _SurveyDetailCardState extends State<SurveyDetailCard> {
         SizedBox(
           width: double.infinity,
           child: WeeklyBarChart(
-            values: const [0, 0, 5, 2, 0, 4, 0],
-            maxHeight: 150,
+            values: widget.values.map((e) => e.toDouble()).toList(),
+            weekDays: widget.weekDays,
           ),
         )
       ],
