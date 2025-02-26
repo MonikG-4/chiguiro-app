@@ -1,58 +1,31 @@
-import 'dart:async';
 import 'package:get/get.dart';
+
+import '../../../core/services/cache_storage_service.dart';
 import '../../../core/values/routes.dart';
-import 'auth_storage_controller.dart';
 
 class SessionController extends GetxController {
-  final AuthStorageController authStorageController;
-  final RxBool isLoading = true.obs;
+  final CacheStorageService _cacheStorageService;
+  var isAuthenticated = false.obs;
 
-  SessionController(this.authStorageController);
+  SessionController(this._cacheStorageService);
 
   @override
   void onInit() {
     super.onInit();
-    initializeSession();
-    authStorageController.authResponse.listen((_) {
-      update();
-    });
+    isAuthenticated.value = _cacheStorageService.isAuthenticated;
   }
 
-  Future<void> initializeSession() async {
-    isLoading.value = true;
-
-    final authResponse = authStorageController.authResponse;
-
-    isLoading.value = false;
+  void updateAuthStatus() {
+    isAuthenticated.value = _cacheStorageService.isAuthenticated;
   }
 
-  bool get isAuthenticated {
-    final authResponse = authStorageController.authResponse.value;
-    if (authResponse == null) return false;
-    return true;
-  }
-
-  void checkSessionValidity() {
-    if (!isAuthenticated && authStorageController.token != null) {
-      handleSessionExpired();
-    }
-  }
-
-  Future<void> handleSessionExpired() async {
-    await authStorageController.clearData();
-
-    Get.snackbar(
-      'Sesión expirada',
-      'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
-      duration: const Duration(seconds: 3),
-    );
-
-    // Redirigir al login
+  void handleSessionExpired() {
+    _cacheStorageService.clearData();
     Get.offAllNamed(Routes.LOGIN);
   }
 
   void logout() async {
-    await authStorageController.clearData();
+    _cacheStorageService.clearData();
     Get.offAllNamed(Routes.LOGIN);
   }
 }

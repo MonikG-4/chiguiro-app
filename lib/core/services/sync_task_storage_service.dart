@@ -1,0 +1,30 @@
+import 'package:hive/hive.dart';
+import '../../app/data/models/sync_task_model.dart';
+
+class SyncTaskStorageService {
+  final Box<SyncTaskModel> _taskBox = Hive.box<SyncTaskModel>('sync_tasks');
+
+  Future<void> addTask(SyncTaskModel task) async {
+    await _taskBox.put(task.id, task);
+  }
+
+  List<SyncTaskModel> getPendingTasks() {
+    return _taskBox.values.where((task) => !task.isProcessing).toList();
+  }
+
+  Future<void> markTaskProcessing(String taskId, bool processing) async {
+    final task = _taskBox.get(taskId);
+    if (task != null) {
+      task.isProcessing = processing;
+      await task.save();
+    }
+  }
+
+  Future<void> removeTask(String taskId) async {
+    await _taskBox.delete(taskId);
+  }
+
+  Future<void> clearAllTasks() async {
+    await _taskBox.clear();
+  }
+}

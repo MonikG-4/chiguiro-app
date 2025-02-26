@@ -6,11 +6,10 @@ import '../values/routes.dart';
 class SessionMiddleware extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
-    final authController = Get.find<SessionController>();
-    if (authController.isAuthenticated) {
-      return null;
+    final sessionController = Get.find<SessionController>();
+    if (!sessionController.isAuthenticated.value) {
+      return const RouteSettings(name: Routes.LOGIN);
     }
-
-    return const RouteSettings(name: Routes.LOGIN);
+    return null;
   }
 }
