@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../../../core/values/app_colors.dart';
-import '../../../../../services/audio_service.dart';
+import '../../../../../../../core/services/audio_service.dart';
 
 class AudioLocationPanel extends StatefulWidget {
   final bool showLocation;
@@ -121,7 +121,7 @@ class _AudioLocationPanelState extends State<AudioLocationPanel> {
                                 child: Obx(() {
                                   final audioService = Get.find<AudioService>();
                                   return CustomPaint(
-                                    size: Size(100, 32),
+                                    size: const Size(100, 32),
                                     painter: WavePainter(audioService.amplitude.value),
                                   );
                                 }),
@@ -150,11 +150,13 @@ class _AudioLocationPanelState extends State<AudioLocationPanel> {
 }
 
 class AnimatedWave extends StatefulWidget {
+  const AnimatedWave({super.key});
+
   @override
-  _AnimatedWaveState createState() => _AnimatedWaveState();
+  AnimatedWaveState createState() => AnimatedWaveState();
 }
 
-class _AnimatedWaveState extends State<AnimatedWave>
+class AnimatedWaveState extends State<AnimatedWave>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _amplitudeAnimation;
@@ -163,7 +165,7 @@ class _AnimatedWaveState extends State<AnimatedWave>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: Duration(seconds: 1),
+      duration: const Duration(seconds: 1),
       vsync: this,
     );
 
@@ -191,7 +193,7 @@ class _AnimatedWaveState extends State<AnimatedWave>
       audioService.amplitude.value = _amplitudeAnimation.value;
 
       return CustomPaint(
-        size: Size(100, 32),
+        size: const Size(100, 32),
         painter: WavePainter(audioService.amplitude.value),
       );
     });

@@ -1,14 +1,16 @@
 import 'package:get/get.dart';
+
+import '../../../core/services/cache_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../../core/values/routes.dart';
 import '../../domain/repositories/i_auth_repository.dart';
-import 'auth_storage_controller.dart';
+import 'session_controller.dart';
 
 class AuthController extends GetxController {
   final IAuthRepository repository;
-  final AuthStorageController _authStorageController =
-      Get.find<AuthStorageController>();
+  final CacheStorageService _cacheStorageService =
+      Get.find<CacheStorageService>();
 
   final isLoading = false.obs;
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
@@ -28,7 +30,9 @@ class AuthController extends GetxController {
 
       final response = await repository.login(email, password);
 
-      await _authStorageController.saveAuthResponse(response);
+      await _cacheStorageService.saveAuthResponse(response);
+      Get.find<SessionController>().updateAuthStatus();
+
 
       Get.closeAllSnackbars();
       Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);

@@ -7,8 +7,8 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../../../core/utils/message_handler.dart';
-import '../../../core/utils/snackbar_message_model.dart';
+import '../utils/message_handler.dart';
+import '../utils/snackbar_message_model.dart';
 
 class AudioService extends GetxService {
   final FlutterSoundRecorder _audioRecorder = FlutterSoundRecorder();
