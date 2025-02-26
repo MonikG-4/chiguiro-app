@@ -3,14 +3,11 @@ import 'package:get/get.dart';
 
 import '../../../../../../core/values/app_colors.dart';
 import '../../../../../../core/values/routes.dart';
-import '../../../../../domain/entities/survey.dart';
 import '../../../../widgets/custom_text_button_redirect.dart';
 import '../../../../widgets/primary_button.dart';
 
 class SurveyWithoutResponsesPage extends GetView {
-  final Survey? survey;
-
-  SurveyWithoutResponsesPage({super.key}) : survey = Get.arguments;
+  const SurveyWithoutResponsesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,12 +47,13 @@ class SurveyWithoutResponsesPage extends GetView {
                 ),
                 const SizedBox(height: 64),
                 PrimaryButton(
-                    onPressed: (() => Get.toNamed(Routes.SURVEY, arguments: survey)),
+                    onPressed: (() => Get.toNamed(Routes.SURVEY)),
                     isLoading: false,
-                    child: 'Iniciar encuesta'
-                ),
+                    child: 'Iniciar encuesta'),
                 const SizedBox(height: 16),
-                CustomTextButtonRedirect(onPressed: ()=> Get.offAllNamed(Routes.DASHBOARD_SURVEYOR) , label: 'Volver al inicio'),
+                CustomTextButtonRedirect(
+                    onPressed: () => Get.offAllNamed(Routes.DASHBOARD_SURVEYOR),
+                    label: 'Volver al inicio'),
               ],
             ),
           ),

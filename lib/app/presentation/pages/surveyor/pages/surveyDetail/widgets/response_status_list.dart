@@ -1,3 +1,4 @@
+import 'package:chiguiro_front_app/core/services/connectivity_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -6,6 +7,7 @@ import '../../../../../controllers/detail_survey_controller.dart';
 
 class ResponseStatusList extends StatelessWidget {
   final DetailSurveyController controller = Get.find();
+  final ConnectivityService _connectivityService = Get.find();
 
   ResponseStatusList({super.key});
 
@@ -38,21 +40,21 @@ class ResponseStatusList extends StatelessWidget {
   }
 
   Widget _buildLoadingIndicator() {
-    return const Center(
+    return _connectivityService.isConnected.value ? const Center(
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: CircularProgressIndicator(color: Colors.black,),
       ),
-    );
+    ) : const Text('No hay datos por mostrar', textAlign: TextAlign.center,);
   }
 
   Widget _buildItem(DetailSurvey item) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       child: Row(
         children: [
           Expanded(
-            flex: 2,
+            flex: 3,
             child: Text(
               _formatDate(item.createdOn),
               style: const TextStyle(
@@ -75,7 +77,7 @@ class ResponseStatusList extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(vertical: 4),
               decoration: BoxDecoration(
                 color: item.completed ? const Color(0xFF1DD1A1) : const Color(0xFFFF6B6B),
                 borderRadius: BorderRadius.circular(11),
@@ -100,9 +102,10 @@ class ResponseStatusList extends StatelessWidget {
     final day = date.day.toString().padLeft(2, '0');
     final month = _getSpanishMonth(date.month).substring(0, 3).toLowerCase();
     final year = date.year.toString().substring(2);
-    return '$day. $month. $year';
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '$day. $month. $year  $hour:$minute';
   }
-
   String _getSpanishMonth(int month) {
     const months = [
       'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',

@@ -17,5 +17,6 @@ class DetailSurveyBinding extends Bindings {
           () => DetailSurveyRepository(Get.find<DetailSurveyProvider>()),
     );
     Get.lazyPut(() => DetailSurveyController(Get.find<IDetailSurveyRepository>()));
+
   }
 }

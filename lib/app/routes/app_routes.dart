@@ -17,12 +17,12 @@ class AppPages {
   static final routes = [
     GetPage(
         name: Routes.DASHBOARD_SURVEYOR,
-        page: () => DashboardSurveyorPage(),
+        page: () => const DashboardSurveyorPage(),
         middlewares: [SessionMiddleware()],
         binding: DashboardSurveyorBinding()),
     GetPage(
       name: Routes.SURVEY_WITHOUT_RESPONSE,
-      page: () => SurveyWithoutResponsesPage(),
+      page: () => const SurveyWithoutResponsesPage(),
       middlewares: [SessionMiddleware()],
     ),
     GetPage(
@@ -35,7 +35,6 @@ class AppPages {
         page: () => SurveyPage(),
         middlewares: [SessionMiddleware()],
         binding: SurveyBinding()),
-
     GetPage(
         name: Routes.LOGIN,
         page: () => const LoginPage(),

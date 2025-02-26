@@ -5,26 +5,15 @@ import '../../controllers/session_controller.dart';
 import './widgets/survey_card.dart';
 import '../../../../core/values/app_colors.dart';
 import '../../../domain/entities/survey.dart';
-import '../../controllers/auth_storage_controller.dart';
 import '../../controllers/dashboard_surveyor_controller.dart';
 import 'widgets/surveyor_balance_card.dart';
 import 'widgets/profile_header.dart';
 
 class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
-  DashboardSurveyorPage({super.key});
-
-  final storageController = Get.find<AuthStorageController>();
+  const DashboardSurveyorPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-
-      final int projectId = storageController.authResponse.value?.projectId ?? 0;
-      controller.fetchSurveys(projectId);
-    });
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: PreferredSize(
@@ -40,7 +29,8 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
                 right: 16.0,
                 child: SurveyorBalanceCard(
                   balance: controller.surveyor.value?.balance ?? 0,
-                  responses: controller.surveyor.value?.responses ?? 0,
+                  responses:
+                      controller.surveyor.value?.statics.totalEntries ?? 0,
                   growthRate: controller.surveyor.value?.growthRate ?? 0,
                   lastSurveyDate: '06. ene. 2025',
                 ),
@@ -61,9 +51,6 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   }
 
   Widget _buildAppBarBackground(BuildContext context) {
-    final name = storageController.authResponse.value?.name ?? '';
-    final surname = storageController.authResponse.value?.surname ?? '';
-
     return Container(
       decoration: const BoxDecoration(
         gradient: AppColors.backgroundSecondary,
@@ -73,7 +60,9 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
         title: ProfileHeader(
-          name: 'Hola $name $surname',
+          name: controller.surveyor.value != null
+              ? 'Hola ${controller.surveyor.value?.name} ${controller.surveyor.value?.surname}'
+              : '',
           role: 'Encuestador',
           avatarPath: 'assets/images/icons/Male.png',
           onSettingsTap: () => _showSettingsModal(context),
@@ -98,7 +87,9 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
               children: [
                 _buildSectionHeader('Mis encuestas', isActive: true),
                 const SizedBox(height: 16),
-                _buildSurveysList(controller.activeSurvey.value != null ? [controller.activeSurvey.value!] : []),
+                _buildSurveysList(controller.activeSurvey.value != null
+                    ? [controller.activeSurvey.value!]
+                    : []),
                 const SizedBox(height: 24),
                 _buildSectionHeader('Historial de encuestas'),
                 const SizedBox(height: 16),
@@ -180,9 +171,15 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
 
   void _redirectToSurvey(Survey survey) {
     if (survey.entriesCount > 0) {
-      Get.toNamed(Routes.SURVEY_DETAIL, arguments: survey);
+      Get.toNamed(
+        Routes.SURVEY_DETAIL,
+        arguments: {
+          'survey': survey,
+          'surveyStatistics': controller.surveyor.value?.statics,
+        },
+      );
     } else {
-      Get.toNamed(Routes.SURVEY_WITHOUT_RESPONSE, arguments: survey);
+      Get.toNamed(Routes.SURVEY_WITHOUT_RESPONSE);
     }
   }
 

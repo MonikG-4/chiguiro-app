@@ -3,12 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../../core/services/cache_storage_service.dart';
 import '../../../../../../core/values/app_colors.dart';
 import '../../../../../domain/entities/auth_response.dart';
-import '../../../../../domain/entities/survey.dart';
 import '../../../../../presentation/controllers/survey_controller.dart';
-import '../../../../controllers/auth_storage_controller.dart';
-import '../../../../services/audio_service.dart';
 import '../../../../widgets/primary_button.dart';
 import 'widgets/audio_location_panel.dart';
 import 'widgets/custom_progress_bar.dart';
@@ -16,12 +14,10 @@ import 'widgets/keep_alive_survey_question.dart';
 import 'widgets/question_widget_factory.dart';
 
 class SurveyPage extends StatefulWidget {
-  final Survey survey;
   final AuthResponse authResponse;
 
   SurveyPage({super.key})
-      : survey = Get.arguments,
-        authResponse = Get.find<AuthStorageController>().authResponse.value!;
+      : authResponse = Get.find<CacheStorageService>().authResponse!;
 
   @override
   SurveyPageState createState() => SurveyPageState();
@@ -29,58 +25,47 @@ class SurveyPage extends StatefulWidget {
 
 class SurveyPageState extends State<SurveyPage> {
   final SurveyController controller = Get.find();
-  final audioService = Get.find<AudioService>();
   final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchSurveyQuestions(widget.survey.id);
-      controller.isGeoLocation.value = widget.survey.geoLocation;
-      controller.isVoiceRecorder.value = widget.survey.voiceRecorder;
-
-      if (widget.survey.voiceRecorder) {
-        audioService.startRecording();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    if (audioService.isRecording.value) {
-      audioService.stopRecording();
-    }
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.survey.name),
+        title: Text(controller.survey.value!.name),
         backgroundColor: Colors.transparent,
       ),
       backgroundColor: AppColors.background,
-      body: Obx(() => controller.isLoadingQuestion.value
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.only(top: 5.0),
-              child: Stack(
-                children: [
-                  (controller.isVoiceRecorder.value ||
-                          controller.isGeoLocation.value)
-                      ? AudioLocationPanel(
-                          showLocation: widget.survey.geoLocation,
-                          showAudioRecorder: widget.survey.voiceRecorder,
-                        )
-                      : const SizedBox.shrink(),
-                  _buildQuestionsForm(context),
-                  _buildProgressBar(),
-                  _buildSubmitButton(context),
-                ],
-              ),
-            )),
+      body: Obx(() {
+        if (controller.isLoadingQuestion.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (controller.sections.isEmpty) {
+          return const Center(child: Text('No hay secciones disponibles'));
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 5.0),
+          child: Stack(
+            children: [
+              if (controller.isVoiceRecorder.value ||
+                  controller.isGeoLocation.value)
+                AudioLocationPanel(
+                  showLocation: controller.survey.value!.geoLocation,
+                  showAudioRecorder: controller.survey.value!.voiceRecorder,
+                ),
+              _buildQuestionsForm(context),
+              _buildProgressBar(),
+              _buildSubmitButton(context),
+            ],
+          ),
+        );
+      }),
     );
   }
 
@@ -93,7 +78,7 @@ class SurveyPageState extends State<SurveyPage> {
                 : 40.0,
         left: 16.0,
         right: 16.0,
-        bottom: 80.0,
+        bottom: 160.0,
       ),
       child: Form(
         key: _formKey,
@@ -108,6 +93,7 @@ class SurveyPageState extends State<SurveyPage> {
             }
 
             return Column(
+              key: ValueKey('section-${section.id}'),
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
@@ -136,6 +122,8 @@ class SurveyPageState extends State<SurveyPage> {
                 ),
                 ...visibleQuestions.map((question) {
                   return KeepAliveSurveyQuestion(
+                    key: ValueKey(
+                        'question-${question.id}'), // Añadir key para mejor reconstrucción
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child:
@@ -242,9 +230,11 @@ class SurveyPageState extends State<SurveyPage> {
               break;
 
             case 'Check':
-              final randomSelections =
-                  question.meta.where((_) => Random().nextBool()).toList();
-
+              final randomSelections = question.meta
+                  .where((_) => Random().nextBool())
+                  .toList()
+                  .where((element) => element.length > 1)
+                  .toList();
               controller.responses[question.id] = {
                 'question': question.question,
                 'type': question.type,
@@ -271,7 +261,9 @@ class SurveyPageState extends State<SurveyPage> {
             case 'Matrix':
               final matrixResults = question.meta.map((meta) {
                 return {
-                  meta: question.meta2?[Random().nextInt(question.meta2!.length)].toString()
+                  meta: question
+                      .meta2?[Random().nextInt(question.meta2!.length)]
+                      .toString()
                 };
               }).toList();
 
@@ -287,7 +279,8 @@ class SurveyPageState extends State<SurveyPage> {
               final matrixTimeResults = question.meta.map((meta) {
                 return {
                   'fila': meta,
-                  'columna': question.meta2![Random().nextInt(question.meta2!.length)],
+                  'columna':
+                      question.meta2![Random().nextInt(question.meta2!.length)],
                   'respuesta': Random().nextInt(100).toString()
                 };
               }).toList();
@@ -305,11 +298,8 @@ class SurveyPageState extends State<SurveyPage> {
         }
       }
     }
-
-    controller.responses.refresh();
   }
 
-// Update the _buildSubmitButton method to include the new button
   Widget _buildSubmitButton(BuildContext context) {
     return Positioned(
       bottom: 0,
@@ -332,7 +322,7 @@ class SurveyPageState extends State<SurveyPage> {
               isLoading: false,
               onPressed: () async {
                 await _fillSurveyWithRandomResponses();
-                setState(() {}); // Para reflejar los cambios en los inputs
+                setState(() {});
               },
               child: 'Responder Aleatoriamente',
             ),
@@ -344,16 +334,7 @@ class SurveyPageState extends State<SurveyPage> {
 
   Future<void> _submitSurvey() async {
     if (_formKey.currentState!.validate() & controller.validateAllQuestions()) {
-      String? audioBase64;
-      if (audioService.isRecording.value) {
-        audioBase64 = await audioService.stopRecording();
-      }
-
-      controller.saveSurveyResults(
-        projectId: widget.survey.id,
-        pollsterId: widget.authResponse.id,
-        audioBase64: audioBase64,
-      );
+      controller.saveSurveyResults(widget.authResponse.id);
     }
   }
 }
