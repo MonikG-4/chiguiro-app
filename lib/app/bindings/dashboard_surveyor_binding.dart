@@ -5,8 +5,6 @@ import '../data/providers/dashboard_surveyor_provider.dart';
 import '../data/repositories/dashboard_surveyor_repository.dart';
 import '../domain/repositories/i_dashboard_surveyor_repository.dart';
 import '../presentation/controllers/dashboard_surveyor_controller.dart';
-import '../presentation/services/audio_service.dart';
-import '../presentation/services/location_service.dart';
 
 class DashboardSurveyorBinding extends Bindings {
   @override
@@ -19,9 +17,5 @@ class DashboardSurveyorBinding extends Bindings {
           () => DashboardSurveyorRepository(Get.find<DashboardSurveyorProvider>()),
     );
     Get.lazyPut(() => DashboardSurveyorController(Get.find<IDashboardSurveyorRepository>()));
-
-    Get.lazyPut(() => LocationService());
-    Get.lazyPut(()=>AudioService());
-
   }
 }
