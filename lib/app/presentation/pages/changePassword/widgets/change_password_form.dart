@@ -5,7 +5,7 @@ import '../../../widgets/custom_text_field.dart';
 class ChangePasswordForm extends StatefulWidget {
   final TextEditingController passwordController;
 
-  const ChangePasswordForm ({
+  const ChangePasswordForm({
     super.key,
     required this.passwordController,
   });
@@ -15,11 +15,13 @@ class ChangePasswordForm extends StatefulWidget {
 }
 
 class _ChangePasswordFormState extends State<ChangePasswordForm> {
-  bool obscureText = true;
+  bool obscureTextPassword = true;
+  bool obscureTextConfirmPassword = true;  final TextEditingController confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
     widget.passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -31,15 +33,15 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
           label: 'Nueva contraseña*',
           hintText: 'Ingresa tu contraseña',
           controller: widget.passwordController,
-          obscureText: obscureText,
+          obscureText: obscureTextPassword,
           validator: (value) {
             return ValidatorLoginFields.validatePassword(value ?? '');
           },
           suffixIcon: IconButton(
-            icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
+            icon: Icon(obscureTextPassword ? Icons.visibility_off : Icons.visibility),
             onPressed: () {
               setState(() {
-                obscureText = !obscureText;
+                obscureTextPassword = !obscureTextPassword;
               });
             },
           ),
@@ -48,16 +50,16 @@ class _ChangePasswordFormState extends State<ChangePasswordForm> {
         CustomInputField<String>(
           label: 'Confirmar contraseña*',
           hintText: 'Ingresa tu contraseña',
-          controller: widget.passwordController,
-          obscureText: obscureText,
+          controller: confirmPasswordController,
+          obscureText: obscureTextConfirmPassword,
           validator: (value) {
-            return ValidatorLoginFields.validatePassword(value ?? '');
+            return ValidatorLoginFields.confirmPassword(widget.passwordController.text, value ?? '');
           },
           suffixIcon: IconButton(
-            icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
+            icon: Icon(obscureTextConfirmPassword ? Icons.visibility_off : Icons.visibility),
             onPressed: () {
               setState(() {
-                obscureText = !obscureText;
+                obscureTextConfirmPassword = !obscureTextConfirmPassword;
               });
             },
           ),

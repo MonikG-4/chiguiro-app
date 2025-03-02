@@ -15,6 +15,18 @@ class DashboardSurveyorRepository extends BaseRepository
   DashboardSurveyorRepository(this.provider);
 
   @override
+  Future<bool> changePassword(int pollsterId, String password) async {
+    final result = await processRequest(() => provider.changePassword(pollsterId, password));
+
+    if (result.hasException) {
+      final error = result.exception?.graphqlErrors.first;
+      throw Exception(error?.message ?? 'Error desconocido');
+    }
+
+    return result.data!['pollsterChangePassword'] == null;
+  }
+
+  @override
   Future<Survey> fetchActiveSurveys(int surveyId) async {
     final result =
         await processRequest(() => provider.fetchActiveSurveys(surveyId));

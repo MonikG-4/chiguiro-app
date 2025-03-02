@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../core/values/routes.dart';
-import '../../controllers/auth_controller.dart';
+import '../../controllers/dashboard_surveyor_controller.dart';
 import '../../widgets/bottom_pages.dart';
 import '../../widgets/custom_text_button_redirect.dart';
 import '../../widgets/custom_view_form.dart';
 import '../../widgets/primary_button.dart';
 import 'widgets/change_password_form.dart';
 
-class ChangePasswordPage extends GetView<AuthController> {
+class ChangePasswordPage extends GetView<DashboardSurveyorController> {
   const ChangePasswordPage({super.key});
 
   @override
@@ -18,14 +17,13 @@ class ChangePasswordPage extends GetView<AuthController> {
     final TextEditingController passwordController = TextEditingController();
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       body: CustomViewForm(
         formKey: formKey,
         title: const Align(
           alignment: Alignment.centerLeft,
           child: Column(
             children: [
-              SizedBox(height: 35 ),
+              SizedBox(height: 36),
               Text(
                 'Nueva contraseña',
                 style: TextStyle(
@@ -66,7 +64,7 @@ class ChangePasswordPage extends GetView<AuthController> {
                   ? null
                   : () {
                 if (formKey.currentState!.validate()) {
-                  controller.forgotPassword(passwordController.text);
+                  controller.changePassword(passwordController.text);
                 }
               },
               isLoading: controller.isLoading.value,
@@ -81,6 +79,6 @@ class ChangePasswordPage extends GetView<AuthController> {
 
   void _handleBackNavigation() {
     Get.closeAllSnackbars();
-    Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
+    Get.back();
   }
 }

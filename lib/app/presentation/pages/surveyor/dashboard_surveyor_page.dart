@@ -24,7 +24,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
             children: [
               _buildAppBarBackground(context),
               Positioned(
-                top: 120.0,
+                top: 130.0,
                 left: 16.0,
                 right: 16.0,
                 child: SurveyorBalanceCard(
@@ -60,9 +60,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
         title: ProfileHeader(
-          name: controller.surveyor.value != null
-              ? 'Hola ${controller.surveyor.value?.name} ${controller.surveyor.value?.surname}'
-              : '',
+          name: 'Hola ${controller.nameSurveyor.value} ${controller.surnameSurveyor.value}',
           role: 'Encuestador',
           avatarPath: 'assets/images/icons/Male.png',
           onSettingsTap: () => _showSettingsModal(context),
@@ -77,7 +75,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.only(
-              top: 64,
+              top: 44,
               left: 16,
               right: 16,
               bottom: 16,
@@ -143,11 +141,11 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
 
   Widget _buildSurveysList(List<Survey> surveys, {bool isHistorical = false}) {
     if (surveys.isEmpty) {
-      return const Center(
-        child: Card(
-          color: Colors.white,
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
+      return const Card(
+        color: Colors.white,
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Center(
             child: Text(
               "No hay encuestas disponibles",
               style: TextStyle(fontSize: 16),

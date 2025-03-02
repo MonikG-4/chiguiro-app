@@ -1,6 +1,7 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../../domain/entities/survey.dart';
+import '../graphql/mutations/password_mutations.dart';
 import '../graphql/queries/survey_query.dart';
 import '../graphql/queries/surveyor_query.dart';
 
@@ -8,6 +9,23 @@ class DashboardSurveyorProvider {
   final GraphQLClient client;
 
   DashboardSurveyorProvider(this.client);
+
+  Future<QueryResult> changePassword(int pollsterId, String password) async {
+    try {
+      final MutationOptions options = MutationOptions(
+        document: gql(PasswordMutations.pollsterChangePassword),
+        variables: {
+          "id": pollsterId,
+          "password": password
+        },
+      );
+
+      final result = await client.mutate(options);
+      return result;
+    } catch (e) {
+      throw Exception('Error en la conexión: $e');
+    }
+  }
 
   Future<QueryResult> fetchActiveSurveys(int surveyId) async {
     try {

@@ -23,7 +23,6 @@ class AuthController extends GetxController {
     MessageHandler.setupSnackbarListener(message);
   }
 
-
   Future<void> login(String email, String password) async {
     try {
       isLoading.value = true;
@@ -33,11 +32,9 @@ class AuthController extends GetxController {
       await _cacheStorageService.saveAuthResponse(response);
       Get.find<SessionController>().updateAuthStatus();
 
-
       Get.closeAllSnackbars();
       Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
     } catch (e) {
-
       message.update((val) {
         val?.message = e.toString().replaceAll("Exception:", "");
         val?.state = 'error';
@@ -51,13 +48,16 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      await repository.forgotPassword(email);
+      final isSuccess = await repository.forgotPassword(email);
 
-      message.update((val) {
-        val?.message = 'Se envio un E-Mail con indicaciones para restablecer la contraseña.';
-        val?.state = 'success';
-      });
-
+      if (isSuccess) {
+        Get.back();
+        message.update((val) {
+          val?.message =
+              'Se envio un E-Mail con indicaciones para restablecer la contraseña.';
+          val?.state = 'success';
+        });
+      }
     } catch (e) {
       message.update((val) {
         val?.message = e.toString().replaceAll("Exception:", "");

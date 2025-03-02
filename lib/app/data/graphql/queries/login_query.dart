@@ -6,9 +6,6 @@ class LoginQuery {
         name
         surname
         accessToken
-        project {
-          id
-        }
       }
     }
   ''';

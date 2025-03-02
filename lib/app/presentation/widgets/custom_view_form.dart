@@ -24,40 +24,49 @@ class CustomViewForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const AppLogo(),
-                title,
-                if (subtitle != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    subtitle!,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        body: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: SafeArea(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const AppLogo(),
+                            title,
+                            if (subtitle != null) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                subtitle!,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ],
+                            const SizedBox(height: 32),
+                            form,
+                            if (textButton != null) ...[textButton!],
+                            if (buttonText != null) ...[buttonText!],
+                          ],
+                        ),
+                      ),
                     ),
-                    textAlign: TextAlign.left,
                   ),
-                ],
-                const SizedBox(height: 32),
-
-                form,
-
-                if (textButton != null) ...[
-                  textButton!,
-                ],
-                if (buttonText != null) ...[
-                  buttonText!,
-                ],
-              ],
+                ),
+              ),
             ),
           ),
         ),

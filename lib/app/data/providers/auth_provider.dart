@@ -1,6 +1,6 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import '../graphql/mutations/auth_mutations.dart';
+import '../graphql/mutations/password_mutations.dart';
 import '../graphql/queries/login_query.dart';
 
 class AuthProvider {
@@ -28,7 +28,7 @@ class AuthProvider {
   Future<QueryResult> forgotPassword(String email) async {
     try {
       final MutationOptions options = MutationOptions(
-        document: gql(AuthMutations.forgotPassword),
+        document: gql(PasswordMutations.pollsterForgotPassword),
         variables: {
           "email": email,
         },

@@ -25,12 +25,14 @@ class AuthRepository extends BaseRepository implements IAuthRepository {
   }
 
   @override
-  Future<void> forgotPassword(String email) async {
+  Future<bool> forgotPassword(String email) async {
     final result = await processRequest(() => provider.forgotPassword(email));
 
     if (result.hasException) {
       final error = result.exception?.graphqlErrors.first;
       throw Exception(error?.message ?? 'Error desconocido');
     }
+
+    return result.data!['pollsterForgotPassword'] == null;
   }
 }
