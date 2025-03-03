@@ -42,20 +42,25 @@ class DetailSurveyController extends GetxController {
     final args = Get.arguments;
     if (args != null) {
       survey.value = args['survey'] as Survey?;
-      surveyStatistics.value = args['surveyStatistics'] as SurveyStatistics?;
     }
 
     MessageHandler.setupSnackbarListener(message);
 
     scrollController = ScrollController()..addListener(_scrollListener);
 
-    ever(_syncNotifier.isSyncComplete, (bool isComplete) {
-      if (isComplete) {
-        fecthDetailSurvey();
-        _syncNotifier.resetSyncStatus();
-      }
-    });
     fecthDetailSurvey();
+    fetchStatisticsSurvey();
+  }
+
+  Future<void> fetchStatisticsSurvey() async {
+    try {
+      final newItems = await repository.fetchStatisticsSurvey(
+          _storageService.authResponse!.id, survey.value!.id);
+
+      surveyStatistics.value = newItems;
+    } catch (e) {
+      _showMessage(e.toString().replaceAll("Exception:", ""), 'error');
+    }
   }
 
   Future<void> fecthDetailSurvey() async {

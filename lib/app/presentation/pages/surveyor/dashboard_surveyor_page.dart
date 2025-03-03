@@ -87,8 +87,7 @@ Widget _buildContent() {
       const SizedBox(height: 24),
       _buildSectionHeader('Historial de encuestas'),
       const SizedBox(height: 16),
-      _buildSurveysList(
-        controller.historicalSurveys,
+      _buildSurveysList(controller.activeSurvey,
         isHistorical: true,
       ),
     ],
@@ -133,7 +132,11 @@ Widget _buildSectionHeader(String title, {bool isActive = false}) {
   }
 
   Widget _buildSurveysList(List<Survey> surveys, {bool isHistorical = false}) {
-    if (surveys.isEmpty) {
+    final filteredSurveys = isHistorical
+        ? surveys.where((survey) => !survey.active).toList()
+        : surveys.where((survey) => survey.active).toList();
+
+    if (filteredSurveys.isEmpty) {
       return const Card(
         color: Colors.white,
         child: Padding(
@@ -150,7 +153,7 @@ Widget _buildSectionHeader(String title, {bool isActive = false}) {
     }
 
     return Column(
-      children: surveys.map((survey) {
+      children: filteredSurveys.map((survey) {
         return SurveyCard(
           survey: survey,
           isHistorical: isHistorical,
@@ -159,6 +162,7 @@ Widget _buildSectionHeader(String title, {bool isActive = false}) {
       }).toList(),
     );
   }
+
 
   void _redirectToSurvey(Survey survey) {
     if (survey.entriesCount > 0) {

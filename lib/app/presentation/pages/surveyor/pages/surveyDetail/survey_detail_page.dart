@@ -17,31 +17,38 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(260.0),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            _buildAppBarBackground(context),
-            Positioned(
-              top: 120.0,
-              left: 16.0,
-              right: 16.0,
-              child: SurveyDetailCard(
-                responses: controller.surveyStatistics.value?.totalEntries ?? 0,
-                lastSurveyDate: '06. ene. 2025',
-                values: [controller.surveyStatistics.value?.totalCompleted ?? 0, controller.surveyStatistics.value?.totalUncompleted ?? 0,],
-                weekDays: const ['Completas', 'Incompletas'],
-              ),
+    return Obx(() {
+      return RefreshIndicator(
+        onRefresh: () async {
+          controller.fecthDetailSurvey();
+        },
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(260.0),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _buildAppBarBackground(context),
+                Positioned(
+                  top: 120.0,
+                  left: 16.0,
+                  right: 16.0,
+                  child: SurveyDetailCard(
+                    responses: controller.surveyStatistics.value?.totalEntries ?? 0,
+                    lastSurveyDate: '06. ene. 2025',
+                    values: [controller.surveyStatistics.value?.totalCompleted ?? 0, controller.surveyStatistics.value?.totalUncompleted ?? 0,],
+                    weekDays: const ['Completas', 'Incompletas'],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
+          body: SafeArea(
+            child: _buildContent(),
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: _buildContent(),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildAppBarBackground(BuildContext context) {
