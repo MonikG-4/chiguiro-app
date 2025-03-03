@@ -2,6 +2,7 @@ import 'package:chiguiro_front_app/core/services/connectivity_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../../../core/values/app_colors.dart';
 import '../../../../../../domain/entities/detail_survey.dart';
 import '../../../../../controllers/detail_survey_controller.dart';
 
@@ -21,18 +22,25 @@ class ResponseStatusList extends StatelessWidget {
           height: 1,
           color: Color(0xFFE8EDF4),
         ),
-        itemBuilder: (context, index) {
-          if (index == controller.detailSurvey.length) {
-            return _buildLoadingIndicator();
+          itemBuilder: (context, index) {
+            if (controller.detailSurvey.isEmpty) {
+              return const Text('No hay datos por mostrar', textAlign: TextAlign.center);
+            }
+            if (index == controller.detailSurvey.length) {
+              return _buildLoadingIndicator();
+            }
+
+            final item = controller.detailSurvey[index];
+            return _buildItem(item);
           }
-          final item = controller.detailSurvey[index];
-          return _buildItem(item);
-        },
       )),
     );
   }
 
   int _getItemCount() {
+    if (controller.detailSurvey.isEmpty) {
+      return 1; // Para mostrar el mensaje cuando la lista está vacía
+    }
     if (controller.currentPage.value == 1 && controller.detailSurvey.length < controller.pageSize) {
       return controller.detailSurvey.length;
     }
@@ -50,7 +58,7 @@ class ResponseStatusList extends StatelessWidget {
 
   Widget _buildItem(DetailSurvey item) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8 ),
       child: Row(
         children: [
           Expanded(
@@ -79,7 +87,7 @@ class ResponseStatusList extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 4),
               decoration: BoxDecoration(
-                color: item.completed ? const Color(0xFF1DD1A1) : const Color(0xFFFF6B6B),
+                color: item.completed ? AppColors.complete : AppColors.incomplete,
                 borderRadius: BorderRadius.circular(11),
               ),
               child: Text(

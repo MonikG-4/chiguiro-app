@@ -50,6 +50,9 @@ class SurveyController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    survey.value = Get.arguments['survey'];
+    sections.assignAll(survey.value!.sections);
     MessageHandler.setupSnackbarListener(message);
     _loadSurveyData();
   }
@@ -63,21 +66,21 @@ class SurveyController extends GetxController {
   }
 
   void _loadSurveyData() {
-    survey.value = _localStorageService.getSurvey();
-    sections.assignAll(_localStorageService.getSections());
-
-    if (survey.value != null) {
-      isGeoLocation.value = survey.value!.geoLocation;
-      isVoiceRecorder.value = survey.value!.voiceRecorder;
-
-      if (isVoiceRecorder.value) {
-        _audioService.startRecording();
-      }
-
-      if (isGeoLocation.value) {
-        _fetchLocation();
-      }
-    }
+    // survey.value = _localStorageService.getSurvey();
+    // sections.assignAll(_localStorageService.getSections());
+    //
+    // if (survey.value != null) {
+    //   isGeoLocation.value = survey.value!.geoLocation;
+    //   isVoiceRecorder.value = survey.value!.voiceRecorder;
+    //
+    //   if (isVoiceRecorder.value) {
+    //     _audioService.startRecording();
+    //   }
+    //
+    //   if (isGeoLocation.value) {
+    //     _fetchLocation();
+    //   }
+    // }
   }
 
   Future<void> _fetchLocation() async {
@@ -109,18 +112,18 @@ class SurveyController extends GetxController {
 
   Future<void> saveSurveyResults(int pollsterId) async {
     if (!validateAllQuestions()) return;
-    String? audioBase64;
-    if (_audioService.isRecording.value) {
-      audioBase64 = await _audioService.stopRecording();
-    }
+    String? audioBase64 = '';
+
+      if (isVoiceRecorder.value && _audioService.isRecording.value) {
+        audioBase64 = await _audioService.stopRecording();
+      }
 
     isLoadingSendSurvey.value = true;
-    final stopwatch = Stopwatch()..start();
 
     try {
       final entryInput =
           await _createSurveyEntry(survey.value!.id, pollsterId, audioBase64!);
-      printEntryInput(entryInput.toJson());
+      //printEntryInput(entryInput.toJson());
       if (_connectivityService.isConnected.value) {
         final isSuccess =
             await _repository.saveSurveyResults(entryInput.toJson());
@@ -137,20 +140,16 @@ class SurveyController extends GetxController {
         ));
         _showMessage('Sin conexión. Encuesta guardada localmente.', 'warning');
       }
-      Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
+      Get.until((route) => route.settings.name == Routes.SURVEY_DETAIL);
     } catch (e) {
       _showMessage('Error al registrar la encuesta', 'error');
     } finally {
       isLoadingSendSurvey.value = false;
-      stopwatch.stop();
-      print(
-          'Tiempo total de procesamiento saveSurveyResults: ${stopwatch.elapsed.inSeconds} ms');
     }
   }
 
   Future<SurveyEntryModel> _createSurveyEntry(
       int projectId, int pollsterId, String audioBase64) async {
-
     return SurveyEntryModel(
       projectId: projectId,
       pollsterId: pollsterId,

@@ -1,3 +1,5 @@
+import 'sections.dart';
+
 class Survey {
   final int id;
   final String name;
@@ -7,6 +9,7 @@ class Survey {
   final String? logoUrl;
   final bool geoLocation;
   final bool voiceRecorder;
+  final List<Sections> sections;
 
   Survey({
     required this.id,
@@ -17,5 +20,6 @@ class Survey {
     this.logoUrl,
     required this.geoLocation,
     required this.voiceRecorder,
+    required this.sections
   });
 }

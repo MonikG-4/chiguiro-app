@@ -25,7 +25,7 @@ class WeeklyBarChart extends StatelessWidget {
     double scaleFactor = 0.85;
 
     if (value == 0) {
-      return maxBarHeight * 0.1;
+      return maxBarHeight * 0.2;
     }
 
     return (value / maxValue) * maxBarHeight * scaleFactor;
@@ -51,7 +51,7 @@ class WeeklyBarChart extends StatelessWidget {
               double normalizedHeight = _calculateNormalizedHeight(
                 values[index],
                 maxValue == 0 ? 0 : maxValue,
-                maxValue == 0 ? 700 :  maxHeight ,
+                maxValue == 0 ? 550 :  maxHeight ,
               );
 
               double percentage = total == 0 ? 0 : (values[index] / total) * 100;
@@ -69,8 +69,10 @@ class WeeklyBarChart extends StatelessWidget {
                         height: normalizedHeight,
                         decoration: BoxDecoration(
                           color: values[index] > 0
-                              ? barColor
-                              : AppColors.secondary,
+                              ? weekDays[index] == 'Completas'
+                                  ? AppColors.complete
+                                  : AppColors.incomplete
+                            : AppColors.secondary,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Center(

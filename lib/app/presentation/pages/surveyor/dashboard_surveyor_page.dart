@@ -14,41 +14,43 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(178.0),
-        child: Obx(() {
-          return Stack(
-            clipBehavior: Clip.none,
-            children: [
-              _buildAppBarBackground(context),
-              Positioned(
-                top: 130.0,
-                left: 16.0,
-                right: 16.0,
-                child: SurveyorBalanceCard(
-                  balance: controller.surveyor.value?.balance ?? 0,
-                  responses:
-                      controller.surveyor.value?.statics.totalEntries ?? 0,
-                  growthRate: controller.surveyor.value?.growthRate ?? 0,
-                  lastSurveyDate: '06. ene. 2025',
+    return Obx(() {
+      return RefreshIndicator(
+        onRefresh: () async {
+           controller.fetchData();
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(178.0),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _buildAppBarBackground(context),
+                Positioned(
+                  top: 130.0,
+                  left: 16.0,
+                  right: 16.0,
+                  child: SurveyorBalanceCard(
+                    balance: controller.surveyor.value?.balance ?? 0,
+                    responses: controller.surveyor.value?.statics.totalEntries ?? 0,
+                    growthRate: controller.surveyor.value?.growthRate ?? 0,
+                    lastSurveyDate: '06. ene. 2025',
+                  ),
                 ),
-              ),
-            ],
-          );
-        }),
-      ),
-      body: SafeArea(
-        child: Obx(() {
-          if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return _buildContent();
-        }),
-      ),
-    );
+              ],
+            ),
+          ),
+          body: SafeArea(
+            child: controller.isLoading.value
+                ? const Center(child: CircularProgressIndicator())
+                : _buildContent(),
+          ),
+        ),
+      );
+    });
   }
+
 
   Widget _buildAppBarBackground(BuildContext context) {
     return Container(
@@ -69,41 +71,32 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
     );
   }
 
-  Widget _buildContent() {
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(
-              top: 44,
-              left: 16,
-              right: 16,
-              bottom: 16,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSectionHeader('Mis encuestas', isActive: true),
-                const SizedBox(height: 16),
-                _buildSurveysList(controller.activeSurvey.value != null
-                    ? [controller.activeSurvey.value!]
-                    : []),
-                const SizedBox(height: 24),
-                _buildSectionHeader('Historial de encuestas'),
-                const SizedBox(height: 16),
-                _buildSurveysList(
-                  controller.historicalSurveys,
-                  isHistorical: true,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+Widget _buildContent() {
+  return ListView(
+    physics: const AlwaysScrollableScrollPhysics(),
+    padding: const EdgeInsets.only(
+      top: 44,
+      left: 16,
+      right: 16,
+      bottom: 16,
+    ),
+    children: [
+      _buildSectionHeader('Mis encuestas', isActive: true),
+      const SizedBox(height: 16),
+      _buildSurveysList(controller.activeSurvey),
+      const SizedBox(height: 24),
+      _buildSectionHeader('Historial de encuestas'),
+      const SizedBox(height: 16),
+      _buildSurveysList(
+        controller.historicalSurveys,
+        isHistorical: true,
+      ),
+    ],
+  );
+}
 
-  Widget _buildSectionHeader(String title, {bool isActive = false}) {
+
+Widget _buildSectionHeader(String title, {bool isActive = false}) {
     return Row(
       children: [
         Text(
@@ -173,7 +166,6 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         Routes.SURVEY_DETAIL,
         arguments: {
           'survey': survey,
-          'surveyStatistics': controller.surveyor.value?.statics,
         },
       );
     } else {

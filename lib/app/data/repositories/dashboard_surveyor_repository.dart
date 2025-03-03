@@ -27,20 +27,22 @@ class DashboardSurveyorRepository extends BaseRepository
   }
 
   @override
-  Future<Survey> fetchActiveSurveys(int surveyId) async {
+  Future<List<Survey>> fetchActiveSurveys(int surveyorId) async {
     final result =
-        await processRequest(() => provider.fetchActiveSurveys(surveyId));
+        await processRequest(() => provider.fetchActiveSurveys(surveyorId));
 
     if (result.hasException) {
       final error = result.exception?.graphqlErrors.first;
       throw Exception(error?.message ?? 'Error desconocido');
     }
 
-    if (result.data == null || result.data!['project'] == null) {
+    if (result.data == null || result.data!['pollstersProjectByPollster'] == null) {
       throw Exception('No se encontraron encuestas');
     }
 
-    return SurveyModel.fromJson(result.data!['project']).toEntity();
+    return (result.data!['pollstersProjectByPollster'] as List)
+        .map((e) => SurveyModel.fromJson(e['project']).toEntity())
+        .toList();
   }
 
   @override
@@ -63,24 +65,5 @@ class DashboardSurveyorRepository extends BaseRepository
     }
 
     return SurveyorModel.fromJson(result.data!['pollster']).toEntity();
-  }
-
-  @override
-  Future<List<Sections>> fetchSurveyQuestions(int surveyId) async {
-    final result =
-    await processRequest(() => provider.fetchSurveyQuestions(surveyId));
-
-    if (result.hasException) {
-      final error = result.exception?.graphqlErrors.first;
-      throw Exception(error?.message ?? 'Error desconocido');
-    }
-
-    if (result.data == null || result.data!['sections'] == null) {
-      throw Exception('No se encontraron preguntas de la encuesta');
-    }
-
-    return (result.data!['sections'] as List)
-        .map((element) => SectionsModel.fromJson(Map<String, dynamic>.from(element)).toEntity())
-        .toList();
   }
 }

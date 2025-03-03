@@ -13,6 +13,7 @@ import 'app/routes/app_routes.dart';
 import 'core/services/audio_service.dart';
 import 'core/services/local_storage_service.dart';
 import 'core/services/location_service.dart';
+import 'core/services/sync_notifier.dart';
 import 'core/theme/app_theme.dart';
 import 'core/network/graphql_config.dart';
 import 'core/network/network_request_interceptor.dart';
@@ -36,7 +37,7 @@ void main() async {
 
 /// **Inicialización de dependencias y servicios**
 Future<void> _initDependencies() async {
-
+  try {
   final cacheStorageService = await Get.putAsync<CacheStorageService>(() async {
     return CacheStorageService();
   }, permanent: true);
@@ -49,13 +50,21 @@ Future<void> _initDependencies() async {
     return AudioService();
   }, permanent: true);
 
-  Get.put(SessionController(cacheStorageService), permanent: true);
-  Get.put(ConnectivityService(), permanent: true);
-  Get.put(NetworkRequestInterceptor(), permanent: true);
+
   Get.put(LocalStorageService(), permanent: true);
   Get.put(SyncTaskStorageService());
   Get.put(SyncService(), permanent: true).onInit();
+  final connectivityService = Get.put(ConnectivityService(), permanent: true);
+  await connectivityService.waitForInitialization();
+  Get.put(SessionController(cacheStorageService), permanent: true);
 
+  Get.put(NetworkRequestInterceptor(), permanent: true);
+  Get.put(SyncNotifier(), permanent: true);
+
+
+  } catch (e) {
+    print('Error al inicializar dependencias: $e');
+  }
 }
 
 /// **Inicialización de Hive**
@@ -75,7 +84,6 @@ Future<void> _initHive() async {
     Hive.openBox<SyncTaskModel>('sync_tasks'),
     Hive.openBox<SurveyModel>('surveysBox'),
     Hive.openBox<SurveyorModel>('surveyorBox'),
-    Hive.openBox<SectionsModel>('sectionsBox'),
   ]);
 }
 

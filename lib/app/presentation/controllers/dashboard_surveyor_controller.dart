@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 
 import '../../../core/services/audio_service.dart';
 import '../../../core/services/cache_storage_service.dart';
+import '../../../core/services/connectivity_service.dart';
+import '../../../core/services/sync_notifier.dart';
 import '../../../core/services/sync_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
@@ -15,18 +17,23 @@ import '../../../core/services/local_storage_service.dart';
 class DashboardSurveyorController extends GetxController {
   final IDashboardSurveyorRepository repository;
   final SyncService _syncService = Get.find<SyncService>();
+  final ConnectivityService _connectivityService =
+      Get.find<ConnectivityService>();
+  final SyncNotifier _syncNotifier = Get.find();
 
   late final LocationService _locationService;
   late final AudioService _audioService;
   late final CacheStorageService _storageService;
   late final LocalStorageService _localStorage;
 
-  final activeSurvey = Rx<Survey?>(null);
+  final activeSurvey = <Survey>[].obs;
   final historicalSurveys = <Survey>[].obs;
   final surveyor = Rx<Surveyor?>(null);
   final sections = <Sections>[].obs;
 
   final isLoading = false.obs;
+  final nameSurveyor = ''.obs;
+  final surnameSurveyor = ''.obs;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
@@ -40,66 +47,102 @@ class DashboardSurveyorController extends GetxController {
     _storageService = Get.find<CacheStorageService>();
     _localStorage = Get.find<LocalStorageService>();
 
-    MessageHandler.setupSnackbarListener(message);
-
-    _syncService.addPostSyncCallback(() async {
-      await _syncService.waitForSyncCompletion();
-      await fetchSurveys();
-    });
+    nameSurveyor.value = _storageService.authResponse!.name;
+    surnameSurveyor.value = _storageService.authResponse!.surname;
 
     await fetchSurveys();
+
+    MessageHandler.setupSnackbarListener(message);
   }
 
-  Future<void> fetchSurveys() async {
-    isLoading.value = true;
 
+  void fetchData() {
+    if (_connectivityService.isConnected.value) {
+      print('fetchData fetchSurveys');
+      fetchSurveys();
+    } else {
+      print('fetchData _loadCachedData');
+      _loadCachedData();
+    }
+  }
+
+
+  Future<void> changePassword(String password) async {
     try {
-      final futures = await Future.wait([
-        repository.fetchActiveSurveys(_storageService.authResponse!.projectId),
-        repository.getHistoricalSurveys(),
-        repository.getSurveyorProfile(_storageService.authResponse!.id),
-        repository.fetchSurveyQuestions(_storageService.authResponse!.projectId)
-      ]);
+      isLoading.value = true;
 
-      activeSurvey.value = futures[0] as Survey;
-      historicalSurveys.value = futures[1] as List<Survey>;
-      surveyor.value = futures[2] as Surveyor;
-      sections.value = futures[3] as List<Sections>;
+      final isSuccess = await repository.changePassword(_storageService.authResponse!.id, password);
 
-
-      _cacheData();
-
-      await _handlePermissions();
+      if (isSuccess) {
+        Get.back();
+        message.update((val) {
+          val?.message =
+          'Contraseña actualizada correctamente.';
+          val?.state = 'success';
+        });
+      }
     } catch (e) {
       message.update((val) {
         val?.message = e.toString().replaceAll("Exception:", "");
         val?.state = 'error';
       });
-
-      _loadCachedData();
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> _handlePermissions() async {
-    if (activeSurvey.value?.geoLocation == true) {
-      await _locationService.requestLocationPermission();
-    }
+  Future<void> fetchSurveys() async {
+    print('Iniciando fetchSurveys...');
+    isLoading.value = true;
 
-    if (activeSurvey.value?.voiceRecorder == true) {
-      await _audioService.requestAudioPermission();
+    try {
+      print('Realizando peticiones al servidor...');
+      final futures = await Future.wait([
+        repository.getHistoricalSurveys(),
+      ]);
+
+      activeSurvey.value = await repository.fetchActiveSurveys(_storageService.authResponse!.id);
+      historicalSurveys.value = futures[0];
+
+      print('Datos recibidos: ${activeSurvey.length} encuestas activas');
+      print('entry: ${activeSurvey.first.entriesCount}');
+      activeSurvey.refresh();
+      historicalSurveys.refresh();
+
+      _cacheData();
+      await _handlePermissions();
+    } catch (e) {
+      print('Error durante fetchSurveys: $e');
+      message.update((val) {
+        val?.message = e.toString().replaceAll("Exception:", "");
+        val?.state = 'error';
+      });
+    } finally {
+      isLoading.value = false;
+      print('Finalizando fetchSurveys, isLoading: ${isLoading.value}');
     }
   }
 
+
+  Future<void> _handlePermissions() async {
+    // if (activeSurvey.value?.geoLocation == true) {
+    //   await _locationService.requestLocationPermission();
+    // }
+    //
+    // if (activeSurvey.value?.voiceRecorder == true) {
+    //   await _audioService.requestAudioPermission();
+    // }
+  }
+
   void _cacheData() {
-    _localStorage.saveSurvey(activeSurvey.value!);
-    _localStorage.saveSurveyor(surveyor.value!);
-    _localStorage.saveSections(sections);
+    _localStorage.saveSurvey(activeSurvey);
   }
 
   void _loadCachedData() {
     activeSurvey.value = _localStorage.getSurvey();
-    surveyor.value = _localStorage.getSurveyor();
+    print('activeSurvey: ${activeSurvey.length}');
+
+    activeSurvey.refresh();
+    update();
   }
 }

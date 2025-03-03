@@ -3,9 +3,13 @@ import 'package:get/get.dart';
 
 import '../../../core/services/cache_storage_service.dart';
 import '../../../core/services/connectivity_service.dart';
+import '../../../core/services/sync_notifier.dart';
+import '../../../core/services/sync_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../domain/entities/detail_survey.dart';
+import '../../domain/entities/survey.dart';
+import '../../domain/entities/survey_statistics.dart';
 import '../../domain/repositories/i_detail_survey_repository.dart';
 
 class DetailSurveyController extends GetxController {
@@ -13,6 +17,8 @@ class DetailSurveyController extends GetxController {
   final ConnectivityService _connectivityService =
       Get.find<ConnectivityService>();
   late final CacheStorageService _storageService;
+  final SyncService _syncService = Get.find<SyncService>();
+  final SyncNotifier _syncNotifier = Get.find();
 
   late ScrollController scrollController;
 
@@ -24,7 +30,8 @@ class DetailSurveyController extends GetxController {
   final int pageSize = 10;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
-
+  final Rx<Survey?> survey = Rx<Survey?>(null);
+  final Rx<SurveyStatistics?> surveyStatistics = Rx<SurveyStatistics?>(null);
   DetailSurveyController(this.repository);
 
   @override
@@ -32,10 +39,22 @@ class DetailSurveyController extends GetxController {
     super.onInit();
     _storageService = Get.find<CacheStorageService>();
 
+    final args = Get.arguments;
+    if (args != null) {
+      survey.value = args['survey'] as Survey?;
+      surveyStatistics.value = args['surveyStatistics'] as SurveyStatistics?;
+    }
 
     MessageHandler.setupSnackbarListener(message);
+
     scrollController = ScrollController()..addListener(_scrollListener);
-    _connectivityService.addCallback(true, fecthDetailSurvey);
+
+    ever(_syncNotifier.isSyncComplete, (bool isComplete) {
+      if (isComplete) {
+        fecthDetailSurvey();
+        _syncNotifier.resetSyncStatus();
+      }
+    });
     fecthDetailSurvey();
   }
 
@@ -46,7 +65,7 @@ class DetailSurveyController extends GetxController {
       isLoadingAnswerSurvey.value = true;
 
       final newItems = await repository.fetchSurveyDetail(
-          _storageService.authResponse!.id, currentPage.value, pageSize);
+          _storageService.authResponse!.id, survey.value!.id, currentPage.value, pageSize);
 
       if (newItems.isEmpty) {
         isLastPage.value = true;
@@ -55,7 +74,6 @@ class DetailSurveyController extends GetxController {
         detailSurvey.addAll(newItems);
         currentPage.value++;
       }
-
     } catch (e) {
       isLoadingAnswerSurvey.value = false;
       _showMessage(e.toString().replaceAll("Exception:", ""), 'error');

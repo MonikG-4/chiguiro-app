@@ -12,12 +12,8 @@ import '../../widgets/profile_header.dart';
 import '../../widgets/survey_detail_card.dart';
 
 class SurveyDetailPage extends GetView<DetailSurveyController> {
-  final Survey? survey;
-  final SurveyStatistics? surveyStatistics;
 
-  SurveyDetailPage({super.key})
-      : survey = Get.arguments['survey'],
-        surveyStatistics = Get.arguments['surveyStatistics'];
+  const SurveyDetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +29,9 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
               left: 16.0,
               right: 16.0,
               child: SurveyDetailCard(
-                responses: surveyStatistics?.totalEntries ?? 0,
+                responses: controller.surveyStatistics.value?.totalEntries ?? 0,
                 lastSurveyDate: '06. ene. 2025',
-                values: [surveyStatistics?.totalCompleted ?? 0, surveyStatistics?.totalUncompleted ?? 0,],
+                values: [controller.surveyStatistics.value?.totalCompleted ?? 0, controller.surveyStatistics.value?.totalUncompleted ?? 0,],
                 weekDays: const ['Completas', 'Incompletas'],
               ),
             ),
@@ -64,8 +60,8 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
         ),
         titleSpacing: -15,
         title: ProfileHeader(
-          name: survey!.name,
-          role: survey!.active ? 'En proceso' : 'Finazalida xxxx',
+          name: controller.survey.value!.name,
+          role: controller.survey.value!.active ? 'En proceso' : 'Finazalida xxxx',
           avatarPath: logoUrl,
         ),
       ),
@@ -134,7 +130,9 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
                   const Divider(height: 1, color: Color(0xFFE8EDF4)),
                   ResponseStatusList(),
                   PrimaryButton(
-                    onPressed: (() => Get.toNamed(Routes.SURVEY)),
+                    onPressed: (() => Get.toNamed(Routes.SURVEY, arguments: {
+                      'survey': controller.survey.value,
+                    },)),
                     isLoading: false,
                     child: 'Iniciar encuesta',
                   ),

@@ -8,13 +8,14 @@ class DetailSurveyProvider {
   DetailSurveyProvider(this.client);
 
   Future<QueryResult> fetchSurveyDetail(
-      int surveyorId, int pageIndex, int pageSize) async {
+      int surveyorId, int surveyId, int pageIndex, int pageSize) async {
     try {
       final QueryOptions options = QueryOptions(
         document: gql(DetailSurveyQuery.entries),
         variables: {
           'id': surveyorId,
-          'Page': {
+          'projectId': surveyId,
+          'page': {
             'pageSize': pageSize,
             'pageIndex': pageIndex,
           }

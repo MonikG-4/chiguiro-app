@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/middleware/session_middleware.dart';
 import '../../core/values/routes.dart';
@@ -27,7 +28,7 @@ class AppPages {
     ),
     GetPage(
         name: Routes.SURVEY_DETAIL,
-        page: () => SurveyDetailPage(),
+        page: () => const SurveyDetailPage(),
         middlewares: [SessionMiddleware()],
         binding: DetailSurveyBinding()),
     GetPage(

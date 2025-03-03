@@ -1,16 +1,16 @@
 class DetailSurveyQuery {
   static String entries = r'''
-    query PollsterEntries($id: ID!, $Page: PageInput!) {
-      pollsterEntries(id: $id, page: $Page) {
+    query PollsterEntries($id: ID!, $projectId: Long!, $page: PageInput!) {
+      pollsterEntries(id: $id, projectId: $projectId, page: $page) {
         total
-        elements{
+        elements {
           createdOn
           id
-          statistic{
+          statistic {
             answerPercentage
             completed
           }
-        } 
+        }
       }
     }
 

@@ -11,10 +11,8 @@ class DetailSurveyBinding extends Bindings {
   void dependencies() {
     final graphQLClient = GraphQLConfig.initializeClient().value;
 
-    Get.lazyPut(() => DetailSurveyProvider(graphQLClient));
-
-    Get.lazyPut<IDetailSurveyRepository>(
-          () => DetailSurveyRepository(Get.find<DetailSurveyProvider>()),
+    Get.put(DetailSurveyProvider(graphQLClient), permanent: true);
+    Get.put<IDetailSurveyRepository>(DetailSurveyRepository(Get.find<DetailSurveyProvider>()), permanent: true
     );
     Get.lazyPut(() => DetailSurveyController(Get.find<IDetailSurveyRepository>()));
 

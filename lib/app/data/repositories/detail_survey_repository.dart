@@ -9,9 +9,9 @@ class DetailSurveyRepository extends BaseRepository implements IDetailSurveyRepo
   DetailSurveyRepository(this.provider);
 
   @override
-  Future<List<DetailSurvey>> fetchSurveyDetail(int surveyorId, int pageIndex, int pageSize) async {
+  Future<List<DetailSurvey>> fetchSurveyDetail(int surveyorId, int surveyId, int pageIndex, int pageSize) async {
         final result =
-        await processRequest(() =>  provider.fetchSurveyDetail(surveyorId, pageIndex, pageSize));
+        await processRequest(() =>  provider.fetchSurveyDetail(surveyorId, surveyId, pageIndex, pageSize));
 
         if (result.hasException) {
           final error = result.exception?.graphqlErrors.first;

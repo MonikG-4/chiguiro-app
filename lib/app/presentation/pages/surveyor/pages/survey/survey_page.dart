@@ -116,6 +116,7 @@ class SurveyPageState extends State<SurveyPage> {
                         Text(
                           section.description!,
                           style: const TextStyle(fontSize: 14),
+                          textAlign: TextAlign.center,
                         )
                     ],
                   ),
@@ -123,7 +124,7 @@ class SurveyPageState extends State<SurveyPage> {
                 ...visibleQuestions.map((question) {
                   return KeepAliveSurveyQuestion(
                     key: ValueKey(
-                        'question-${question.id}'), // Añadir key para mejor reconstrucción
+                        'question-${question.id}'),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child:

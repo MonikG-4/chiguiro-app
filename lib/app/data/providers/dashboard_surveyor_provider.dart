@@ -27,12 +27,12 @@ class DashboardSurveyorProvider {
     }
   }
 
-  Future<QueryResult> fetchActiveSurveys(int surveyId) async {
+  Future<QueryResult> fetchActiveSurveys(int surveyorId) async {
     try {
       final QueryOptions options = QueryOptions(
-        document: gql(SurveyQuery.project),
+        document: gql(SurveyQuery.pollstersProjectByPollster),
         variables: {
-          'id': surveyId,
+          'pollsterId': surveyorId,
         },
       );
       final result = await client.query(options);
@@ -84,22 +84,6 @@ class DashboardSurveyorProvider {
       );
 
       final result = await client.query(options);
-      return result;
-    } catch (e) {
-      throw Exception('Error en la conexión: $e');
-    }
-  }
-
-  Future<QueryResult> fetchSurveyQuestions(int surveyId) async {
-    try {
-      final QueryOptions options = QueryOptions(
-        document: gql(SurveyQuery.sections),
-        variables: {
-          'projectId': surveyId,
-        },
-      );
-      final result = await client.query(options);
-
       return result;
     } catch (e) {
       throw Exception('Error en la conexión: $e');
