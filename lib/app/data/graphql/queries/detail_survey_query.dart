@@ -7,6 +7,7 @@ class DetailSurveyQuery {
         totalCompleted
         totalUncompleted
         completedPercentage
+        lastSurvey
       }
     }
   ''';

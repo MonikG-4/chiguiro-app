@@ -1,0 +1,2 @@
+D:/laboral_Chiguiro/chiguiro-app/android/app/.cxx/RelWithDebInfo/4036kv6x/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/laboral_Chiguiro/chiguiro-app/android/app/.cxx/RelWithDebInfo/4036kv6x/armeabi-v7a/CMakeFiles/rebuild_cache.dir
