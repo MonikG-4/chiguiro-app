@@ -5,7 +5,6 @@ import '../../../core/services/cache_storage_service.dart';
 import '../../../core/services/connectivity_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
-import '../../domain/entities/sections.dart';
 import '../../domain/entities/survey.dart';
 import '../../domain/entities/surveyor.dart';
 import '../../domain/repositories/i_dashboard_surveyor_repository.dart';

@@ -4,6 +4,7 @@ import 'custom_card.dart';
 import 'weekly_bar_chart.dart';
 
 class SurveyDetailCard extends StatefulWidget {
+  final bool isLoading;
   final int responses;
   final String lastSurveyDate;
   final List<String> weekDays;
@@ -11,6 +12,7 @@ class SurveyDetailCard extends StatefulWidget {
 
   const SurveyDetailCard({
     super.key,
+    required this.isLoading,
     required this.responses,
     required this.lastSurveyDate,
     required this.weekDays,
@@ -25,24 +27,33 @@ class _SurveyDetailCardState extends State<SurveyDetailCard> {
   @override
   Widget build(BuildContext context) {
     return CustomCard(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildBalanceSection(widget.responses),
-            _buildSurveyInfoSection(widget.lastSurveyDate),
-          ],
-        ),
-        SizedBox(
-          width: double.infinity,
-          child: WeeklyBarChart(
-            values: (widget.values.isEmpty)
-                ? [0.0, 0.0]
-                : widget.values.map((e) => e.toDouble()).toList(),
-            weekDays: widget.weekDays,
-          ),
-        ),
-      ],
+      children: widget.isLoading
+          ? [
+              const SizedBox(
+                height: 216,
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            ]
+          : [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildBalanceSection(widget.responses),
+                  _buildSurveyInfoSection(widget.lastSurveyDate),
+                ],
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: WeeklyBarChart(
+                  values: (widget.values.isEmpty)
+                      ? [0.0, 0.0]
+                      : widget.values.map((e) => e.toDouble()).toList(),
+                  weekDays: widget.weekDays,
+                ),
+              ),
+            ],
     );
   }
 

@@ -36,15 +36,17 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
                           top: 130.0,
                           left: 16.0,
                           right: 16.0,
-                          child: SurveyorBalanceCard(
-                            balance: controller.surveyor.value?.balance ?? 0,
-                            responses: controller
-                                    .surveyor.value?.statics.totalEntries ??
-                                0,
-                            growthRate:
-                                controller.surveyor.value?.growthRate ?? 0,
-                            lastSurveyDate: '06. ene. 2025',
-                          ),
+                          child: Obx(() {
+                            return SurveyorBalanceCard(
+                              isLoading: controller.isLoading.value,
+                              responses:
+                                  controller.dataSurveyor.value?.totalEntries ??
+                                      0,
+                              lastSurveyDate:
+                                  controller.dataSurveyor.value?.lastSurvey ??
+                                      '-- -- -- --',
+                            );
+                          }),
                         ),
                       ],
                     ),
@@ -92,7 +94,10 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         bottom: 16,
       ),
       child: (controller.isLoading.value)
-          ? const Center(child: CircularProgressIndicator())
+          ? const Padding(
+              padding: EdgeInsets.only(top: 40),
+              child: Center(child: CircularProgressIndicator()),
+            )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -185,7 +190,6 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         Routes.SURVEY_DETAIL,
         arguments: {
           'survey': survey,
-          'surveyStatistics': controller.surveyor.value?.statics,
         },
       );
     } else {
@@ -205,6 +209,13 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              ListTile(
+                leading: const Icon(Icons.watch_later_outlined),
+                title: const Text('Encuestas pendientes'),
+                onTap: () {
+                  Get.toNamed(Routes.PENDING_SURVEYS);
+                },
+              ),
               ListTile(
                 leading: const Icon(Icons.lock_outline),
                 title: const Text('Cambiar contraseña'),

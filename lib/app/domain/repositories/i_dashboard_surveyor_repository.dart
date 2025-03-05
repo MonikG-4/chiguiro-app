@@ -5,5 +5,5 @@ abstract class IDashboardSurveyorRepository {
   Future<bool> changePassword(int pollsterId, String password);
 
   Future<List<Survey>> fetchSurveys(int surveyorId);
-  Future<Surveyor> getSurveyorProfile(int surveyorId);
+  Future<Surveyor> fetchDataSurveyor(int surveyorId);
 }

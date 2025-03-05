@@ -20,6 +20,7 @@ class DetailSurveyController extends GetxController {
 
   final detailSurvey = <DetailSurvey>[].obs;
 
+  var isLoadingStatisticSurvey = false.obs;
   var isLoadingAnswerSurvey = false.obs;
   var currentPage = 0.obs;
   var isLastPage = false.obs;
@@ -57,13 +58,18 @@ class DetailSurveyController extends GetxController {
   }
 
   Future<void> fetchStatisticsSurvey() async {
+    surveyStatistics.value = null;
+
     try {
+      isLoadingStatisticSurvey.value = true;
       final newItems = await repository.fetchStatisticsSurvey(
           _storageService.authResponse!.id, survey.value!.id);
 
       surveyStatistics.value = newItems;
     } catch (e) {
-      _showMessage(e.toString().replaceAll("Exception:", ""), 'error');
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
+    } finally {
+      isLoadingStatisticSurvey.value = false;
     }
   }
 
@@ -74,7 +80,10 @@ class DetailSurveyController extends GetxController {
       isLoadingAnswerSurvey.value = true;
 
       final newItems = await repository.fetchSurveyDetail(
-          _storageService.authResponse!.id, survey.value!.id, currentPage.value, pageSize);
+          _storageService.authResponse!.id,
+          survey.value!.id,
+          currentPage.value,
+          pageSize);
 
       if (newItems.isEmpty) {
         isLastPage.value = true;

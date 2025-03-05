@@ -4,16 +4,14 @@ import '../../../../../core/values/app_colors.dart';
 import 'custom_card.dart';
 
 class SurveyorBalanceCard extends StatefulWidget {
-  final double balance;
+  final bool isLoading;
   final int responses;
-  final double growthRate;
   final String lastSurveyDate;
 
   const SurveyorBalanceCard({
     super.key,
-    required this.balance,
+    required this.isLoading,
     required this.responses,
-    required this.growthRate,
     required this.lastSurveyDate,
   });
 
@@ -22,19 +20,25 @@ class SurveyorBalanceCard extends StatefulWidget {
 }
 
 class _SurveyorBalanceCardState extends State<SurveyorBalanceCard> {
-
   @override
   Widget build(BuildContext context) {
     return CustomCard(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHiddenBalanceInfo(),
-            _buildSurveyInfoSection(),
-          ],
-        ),
+        widget.isLoading
+            ? const SizedBox(
+              height: 75,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHiddenBalanceInfo(),
+                  _buildSurveyInfoSection(),
+                ],
+              ),
       ],
     );
   }
@@ -70,11 +74,34 @@ class _SurveyorBalanceCardState extends State<SurveyorBalanceCard> {
           style: TextStyle(color: AppColors.primary),
         ),
         Text(
-          widget.lastSurveyDate,
+          _formatDate(widget.lastSurveyDate),
           style: const TextStyle(color: AppColors.secondary),
         ),
         const SizedBox(height: 16),
       ],
     );
+  }
+
+  String _formatDate(String isoDate) {
+    const months = [
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic'
+    ];
+    try {
+      DateTime date = DateTime.parse(isoDate);
+      return '${date.day}. ${months[date.month - 1]}. ${date.year}  ${date.hour}:${date.minute}';
+    } catch (e) {
+      return '-- -- -- --';
+    }
   }
 }

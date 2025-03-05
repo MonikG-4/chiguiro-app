@@ -64,21 +64,34 @@ class DashboardSurveyorRepository extends BaseRepository
     }
   }
 
-
   @override
-  Future<Surveyor> getSurveyorProfile(int surveyorId) async {
-    final result =
-        await processRequest(() => provider.getSurveyorProfile(surveyorId));
+  Future<Surveyor> fetchDataSurveyor(int surveyorId) async {
+    if (_connectivityService.isConnected.value) {
+      final result =
+          await processRequest(() => provider.fetchDataSurveyor(surveyorId));
 
-    if (result.hasException) {
-      final error = result.exception?.graphqlErrors.first;
-      throw Exception(error?.message ?? 'Error desconocido');
+      if (result.hasException) {
+        final error = result.exception?.graphqlErrors.first;
+        throw Exception(error?.message ?? 'Error desconocido');
+      }
+
+      if (result.data == null || result.data!['pollsterHome'] == null) {
+        throw UnknownException('No se encontraron datos del encuestador');
+      }
+
+      final surveyor =
+          SurveyorModel.fromJson(result.data!['pollsterHome']).toEntity();
+      _localStorageService.saveSurveyor(surveyor);
+
+      return surveyor;
+    } else {
+      try {
+        return Future.value(_localStorageService.getSurveyor() ??
+            (throw UnknownException(
+                'No se encontró información del encuestador')));
+      } on CacheException catch (e) {
+        throw CacheException(e.message);
+      }
     }
-
-    if (result.data == null || result.data!['pollster'] == null) {
-      throw UnknownException('No se encontraron datos del encuestador');
-    }
-
-    return SurveyorModel.fromJson(result.data!['pollster']).toEntity();
   }
 }

@@ -42,7 +42,7 @@ class DashboardSurveyorProvider {
     }
   }
 
-  Future<QueryResult> getSurveyorProfile(int surveyorId) async {
+  Future<QueryResult> fetchDataSurveyor(int surveyorId) async {
     try {
       final QueryOptions options = QueryOptions(
         document: gql(SurveyorQuery.surveyor),

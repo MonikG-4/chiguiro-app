@@ -18,7 +18,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
       backgroundColor: AppColors.background,
       body: RefreshIndicator(
         onRefresh: () async {
-          await controller.fetchData();
+          controller.fetchData();
         },
         child: Stack(
           children: [
@@ -38,6 +38,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
                           right: 16.0,
                           child: Obx(() {
                             return SurveyDetailCard(
+                              isLoading: controller.isLoadingStatisticSurvey.value,
                               responses: controller
                                       .surveyStatistics.value?.totalEntries ??
                                   0,
