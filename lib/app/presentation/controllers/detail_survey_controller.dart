@@ -49,6 +49,13 @@ class DetailSurveyController extends GetxController {
     _connectivityService.addCallback(true, fetchData);
   }
 
+  void fetchData() {
+    detailSurvey.clear();
+    surveyStatistics.value = null;
+    fecthDetailSurvey();
+    fetchStatisticsSurvey();
+  }
+
   Future<void> fetchStatisticsSurvey() async {
     try {
       final newItems = await repository.fetchStatisticsSurvey(
@@ -78,7 +85,7 @@ class DetailSurveyController extends GetxController {
       }
     } catch (e) {
       isLoadingAnswerSurvey.value = false;
-      _showMessage(e.toString().replaceAll("Exception:", ""), 'error');
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
       isLoadingAnswerSurvey.value = false;
     }
@@ -92,8 +99,9 @@ class DetailSurveyController extends GetxController {
     }
   }
 
-  void _showMessage(String msg, String state) {
+  void _showMessage(String title, String msg, String state) {
     message.update((val) {
+      val?.title = title;
       val?.message = msg;
       val?.state = state;
     });

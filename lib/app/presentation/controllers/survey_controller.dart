@@ -122,9 +122,11 @@ class SurveyController extends GetxController {
         final isSuccess =
             await _repository.saveSurveyResults(entryInput.toJson());
         if (!isSuccess) {
-          _showMessage('Error enviando la encuesta al servidor', 'error');
+          _showMessage('Encuesta',
+              'Su encuesta no pudo ser enviada al servidor', 'error');
         }
-        _showMessage('Encuesta enviada correctamente', 'success');
+        _showMessage(
+            'Encuesta', 'Su encuesta fue enviada correctamente', 'success');
       } else {
         await _taskStorageService.addTask(SyncTaskModel(
           id: generateUniqueId(),
@@ -132,11 +134,12 @@ class SurveyController extends GetxController {
           payload: entryInput.toJson(),
           repositoryKey: 'surveyRepository',
         ));
-        _showMessage('Sin conexión. Encuesta guardada localmente.', 'warning');
+        _showMessage(
+            'Encuesta', 'Su encuesta fue guardada localmente.', 'info');
       }
       Get.until((route) => route.settings.name == Routes.SURVEY_DETAIL);
     } catch (e) {
-      _showMessage('Error al registrar la encuesta', 'error');
+      _showMessage('Encuesta', 'problemas al registrar la encuesta', 'error');
     } finally {
       isLoadingSendSurvey.value = false;
     }
@@ -229,8 +232,9 @@ class SurveyController extends GetxController {
         .toList();
   }
 
-  void _showMessage(String msg, String state) {
+  void _showMessage(String title, String msg, String state) {
     message.update((val) {
+      val?.title = title;
       val?.message = msg;
       val?.state = state;
     });
@@ -246,11 +250,8 @@ class SurveyController extends GetxController {
         final response = responses[question.id];
 
         if (response == null) {
-          message.update((val) {
-            val?.message =
-                'Por favor responde todas las preguntas obligatorias';
-            val?.state = 'error';
-          });
+          _showMessage('Error',
+              'Por favor responde todas las preguntas obligatorias', 'error');
           return false;
         }
 
@@ -258,11 +259,8 @@ class SurveyController extends GetxController {
           final value = response['value'] as List;
           final subQuestions = question.meta.length;
           if (value.length < subQuestions) {
-            message.update((val) {
-              val?.message =
-                  'Por favor responde todas las preguntas obligatorias';
-              val?.state = 'error';
-            });
+            _showMessage('Error',
+                'Por favor responde todas las preguntas obligatorias', 'error');
             return false;
           }
         }

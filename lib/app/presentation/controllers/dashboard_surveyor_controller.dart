@@ -21,9 +21,7 @@ class DashboardSurveyorController extends GetxController {
   late final CacheStorageService _storageService;
 
   final surveys = <Survey>[].obs;
-  final historicalSurveys = <Survey>[].obs;
-  final surveyor = Rx<Surveyor?>(null);
-  final sections = <Sections>[].obs;
+  final dataSurveyor = Rx<Surveyor?>(null);
 
   final isLoading = false.obs;
   final nameSurveyor = ''.obs;
@@ -55,40 +53,37 @@ class DashboardSurveyorController extends GetxController {
     try {
       isLoading.value = true;
 
-      final isSuccess = await repository.changePassword(_storageService.authResponse!.id, password);
+      final isSuccess = await repository.changePassword(
+          _storageService.authResponse!.id, password);
 
       if (isSuccess) {
         Get.back();
-        message.update((val) {
-          val?.message =
-          'Contraseña actualizada correctamente.';
-          val?.state = 'success';
-        });
+        _showMessage('Cambio de contraseña', 'Su contraseña fue actualizada correctamente', 'success');
       }
     } catch (e) {
-      message.update((val) {
-        val?.message = e.toString().replaceAll("Exception:", "");
-        val?.state = 'error';
-      });
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
       isLoading.value = false;
     }
   }
 
+
   Future<void> fetchSurveys() async {
     isLoading.value = true;
 
     try {
-      surveys.value =
-          await repository.fetchSurveys(_storageService.authResponse!.id);
+      
+      final future = await Future.wait([
+        repository.fetchSurveys(_storageService.authResponse!.id),
+        repository.fetchDataSurveyor(_storageService.authResponse!.id),
+      ]);
+
+      surveys.value = future[0] as List<Survey>;
+      dataSurveyor.value = future[1] as Surveyor;
 
       await _handlePermissions(surveys);
     } catch (e) {
-      print('Error durante fetchSurveys: $e');
-      message.update((val) {
-        val?.message = e.toString().replaceAll("Exception:", "");
-        val?.state = 'error';
-      });
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
       isLoading.value = false;
     }
@@ -115,7 +110,11 @@ class DashboardSurveyorController extends GetxController {
 
 
 
-    activeSurvey.refresh();
-    update();
+  void _showMessage(String title, String msg, String state) {
+    message.update((val) {
+      val?.title = title;
+      val?.message = msg;
+      val?.state = state;
+    });
   }
 }
