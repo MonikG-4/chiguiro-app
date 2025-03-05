@@ -15,12 +15,15 @@ class SurveyStatisticsModel extends HiveObject{
   final int totalUncompleted;
   @HiveField(3)
   final String completedPercentage;
+  @HiveField(4)
+  final DateTime lastSurvey;
 
   SurveyStatisticsModel({
     required this.totalEntries,
     required this.totalCompleted,
     required this.totalUncompleted,
     required this.completedPercentage,
+    required this.lastSurvey,
   });
 
   factory SurveyStatisticsModel.fromEntity(SurveyStatistics entity) {
@@ -29,6 +32,7 @@ class SurveyStatisticsModel extends HiveObject{
       totalCompleted: entity.totalCompleted,
       totalUncompleted: entity.totalUncompleted,
       completedPercentage: entity.completedPercentage,
+      lastSurvey: entity.lastSurvey,
     );
   }
 
@@ -38,6 +42,7 @@ class SurveyStatisticsModel extends HiveObject{
       totalCompleted: json['totalCompleted'],
       totalUncompleted: json['totalUncompleted'],
       completedPercentage: json['completedPercentage'],
+      lastSurvey: DateTime.parse(json['lastSurvey']),
     );
   }
 
@@ -47,6 +52,7 @@ class SurveyStatisticsModel extends HiveObject{
       totalCompleted: totalCompleted,
       totalUncompleted: totalUncompleted,
       completedPercentage: completedPercentage,
+      lastSurvey: lastSurvey,
     );
   }
 
@@ -56,6 +62,7 @@ class SurveyStatisticsModel extends HiveObject{
       'totalCompleted': totalCompleted,
       'totalUncompleted': totalUncompleted,
       'completedPercentage': completedPercentage,
+      'lastSurvey': lastSurvey.toIso8601String(),
     };
   }
 

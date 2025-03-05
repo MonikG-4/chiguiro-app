@@ -30,7 +30,7 @@ class _MatrixCellState extends State<MatrixCell> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 50,
+      width: widget.hinText == '' ? 50 : 100,
       child: TextField(
         controller: widget.controller,
         keyboardType: TextInputType.number,
@@ -42,6 +42,7 @@ class _MatrixCellState extends State<MatrixCell> {
           });
         },
         decoration: InputDecoration(
+
           hintText: widget.hinText,
           contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           isDense: true,

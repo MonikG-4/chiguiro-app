@@ -1,3 +1,4 @@
+import 'package:chiguiro_front_app/app/data/models/sections_model.dart';
 import 'package:hive/hive.dart';
 import '../../domain/entities/survey.dart';
 
@@ -29,6 +30,9 @@ class SurveyModel extends HiveObject {
   @HiveField(7)
   final bool voiceRecorder;
 
+  @HiveField(8)
+  final List<SectionsModel> sections;
+
   SurveyModel({
     required this.id,
     required this.name,
@@ -38,6 +42,7 @@ class SurveyModel extends HiveObject {
     this.logoUrl,
     required this.geoLocation,
     required this.voiceRecorder,
+    required this.sections
   });
 
   factory SurveyModel.fromJson(Map<String, dynamic> json) {
@@ -50,21 +55,11 @@ class SurveyModel extends HiveObject {
       logoUrl: json['logoUrl'],
       geoLocation: json['geoLocation'],
       voiceRecorder: json['voiceRecorder'],
+      sections: json['sections'] != null ? List<SectionsModel>.from(json['sections'].map((x) => SectionsModel.fromJson(x))) : [],
+
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'active': active,
-      'closeDate': closeDate?.toIso8601String(),
-      'entriesCount': entriesCount,
-      'logoUrl': logoUrl,
-      'geoLocation': geoLocation,
-      'voiceRecorder': voiceRecorder,
-    };
-  }
 
   factory SurveyModel.fromEntity(Survey survey) {
     return SurveyModel(
@@ -76,6 +71,7 @@ class SurveyModel extends HiveObject {
       logoUrl: survey.logoUrl,
       geoLocation: survey.geoLocation,
       voiceRecorder: survey.voiceRecorder,
+      sections: survey.sections.map((s) => SectionsModel.fromEntity(s)).toList(),
     );
   }
 
@@ -89,6 +85,7 @@ class SurveyModel extends HiveObject {
       logoUrl: logoUrl,
       geoLocation: geoLocation,
       voiceRecorder: voiceRecorder,
+      sections: sections.map((s) => s.toEntity()).toList(),
     );
   }
 }

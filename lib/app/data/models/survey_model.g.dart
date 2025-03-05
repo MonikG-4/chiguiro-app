@@ -25,13 +25,14 @@ class SurveyModelAdapter extends TypeAdapter<SurveyModel> {
       logoUrl: fields[5] as String?,
       geoLocation: fields[6] as bool,
       voiceRecorder: fields[7] as bool,
+      sections: (fields[8] as List).cast<SectionsModel>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, SurveyModel obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class SurveyModelAdapter extends TypeAdapter<SurveyModel> {
       ..writeByte(6)
       ..write(obj.geoLocation)
       ..writeByte(7)
-      ..write(obj.voiceRecorder);
+      ..write(obj.voiceRecorder)
+      ..writeByte(8)
+      ..write(obj.sections);
   }
 
   @override

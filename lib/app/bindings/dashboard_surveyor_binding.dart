@@ -11,11 +11,10 @@ class DashboardSurveyorBinding extends Bindings {
   void dependencies() {
     final graphQLClient = GraphQLConfig.initializeClient().value;
 
-    Get.lazyPut(() => DashboardSurveyorProvider(graphQLClient));
+    Get.put(DashboardSurveyorProvider(graphQLClient));
 
-    Get.lazyPut<IDashboardSurveyorRepository>(
-          () => DashboardSurveyorRepository(Get.find<DashboardSurveyorProvider>()),
+    Get.put<IDashboardSurveyorRepository>( DashboardSurveyorRepository(Get.find<DashboardSurveyorProvider>()),
     );
-    Get.lazyPut(() => DashboardSurveyorController(Get.find<IDashboardSurveyorRepository>()));
+    Get.put(DashboardSurveyorController(Get.find<IDashboardSurveyorRepository>()));
   }
 }

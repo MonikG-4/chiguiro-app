@@ -6,6 +6,8 @@ import '../../../core/services/connectivity_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../domain/entities/detail_survey.dart';
+import '../../domain/entities/survey.dart';
+import '../../domain/entities/survey_statistics.dart';
 import '../../domain/repositories/i_detail_survey_repository.dart';
 
 class DetailSurveyController extends GetxController {
@@ -18,13 +20,15 @@ class DetailSurveyController extends GetxController {
 
   final detailSurvey = <DetailSurvey>[].obs;
 
+  var isLoadingStatisticSurvey = false.obs;
   var isLoadingAnswerSurvey = false.obs;
   var currentPage = 0.obs;
   var isLastPage = false.obs;
   final int pageSize = 10;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
-
+  final Rx<Survey?> survey = Rx<Survey?>(null);
+  final Rx<SurveyStatistics?> surveyStatistics = Rx<SurveyStatistics?>(null);
   DetailSurveyController(this.repository);
 
   @override
@@ -32,11 +36,41 @@ class DetailSurveyController extends GetxController {
     super.onInit();
     _storageService = Get.find<CacheStorageService>();
 
+    final args = Get.arguments;
+    if (args != null) {
+      survey.value = args['survey'] as Survey?;
+    }
 
     MessageHandler.setupSnackbarListener(message);
+
     scrollController = ScrollController()..addListener(_scrollListener);
-    _connectivityService.addCallback(true, fecthDetailSurvey);
+
+    fetchData();
+
+    _connectivityService.addCallback(true, fetchData);
+  }
+
+  void fetchData() {
+    detailSurvey.clear();
+    surveyStatistics.value = null;
     fecthDetailSurvey();
+    fetchStatisticsSurvey();
+  }
+
+  Future<void> fetchStatisticsSurvey() async {
+    surveyStatistics.value = null;
+
+    try {
+      isLoadingStatisticSurvey.value = true;
+      final newItems = await repository.fetchStatisticsSurvey(
+          _storageService.authResponse!.id, survey.value!.id);
+
+      surveyStatistics.value = newItems;
+    } catch (e) {
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
+    } finally {
+      isLoadingStatisticSurvey.value = false;
+    }
   }
 
   Future<void> fecthDetailSurvey() async {
@@ -46,7 +80,10 @@ class DetailSurveyController extends GetxController {
       isLoadingAnswerSurvey.value = true;
 
       final newItems = await repository.fetchSurveyDetail(
-          _storageService.authResponse!.id, currentPage.value, pageSize);
+          _storageService.authResponse!.id,
+          survey.value!.id,
+          currentPage.value,
+          pageSize);
 
       if (newItems.isEmpty) {
         isLastPage.value = true;
@@ -55,10 +92,9 @@ class DetailSurveyController extends GetxController {
         detailSurvey.addAll(newItems);
         currentPage.value++;
       }
-
     } catch (e) {
       isLoadingAnswerSurvey.value = false;
-      _showMessage(e.toString().replaceAll("Exception:", ""), 'error');
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
       isLoadingAnswerSurvey.value = false;
     }
@@ -72,8 +108,9 @@ class DetailSurveyController extends GetxController {
     }
   }
 
-  void _showMessage(String msg, String state) {
+  void _showMessage(String title, String msg, String state) {
     message.update((val) {
+      val?.title = title;
       val?.message = msg;
       val?.state = state;
     });

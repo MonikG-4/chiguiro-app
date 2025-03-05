@@ -35,10 +35,7 @@ class AuthController extends GetxController {
       Get.closeAllSnackbars();
       Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
     } catch (e) {
-      message.update((val) {
-        val?.message = e.toString().replaceAll("Exception:", "");
-        val?.state = 'error';
-      });
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
       isLoading.value = false;
     }
@@ -52,19 +49,20 @@ class AuthController extends GetxController {
 
       if (isSuccess) {
         Get.back();
-        message.update((val) {
-          val?.message =
-              'Se envio un E-Mail con indicaciones para restablecer la contraseña.';
-          val?.state = 'success';
-        });
+        _showMessage('Olvidar Contraseña', 'Se envio un E-Mail con una constraseña temporal.', 'success');
       }
     } catch (e) {
-      message.update((val) {
-        val?.message = e.toString().replaceAll("Exception:", "");
-        val?.state = 'error';
-      });
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void _showMessage(String title, String msg, String state) {
+    message.update((val) {
+      val?.title = title;
+      val?.message = msg;
+      val?.state = state;
+    });
   }
 }

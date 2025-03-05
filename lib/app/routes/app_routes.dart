@@ -27,7 +27,7 @@ class AppPages {
     ),
     GetPage(
         name: Routes.SURVEY_DETAIL,
-        page: () => SurveyDetailPage(),
+        page: () => const SurveyDetailPage(),
         middlewares: [SessionMiddleware()],
         binding: DetailSurveyBinding()),
     GetPage(

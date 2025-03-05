@@ -17,31 +17,19 @@ class SurveyorModelAdapter extends TypeAdapter<SurveyorModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return SurveyorModel(
-      name: fields[0] as String,
-      surname: fields[1] as String,
-      statics: fields[2] as SurveyStatisticsModel,
-      balance: fields[3] as double?,
-      responses: fields[4] as int?,
-      growthRate: fields[5] as double?,
+      totalEntries: fields[0] as int,
+      lastSurvey: fields[1] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, SurveyorModel obj) {
     writer
-      ..writeByte(6)
-      ..writeByte(0)
-      ..write(obj.name)
-      ..writeByte(1)
-      ..write(obj.surname)
       ..writeByte(2)
-      ..write(obj.statics)
-      ..writeByte(3)
-      ..write(obj.balance)
-      ..writeByte(4)
-      ..write(obj.responses)
-      ..writeByte(5)
-      ..write(obj.growthRate);
+      ..writeByte(0)
+      ..write(obj.totalEntries)
+      ..writeByte(1)
+      ..write(obj.lastSurvey);
   }
 
   @override

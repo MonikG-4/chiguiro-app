@@ -2,19 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 
+import '../utils/message_handler.dart';
+import '../utils/snackbar_message_model.dart';
+
 class LocationService extends GetxService {
   final RxBool hasPermission = false.obs;
   Position? cachedPosition;
 
+  final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
+
+  @override
+  Future<void> onInit() async {
+    super.onInit();
+    MessageHandler.setupSnackbarListener(message);
+
+  }
+
   Future<void> initializeCachedPosition() async {
-    if (!await _checkPermission()) return;
     cachedPosition = await _getCurrentLocation(forceRefresh: true);
   }
 
   Future<void> requestLocationPermission() async {
-    if (!await _checkPermission()) {
-      _showPermissionDialog();
-    }
+    await _checkPermission();
+
   }
 
   Future<bool> _checkPermission() async {
@@ -24,18 +34,20 @@ class LocationService extends GetxService {
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
+
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
 
     if (permission == LocationPermission.deniedForever) {
-      _showPermissionDialog();
+      await _showSettingsDialog('ubicación');
       return false;
     }
 
     hasPermission.value = permission == LocationPermission.whileInUse || permission == LocationPermission.always;
     return hasPermission.value;
   }
+
 
   Future<Position?> _getCurrentLocation({bool forceRefresh = false}) async {
     if (!hasPermission.value && !(await _checkPermission())) return null;
@@ -48,27 +60,27 @@ class LocationService extends GetxService {
       );
       return cachedPosition;
     } catch (e) {
-      print('Error obteniendo la ubicación: \$e');
+      message.update((val) {
+        val?.title = 'Servicio de ubicacion';
+        val?.message = 'No se pudo detener la ubicación';
+        val?.state = 'error';
+      });
       return null;
     }
   }
 
-  void _showPermissionDialog() {
-    Get.dialog(
+  Future<void> _showSettingsDialog(String permissionType) async {
+    await Get.dialog(
       AlertDialog(
-        title: const Text('Permiso de ubicación requerido'),
-        content: const Text('Para continuar, habilita el acceso a la ubicación en la configuración.'),
+        title: Text('Permiso de $permissionType requerido'),
+        content: Text('Debes habilitar el acceso a tu $permissionType desde la configuración para continuar.'),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancelar'),
-          ),
           TextButton(
             onPressed: () async {
               Get.back();
               await Geolocator.openAppSettings();
             },
-            child: const Text('Abrir configuración'),
+            child: const Text('Aceptar'),
           ),
         ],
       ),

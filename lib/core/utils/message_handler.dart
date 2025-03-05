@@ -9,6 +9,7 @@ class MessageHandler {
     ever(snackbarMessage, (SnackbarMessage msg) {
       if (msg.isNotEmpty) {
         AlertMessage.showSnackbar(
+          title: msg.title,
           message: msg.message,
           state: msg.state,
         );

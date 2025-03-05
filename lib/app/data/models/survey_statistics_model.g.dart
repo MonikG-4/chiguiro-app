@@ -21,13 +21,14 @@ class SurveyStatisticsModelAdapter extends TypeAdapter<SurveyStatisticsModel> {
       totalCompleted: fields[1] as int,
       totalUncompleted: fields[2] as int,
       completedPercentage: fields[3] as String,
+      lastSurvey: fields[4] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, SurveyStatisticsModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.totalEntries)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class SurveyStatisticsModelAdapter extends TypeAdapter<SurveyStatisticsModel> {
       ..writeByte(2)
       ..write(obj.totalUncompleted)
       ..writeByte(3)
-      ..write(obj.completedPercentage);
+      ..write(obj.completedPercentage)
+      ..writeByte(4)
+      ..write(obj.lastSurvey);
   }
 
   @override

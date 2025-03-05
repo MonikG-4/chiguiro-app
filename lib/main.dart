@@ -36,7 +36,6 @@ void main() async {
 
 /// **Inicialización de dependencias y servicios**
 Future<void> _initDependencies() async {
-
   final cacheStorageService = await Get.putAsync<CacheStorageService>(() async {
     return CacheStorageService();
   }, permanent: true);
@@ -49,13 +48,13 @@ Future<void> _initDependencies() async {
     return AudioService();
   }, permanent: true);
 
-  Get.put(SessionController(cacheStorageService), permanent: true);
-  Get.put(ConnectivityService(), permanent: true);
-  Get.put(NetworkRequestInterceptor(), permanent: true);
   Get.put(LocalStorageService(), permanent: true);
   Get.put(SyncTaskStorageService());
   Get.put(SyncService(), permanent: true).onInit();
-
+  final connectivityService = Get.put(ConnectivityService(), permanent: true);
+  await connectivityService.waitForInitialization();
+  Get.put(SessionController(cacheStorageService), permanent: true);
+  Get.put(NetworkRequestInterceptor(), permanent: true);
 }
 
 /// **Inicialización de Hive**
@@ -74,8 +73,8 @@ Future<void> _initHive() async {
     Hive.openBox('authBox'),
     Hive.openBox<SyncTaskModel>('sync_tasks'),
     Hive.openBox<SurveyModel>('surveysBox'),
+    Hive.openBox<SurveyStatisticsModel>('statisticsBox'),
     Hive.openBox<SurveyorModel>('surveyorBox'),
-    Hive.openBox<SectionsModel>('sectionsBox'),
   ]);
 }
 

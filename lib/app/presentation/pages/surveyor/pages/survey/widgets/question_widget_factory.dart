@@ -60,9 +60,10 @@ class _QuestionHeader extends StatelessWidget {
         ),
         Text(question.question,
             style: const TextStyle(fontWeight: FontWeight.w600)),
-        question.description == null
-            ? const SizedBox.shrink()
-            : Text(question.description!),
+        if (question.description != null) ...[
+          const SizedBox(height: 12),
+          Text(question.description!),
+        ],
       ],
     );
   }

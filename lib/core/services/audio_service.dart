@@ -26,8 +26,24 @@ class AudioService extends GetxService {
   Future<void> onInit() async {
     super.onInit();
     MessageHandler.setupSnackbarListener(message);
-    await _initializeRecorder();
+  }
 
+  Future<void> requestAudioPermission() async {
+    final permissionGranted = await _checkPermission();
+    if (!permissionGranted) {
+      _showSettingsDialog('audio');
+    }
+  }
+
+  Future<bool> _checkPermission() async {
+    final status = await Permission.microphone.request();
+
+    if (status.isPermanentlyDenied) {
+      await _showSettingsDialog('micrófono');
+
+      return false;
+    }
+    return status.isGranted;
   }
 
   Future<void> _initializeRecorder() async {
@@ -38,50 +54,16 @@ class AudioService extends GetxService {
       isInitialized.value = true;
     } catch (e) {
       message.update((val) {
+        val?.title = 'Servicio de audio';
         val?.message = 'No se pudo inicializar el grabador';
         val?.state = 'error';
       });
     }
   }
 
-  Future<bool> checkPermission() async {
-    final status = await Permission.microphone.request();
-    return status.isGranted;
-  }
-
-  Future<void> requestAudioPermission() async {
-    final permissionGranted = await checkPermission();
-
-    if (!permissionGranted) {
-      Get.dialog(
-        AlertDialog(
-          title: const Text('Permiso de ubicación'),
-          content: const Text(
-              'Esta aplicación necesita acceso a tu microfono para funcionar correctamente. '
-                  '¿Deseas permitir el acceso?'
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                Get.back();
-                checkPermission();
-              },
-              child: const Text('Sí'),
-            ),
-            TextButton(
-              onPressed: () => Get.back(),
-              child: const Text('No'),
-            ),
-          ],
-        ),
-        barrierDismissible: false,
-      );
-    }
-  }
-
-
   Future<void> startRecording() async {
     if (!isInitialized.value) {
+      await requestAudioPermission();
       await _initializeRecorder();
     }
 
@@ -96,7 +78,6 @@ class AudioService extends GetxService {
         codec: Codec.aacADTS,
         bitRate: 128000,
         sampleRate: 44100,
-
       );
 
       recordingPath.value = path;
@@ -106,16 +87,14 @@ class AudioService extends GetxService {
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         recordingDuration.value++;
       });
-
     } catch (e) {
       message.update((val) {
+        val?.title = 'Servicio de audio';
         val?.message = 'No se pudo iniciar la grabación';
         val?.state = 'error';
       });
     }
   }
-
-
 
   Future<String?> stopRecording() async {
     if (!isRecording.value) {
@@ -137,6 +116,7 @@ class AudioService extends GetxService {
       }
     } catch (e) {
       message.update((val) {
+        val?.title = 'Servicio de audio';
         val?.message = 'No se pudo detener la grabación';
         val?.state = 'error';
       });
@@ -144,6 +124,25 @@ class AudioService extends GetxService {
     return null;
   }
 
+  Future<void> _showSettingsDialog(String permissionType) async {
+    await Get.dialog(
+      AlertDialog(
+        title: Text('Permiso de $permissionType requerido'),
+        content: Text(
+            'Debes habilitar el acceso a tu $permissionType desde la configuración para continuar.'),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              Get.back();
+              await openAppSettings();
+            },
+            child: const Text('Aceptar'),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
 
   @override
   void onClose() async {

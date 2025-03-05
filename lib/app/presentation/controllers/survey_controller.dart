@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/services/audio_service.dart';
-import '../../../core/services/local_storage_service.dart';
 import '../../../core/services/sync_task_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
@@ -26,8 +25,6 @@ class SurveyController extends GetxController {
       Get.find<ConnectivityService>();
   final SyncTaskStorageService _taskStorageService =
       Get.find<SyncTaskStorageService>();
-  final LocalStorageService _localStorageService =
-      Get.find<LocalStorageService>();
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
@@ -50,6 +47,9 @@ class SurveyController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    survey.value = Get.arguments['survey'];
+    sections.assignAll(survey.value!.sections);
     MessageHandler.setupSnackbarListener(message);
     _loadSurveyData();
   }
@@ -63,9 +63,6 @@ class SurveyController extends GetxController {
   }
 
   void _loadSurveyData() {
-    survey.value = _localStorageService.getSurvey();
-    sections.assignAll(_localStorageService.getSections());
-
     if (survey.value != null) {
       isGeoLocation.value = survey.value!.geoLocation;
       isVoiceRecorder.value = survey.value!.voiceRecorder;
@@ -109,25 +106,27 @@ class SurveyController extends GetxController {
 
   Future<void> saveSurveyResults(int pollsterId) async {
     if (!validateAllQuestions()) return;
-    String? audioBase64;
-    if (_audioService.isRecording.value) {
+    String? audioBase64 = '';
+
+    if (isVoiceRecorder.value && _audioService.isRecording.value) {
       audioBase64 = await _audioService.stopRecording();
     }
 
     isLoadingSendSurvey.value = true;
-    final stopwatch = Stopwatch()..start();
 
     try {
       final entryInput =
           await _createSurveyEntry(survey.value!.id, pollsterId, audioBase64!);
-      printEntryInput(entryInput.toJson());
+      //printEntryInput(entryInput.toJson());
       if (_connectivityService.isConnected.value) {
         final isSuccess =
             await _repository.saveSurveyResults(entryInput.toJson());
         if (!isSuccess) {
-          _showMessage('Error enviando la encuesta al servidor', 'error');
+          _showMessage('Encuesta',
+              'Su encuesta no pudo ser enviada al servidor', 'error');
         }
-        _showMessage('Encuesta enviada correctamente', 'success');
+        _showMessage(
+            'Encuesta', 'Su encuesta fue enviada correctamente', 'success');
       } else {
         await _taskStorageService.addTask(SyncTaskModel(
           id: generateUniqueId(),
@@ -135,22 +134,19 @@ class SurveyController extends GetxController {
           payload: entryInput.toJson(),
           repositoryKey: 'surveyRepository',
         ));
-        _showMessage('Sin conexión. Encuesta guardada localmente.', 'warning');
+        _showMessage(
+            'Encuesta', 'Su encuesta fue guardada localmente.', 'info');
       }
-      Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
+      Get.until((route) => route.settings.name == Routes.SURVEY_DETAIL);
     } catch (e) {
-      _showMessage('Error al registrar la encuesta', 'error');
+      _showMessage('Encuesta', 'problemas al registrar la encuesta', 'error');
     } finally {
       isLoadingSendSurvey.value = false;
-      stopwatch.stop();
-      print(
-          'Tiempo total de procesamiento saveSurveyResults: ${stopwatch.elapsed.inSeconds} ms');
     }
   }
 
   Future<SurveyEntryModel> _createSurveyEntry(
       int projectId, int pollsterId, String audioBase64) async {
-
     return SurveyEntryModel(
       projectId: projectId,
       pollsterId: pollsterId,
@@ -236,8 +232,9 @@ class SurveyController extends GetxController {
         .toList();
   }
 
-  void _showMessage(String msg, String state) {
+  void _showMessage(String title, String msg, String state) {
     message.update((val) {
+      val?.title = title;
       val?.message = msg;
       val?.state = state;
     });
@@ -253,11 +250,8 @@ class SurveyController extends GetxController {
         final response = responses[question.id];
 
         if (response == null) {
-          message.update((val) {
-            val?.message =
-                'Por favor responde todas las preguntas obligatorias';
-            val?.state = 'error';
-          });
+          _showMessage('Error',
+              'Por favor responde todas las preguntas obligatorias', 'error');
           return false;
         }
 
@@ -265,11 +259,8 @@ class SurveyController extends GetxController {
           final value = response['value'] as List;
           final subQuestions = question.meta.length;
           if (value.length < subQuestions) {
-            message.update((val) {
-              val?.message =
-                  'Por favor responde todas las preguntas obligatorias';
-              val?.state = 'error';
-            });
+            _showMessage('Error',
+                'Por favor responde todas las preguntas obligatorias', 'error');
             return false;
           }
         }

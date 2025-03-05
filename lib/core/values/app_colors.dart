@@ -19,8 +19,8 @@ class AppColors {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [
-      Color(0xFF1E293B), // Inicio del gradiente
-      Color(0xFF5270A1), // Fin del gradiente
+      Color(0xFF1E293B),
+      Color(0xFF5270A1),
     ],
   );
 
@@ -42,4 +42,8 @@ class AppColors {
   static const Color progressBar = Color(0xFF57E9B4);
   static const Color star = Color(0xFFF8B84E);
   static const Color scale = Color(0xFFBEF6E1);
+
+  //Estado encuesta
+  static const Color complete = Color(0xFF0D9488);
+  static const Color incomplete = Color(0xFFF0A330);
 }

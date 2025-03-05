@@ -1,40 +1,37 @@
 class SurveyQuery {
-  static String project = r'''
-    query Project($id: Long!) {
-      project(id: $id) {
-        id
-        name
-        active
-        entriesCount
-        geoLocation
-        voiceRecorder
-      }
-    }
-  ''';
-
-  static String sections = r'''
-    query Sections($projectId: Long!) {
-      sections(projectId: $projectId) {
-        id
-        name
-        description
-        sort
-        questions{
+  static String pollstersProjectByPollster = r'''
+    query PollsterProject($pollsterId: Long!){
+      pollstersProjectByPollster(pollsterId: $pollsterId){
+        project{
           id
-          question
-          description
-          sort
-          type
-          mandatory
-          meta
-          meta2
-          anchorMax
-          anchorMin
-          scaleMax
-          scaleMin
-          jumpers {
-            value
-            questionNumber
+          name
+          active
+          entriesCount
+          geoLocation
+          voiceRecorder
+          sections{
+            id
+            name
+            description
+            sort
+            questions{
+              id
+              question
+              description
+              sort
+              type
+              mandatory
+              meta
+              meta2
+              anchorMax
+              anchorMin
+              scaleMax
+              scaleMin
+              jumpers {
+                value
+                questionNumber
+              }
+            }
           }
         }
       }

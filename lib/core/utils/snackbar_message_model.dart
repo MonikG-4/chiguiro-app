@@ -1,8 +1,10 @@
 class SnackbarMessage {
+  String title;
   String message;
   String state;
 
   SnackbarMessage({
+    this.title = '',
     this.message = '',
     this.state = '',
   });
@@ -11,6 +13,7 @@ class SnackbarMessage {
   bool get isNotEmpty => !isEmpty;
 
   void clear() {
+    title = '';
     message = '';
     state = '';
   }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-
 import '../../../../../core/values/app_colors.dart';
 import 'custom_card.dart';
 import 'weekly_bar_chart.dart';
 
 class SurveyDetailCard extends StatefulWidget {
+  final bool isLoading;
   final int responses;
   final String lastSurveyDate;
   final List<String> weekDays;
@@ -12,6 +12,7 @@ class SurveyDetailCard extends StatefulWidget {
 
   const SurveyDetailCard({
     super.key,
+    required this.isLoading,
     required this.responses,
     required this.lastSurveyDate,
     required this.weekDays,
@@ -23,37 +24,45 @@ class SurveyDetailCard extends StatefulWidget {
 }
 
 class _SurveyDetailCardState extends State<SurveyDetailCard> {
-
   @override
   Widget build(BuildContext context) {
     return CustomCard(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildBalanceSection(),
-            _buildSurveyInfoSection(),
-
-          ],
-        ),
-        SizedBox(
-          width: double.infinity,
-          child: WeeklyBarChart(
-            values: widget.values.map((e) => e.toDouble()).toList(),
-            weekDays: widget.weekDays,
-          ),
-        )
-      ],
+      children: widget.isLoading
+          ? [
+              const SizedBox(
+                height: 216,
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            ]
+          : [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildBalanceSection(widget.responses),
+                  _buildSurveyInfoSection(widget.lastSurveyDate),
+                ],
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: WeeklyBarChart(
+                  values: (widget.values.isEmpty)
+                      ? [0.0, 0.0]
+                      : widget.values.map((e) => e.toDouble()).toList(),
+                  weekDays: widget.weekDays,
+                ),
+              ),
+            ],
     );
   }
 
-  Widget _buildBalanceSection() {
+  Widget _buildBalanceSection(int responses) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildBalanceHeader(),
-        _buildVisibleBalanceInfo()
-
+        _buildVisibleBalanceInfo(responses),
       ],
     );
   }
@@ -69,7 +78,7 @@ class _SurveyDetailCardState extends State<SurveyDetailCard> {
     );
   }
 
-  Widget _buildVisibleBalanceInfo() {
+  Widget _buildVisibleBalanceInfo(int responses) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -81,7 +90,7 @@ class _SurveyDetailCardState extends State<SurveyDetailCard> {
           ),
         ),
         Text(
-          '${widget.responses}',
+          '$responses',
           style: const TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
@@ -91,7 +100,7 @@ class _SurveyDetailCardState extends State<SurveyDetailCard> {
     );
   }
 
-  Widget _buildSurveyInfoSection() {
+  Widget _buildSurveyInfoSection(String? lastSurveyDate) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -100,12 +109,33 @@ class _SurveyDetailCardState extends State<SurveyDetailCard> {
           style: TextStyle(color: AppColors.primary),
         ),
         Text(
-          widget.lastSurveyDate,
+          _formatDate(lastSurveyDate!),
           style: const TextStyle(color: AppColors.secondary),
         ),
       ],
     );
   }
 
-
+  String _formatDate(String isoDate) {
+    const months = [
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic'
+    ];
+    try {
+      DateTime date = DateTime.parse(isoDate);
+      return '${date.day}. ${months[date.month - 1]}. ${date.year}  ${date.hour}:${date.minute}';
+    } catch (e) {
+      return '-- -- -- --';
+    }
+  }
 }
