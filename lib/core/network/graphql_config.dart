@@ -18,8 +18,17 @@ class GraphQLConfig {
     return ValueNotifier(
       GraphQLClient(
         link: httpLink,
-        cache: GraphQLCache(store: InMemoryStore()),
+        cache: GraphQLCache(store: null),
+        defaultPolicies: DefaultPolicies(
+          query: Policies(
+            fetch: FetchPolicy.noCache,
+          ),
+          mutate: Policies(
+            fetch: FetchPolicy.noCache,
+          ),
+        ),
       ),
     );
+
   }
 }

@@ -52,6 +52,8 @@ class DashboardSurveyorController extends GetxController {
 
     await fetchSurveys();
 
+    _connectivityService.addCallback(true, fetchSurveys);
+
     MessageHandler.setupSnackbarListener(message);
   }
 

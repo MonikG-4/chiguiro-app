@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 
 import '../../../core/services/cache_storage_service.dart';
 import '../../../core/services/connectivity_service.dart';
-import '../../../core/services/sync_notifier.dart';
-import '../../../core/services/sync_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../domain/entities/detail_survey.dart';
@@ -17,8 +15,6 @@ class DetailSurveyController extends GetxController {
   final ConnectivityService _connectivityService =
       Get.find<ConnectivityService>();
   late final CacheStorageService _storageService;
-  final SyncService _syncService = Get.find<SyncService>();
-  final SyncNotifier _syncNotifier = Get.find();
 
   late ScrollController scrollController;
 
@@ -48,8 +44,9 @@ class DetailSurveyController extends GetxController {
 
     scrollController = ScrollController()..addListener(_scrollListener);
 
-    fecthDetailSurvey();
-    fetchStatisticsSurvey();
+    fetchData();
+
+    _connectivityService.addCallback(true, fetchData);
   }
 
   Future<void> fetchStatisticsSurvey() async {

@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/services/audio_service.dart';
-import '../../../core/services/local_storage_service.dart';
 import '../../../core/services/sync_task_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
@@ -26,8 +25,6 @@ class SurveyController extends GetxController {
       Get.find<ConnectivityService>();
   final SyncTaskStorageService _taskStorageService =
       Get.find<SyncTaskStorageService>();
-  final LocalStorageService _localStorageService =
-      Get.find<LocalStorageService>();
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
@@ -66,21 +63,18 @@ class SurveyController extends GetxController {
   }
 
   void _loadSurveyData() {
-    // survey.value = _localStorageService.getSurvey();
-    // sections.assignAll(_localStorageService.getSections());
-    //
-    // if (survey.value != null) {
-    //   isGeoLocation.value = survey.value!.geoLocation;
-    //   isVoiceRecorder.value = survey.value!.voiceRecorder;
-    //
-    //   if (isVoiceRecorder.value) {
-    //     _audioService.startRecording();
-    //   }
-    //
-    //   if (isGeoLocation.value) {
-    //     _fetchLocation();
-    //   }
-    // }
+    if (survey.value != null) {
+      isGeoLocation.value = survey.value!.geoLocation;
+      isVoiceRecorder.value = survey.value!.voiceRecorder;
+
+      if (isVoiceRecorder.value) {
+        _audioService.startRecording();
+      }
+
+      if (isGeoLocation.value) {
+        _fetchLocation();
+      }
+    }
   }
 
   Future<void> _fetchLocation() async {
@@ -114,9 +108,9 @@ class SurveyController extends GetxController {
     if (!validateAllQuestions()) return;
     String? audioBase64 = '';
 
-      if (isVoiceRecorder.value && _audioService.isRecording.value) {
-        audioBase64 = await _audioService.stopRecording();
-      }
+    if (isVoiceRecorder.value && _audioService.isRecording.value) {
+      audioBase64 = await _audioService.stopRecording();
+    }
 
     isLoadingSendSurvey.value = true;
 
