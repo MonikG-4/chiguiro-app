@@ -1,3 +1,4 @@
+import '../../../core/error/exceptions/exceptions.dart';
 import '../../domain/entities/auth_response.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 import '../providers/auth_provider.dart';
@@ -14,11 +15,11 @@ class AuthRepository extends BaseRepository implements IAuthRepository {
 
     if (result.hasException) {
       final error = result.exception?.graphqlErrors.first;
-      throw Exception(error?.message ?? 'Error desconocido');
+      throw ServerException(error?.message ?? 'Error desconocido');
     }
 
     if (result.data == null || result.data!['pollsterLogin'] == null) {
-      throw Exception('Datos de login inválidos');
+      throw UnknownException('Datos de login inválidos');
     }
 
     return AuthResponse.fromJson(result.data!['pollsterLogin']);
@@ -30,7 +31,7 @@ class AuthRepository extends BaseRepository implements IAuthRepository {
 
     if (result.hasException) {
       final error = result.exception?.graphqlErrors.first;
-      throw Exception(error?.message ?? 'Error desconocido');
+      throw ServerException(error?.message ?? 'Error desconocido');
     }
 
     return result.data!['pollsterForgotPassword'] == null;
