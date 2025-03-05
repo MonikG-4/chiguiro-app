@@ -125,24 +125,26 @@ class DashboardSurveyorController extends GetxController {
     }
   }
 
+  Future<void> _handlePermissions(List<Survey> surveys) async {
+    bool locationPermissionRequested = false;
+    bool audioPermissionRequested = false;
 
-  Future<void> _handlePermissions() async {
-    // if (activeSurvey.value?.geoLocation == true) {
-    //   await _locationService.requestLocationPermission();
-    // }
-    //
-    // if (activeSurvey.value?.voiceRecorder == true) {
-    //   await _audioService.requestAudioPermission();
-    // }
+    for (var survey in surveys) {
+      if (survey.geoLocation == true && !locationPermissionRequested) {
+        await _locationService.requestLocationPermission();
+        locationPermissionRequested = true;
+        await Future.delayed(const Duration(seconds: 1));
+        continue;
+      }
+      if (survey.voiceRecorder == true && !audioPermissionRequested) {
+        await _audioService.requestAudioPermission();
+        audioPermissionRequested = true;
+        await Future.delayed(const Duration(seconds: 1));
+      }
+    }
   }
 
-  void _cacheData() {
-    _localStorage.saveSurvey(activeSurvey);
-  }
 
-  void _loadCachedData() {
-    activeSurvey.value = _localStorage.getSurvey();
-    print('activeSurvey: ${activeSurvey.length}');
 
     activeSurvey.refresh();
     update();
