@@ -28,6 +28,7 @@ class SurveyController extends GetxController {
   final surveyPending = <Map<String, dynamic>>[].obs;
   final survey = Rx<Survey?>(null);
   final sections = <Sections>[].obs;
+  final codeHouse = ''.obs;
   final responses = <String, dynamic>{}.obs;
   final hiddenQuestions = <String>{}.obs;
   final RxMap<int, Set<String>> jumperHiddenQuestions =
@@ -51,6 +52,8 @@ class SurveyController extends GetxController {
     _taskStorageService = Get.find<SyncTaskStorageService>();
 
     survey.value = Get.arguments?['survey'];
+    codeHouse.value = Get.arguments?['codeHouse'];
+
     if (survey.value != null) {
       sections.assignAll(survey.value!.sections);
     }

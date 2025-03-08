@@ -27,6 +27,9 @@ class DashboardSurveyorController extends GetxController {
   final nameSurveyor = ''.obs;
   final surnameSurveyor = ''.obs;
 
+  final showContent = false.obs;
+  final codeHouse = ''.obs;
+
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
   DashboardSurveyorController(this.repository);

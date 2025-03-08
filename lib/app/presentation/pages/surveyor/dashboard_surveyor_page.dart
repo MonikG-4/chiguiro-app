@@ -3,10 +3,12 @@ import 'package:get/get.dart';
 import '../../../../core/values/routes.dart';
 import '../../controllers/session_controller.dart';
 import '../../widgets/connectivity_banner.dart';
+import '../../widgets/primary_button.dart';
 import './widgets/survey_card.dart';
 import '../../../../core/values/app_colors.dart';
 import '../../../domain/entities/survey.dart';
 import '../../controllers/dashboard_surveyor_controller.dart';
+import 'widgets/home_code_widget.dart';
 import 'widgets/surveyor_balance_card.dart';
 import 'widgets/profile_header.dart';
 
@@ -15,54 +17,63 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
 
   @override
   Widget build(BuildContext context) {
+    final homeCodeController = Get.find<HomeCodeController>();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: RefreshIndicator(
         onRefresh: () async {
           await controller.fetchSurveys();
         },
-        child: Stack(
-          children: [
-            CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 178.0,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        _buildAppBarBackground(context),
-                        Positioned(
-                          top: 130.0,
-                          left: 16.0,
-                          right: 16.0,
-                          child: Obx(() {
-                            return SurveyorBalanceCard(
-                              isLoading: controller.isLoading.value,
-                              responses:
-                                  controller.dataSurveyor.value?.totalEntries ??
-                                      0,
-                              lastSurveyDate:
-                                  controller.dataSurveyor.value?.lastSurvey ??
-                                      '-- -- -- --',
-                            );
-                          }),
-                        ),
-                      ],
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 178.0,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _buildAppBarBackground(context),
+                    Positioned(
+                      top: 130.0,
+                      left: 16.0,
+                      right: 16.0,
+                      child: Obx(() {
+                        return SurveyorBalanceCard(
+                          isLoading: controller.isLoading.value,
+                          responses:
+                              controller.dataSurveyor.value?.totalEntries ?? 0,
+                          lastSurveyDate:
+                              controller.dataSurveyor.value?.lastSurvey ??
+                                  '-- -- -- --',
+                        );
+                      }),
                     ),
-                  ),
+                  ],
                 ),
-                SliverToBoxAdapter(
-                  child: Obx(() {
-                    return _buildContent();
-                  }),
-                ),
-              ],
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: _buildContent(),
             ),
           ],
         ),
       ),
+      bottomNavigationBar: Obx(() => controller.showContent.value
+          ? Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: AppColors.background,
+              child: PrimaryButton(
+                onPressed: () {
+                  controller.showContent.value = false;
+                  homeCodeController.resetHomeCode();
+                },
+                isLoading: false,
+                child: 'Finalizar hogar',
+              ),
+            )
+          : const SizedBox.shrink()),
     );
   }
 
@@ -89,32 +100,45 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   Widget _buildContent() {
     return Container(
       padding: const EdgeInsets.only(
-        top: 80,
+        top: 70,
         left: 16,
         right: 16,
         bottom: 16,
       ),
-      child: (controller.isLoading.value)
-          ? const Padding(
-              padding: EdgeInsets.only(top: 40),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ConnectivityBanner(),
-                _buildSectionHeader('Mis encuestas', isActive: true),
-                const SizedBox(height: 16),
-                _buildSurveysList(controller.surveys),
-                const SizedBox(height: 24),
-                _buildSectionHeader('Historial de encuestas'),
-                const SizedBox(height: 16),
-                _buildSurveysList(
-                  controller.surveys,
-                  isHistorical: true,
-                ),
-              ],
-            ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ConnectivityBanner(),
+          HomeCodeWidget(
+            onCodeGenerated: (homeCode) {
+              controller.showContent.value = true;
+              controller.codeHouse.value = homeCode;
+            },
+          ),
+          Obx(() => controller.showContent.value
+              ? controller.isLoading.value
+                  ? const Padding(
+                      padding: EdgeInsets.only(top: 20),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader('Rango de edad'),
+                        const SizedBox(height: 16),
+                        _buildSurveysList(controller.surveys),
+                        const SizedBox(height: 24),
+                        _buildSectionHeader('Rango de edad encuestados'),
+                        const SizedBox(height: 16),
+                        _buildSurveysList(
+                          controller.surveys,
+                          isHistorical: true,
+                        )
+                      ],
+                    )
+              : const SizedBox()),
+        ],
+      ),
     );
   }
 
@@ -192,6 +216,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         Routes.SURVEY_DETAIL,
         arguments: {
           'survey': survey,
+          'codeHouse': controller.codeHouse.value,
         },
       )?.then((_) => controller.fetchSurveys());
     } else {
@@ -199,6 +224,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         Routes.SURVEY_WITHOUT_RESPONSE,
         arguments: {
           'survey': survey,
+          'codeHouse': controller.codeHouse.value,
         },
       );
     }

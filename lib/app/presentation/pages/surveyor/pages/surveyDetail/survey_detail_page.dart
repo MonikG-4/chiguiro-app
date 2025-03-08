@@ -7,10 +7,12 @@ import '../../../../widgets/connectivity_banner.dart';
 import '../../../../widgets/primary_button.dart';
 import 'widgets/response_status_list.dart';
 import '../../widgets/profile_header.dart';
-import '../../widgets/survey_detail_card.dart';
+import 'widgets/survey_detail_card.dart';
 
 class SurveyDetailPage extends GetView<DetailSurveyController> {
-  const SurveyDetailPage({super.key});
+  final String? codeHouse;
+
+  SurveyDetailPage({super.key}) : codeHouse = Get.arguments['codeHouse'];
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +95,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
                   Routes.SURVEY,
                   arguments: {
                     'survey': controller.survey.value,
+                    'codeHouse': codeHouse,
                   },
                 )?.then((_) => controller.fetchData(clearData: true));
               }),
