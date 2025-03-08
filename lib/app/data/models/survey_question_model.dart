@@ -64,18 +64,18 @@ class SurveyQuestionModel extends HiveObject {
 
   factory SurveyQuestionModel.fromJson(Map<String, dynamic> json) {
     return SurveyQuestionModel(
-      id: json['id'],
-      question: json['question'],
-      description: json['description'],
-      sort: json['sort'],
-      type: json['type'],
-      mandatory: json['mandatory'],
+      id: json['id'] ?? '',
+      question: json['question'] ?? '',
+      description: json['description'] ?? '',
+      sort: json['sort'] ?? 0,
+      type: json['type'] ?? '',
+      mandatory: json['mandatory'] ?? false,
       meta: List<String>.from(json['meta']),
       meta2: json['meta2'] != null ? List<String>.from(json['meta2']) : null,
-      anchorMin: json['anchorMin'],
-      anchorMax: json['anchorMax'],
-      scaleMin: json['scaleMin'],
-      scaleMax: json['scaleMax'],
+      anchorMin: json['anchorMin'] ?? '',
+      anchorMax: json['anchorMax'] ?? '',
+      scaleMin: json['scaleMin'] ?? 0,
+      scaleMax: json['scaleMax'] ?? 0,
       jumpers: json['jumpers'] != null
           ? (json['jumpers'] as List)
           .map((e) => JumperModel.fromJson(e))

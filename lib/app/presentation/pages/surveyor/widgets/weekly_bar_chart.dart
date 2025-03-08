@@ -21,15 +21,18 @@ class WeeklyBarChart extends StatelessWidget {
 
   double _calculateNormalizedHeight(double value, double maxValue, double availableHeight) {
     double maxBarHeight = availableHeight - 30;
-
     double scaleFactor = 0.85;
+    double minBarHeight = 15.0;
 
     if (value == 0) {
       return maxBarHeight * 0.2;
     }
 
-    return (value / maxValue) * maxBarHeight * scaleFactor;
+    double calculatedHeight = (value / maxValue) * maxBarHeight * scaleFactor;
+
+    return calculatedHeight < minBarHeight ? minBarHeight : calculatedHeight;
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -7,30 +7,19 @@ import '../../../../../../core/services/cache_storage_service.dart';
 import '../../../../../../core/values/app_colors.dart';
 import '../../../../../domain/entities/auth_response.dart';
 import '../../../../../presentation/controllers/survey_controller.dart';
+import '../../../../widgets/connectivity_banner.dart';
 import '../../../../widgets/primary_button.dart';
 import 'widgets/audio_location_panel.dart';
 import 'widgets/custom_progress_bar.dart';
 import 'widgets/keep_alive_survey_question.dart';
 import 'widgets/question_widget_factory.dart';
 
-class SurveyPage extends StatefulWidget {
+class SurveyPage extends GetView<SurveyController> {
   final AuthResponse authResponse;
+  final _formKey = GlobalKey<FormState>();
 
   SurveyPage({super.key})
       : authResponse = Get.find<CacheStorageService>().authResponse!;
-
-  @override
-  SurveyPageState createState() => SurveyPageState();
-}
-
-class SurveyPageState extends State<SurveyPage> {
-  final SurveyController controller = Get.find();
-  final _formKey = GlobalKey<FormState>();
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,14 +42,17 @@ class SurveyPageState extends State<SurveyPage> {
           padding: const EdgeInsets.only(top: 5.0),
           child: Stack(
             children: [
+
               if (controller.isVoiceRecorder.value ||
                   controller.isGeoLocation.value)
                 AudioLocationPanel(
                   showLocation: controller.survey.value!.geoLocation,
                   showAudioRecorder: controller.survey.value!.voiceRecorder,
                 ),
+
               _buildQuestionsForm(context),
               _buildProgressBar(),
+
               _buildSubmitButton(context),
             ],
           ),
@@ -123,8 +115,7 @@ class SurveyPageState extends State<SurveyPage> {
                 ),
                 ...visibleQuestions.map((question) {
                   return KeepAliveSurveyQuestion(
-                    key: ValueKey(
-                        'question-${question.id}'),
+                    key: ValueKey('question-${question.id}'),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child:
@@ -172,6 +163,9 @@ class SurveyPageState extends State<SurveyPage> {
               children: [
                 const SizedBox(height: 8.0),
                 CustomProgressBar(progress: progress),
+                const SizedBox(height: 8.0),
+                ConnectivityBanner(),
+
               ],
             ),
           );
@@ -276,8 +270,23 @@ class SurveyPageState extends State<SurveyPage> {
               break;
 
             case 'MatrixTime':
-            case 'MatrixDouble':
               final matrixTimeResults = question.meta.map((meta) {
+                return {
+                  'fila': meta,
+                  'columna':
+                      question.meta2![Random().nextInt(question.meta2!.length)],
+                  'respuesta': Random().nextInt(24).toString()
+                };
+              }).toList();
+              controller.responses[question.id] = {
+                'question': question.question,
+                'type': question.type,
+                'value': matrixTimeResults,
+              };
+              break;
+
+            case 'MatrixDouble':
+              final matrixDoubleResults = question.meta.map((meta) {
                 return {
                   'fila': meta,
                   'columna':
@@ -289,7 +298,7 @@ class SurveyPageState extends State<SurveyPage> {
               controller.responses[question.id] = {
                 'question': question.question,
                 'type': question.type,
-                'value': matrixTimeResults,
+                'value': matrixDoubleResults,
               };
               break;
 
@@ -323,7 +332,6 @@ class SurveyPageState extends State<SurveyPage> {
               isLoading: false,
               onPressed: () async {
                 await _fillSurveyWithRandomResponses();
-                setState(() {});
               },
               child: 'Responder Aleatoriamente',
             ),
@@ -335,7 +343,7 @@ class SurveyPageState extends State<SurveyPage> {
 
   Future<void> _submitSurvey() async {
     if (_formKey.currentState!.validate() & controller.validateAllQuestions()) {
-      controller.saveSurveyResults(widget.authResponse.id);
+      controller.saveSurveyResults(authResponse.id);
     }
   }
 }

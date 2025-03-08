@@ -36,19 +36,15 @@ class SurveyCard extends StatelessWidget {
   }
 
   Widget _buildLeadingIcon() {
-    var logoUrl =
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFe4BEwG37Mv0M724WYCTjsNP2UojEL3Oa0Q&s';
-    return logoUrl.isEmpty
-        ? const Icon(Icons.business, size: 40)
-        : Image.network(
-            logoUrl,
-            width: 60,
-            height: 60,
-            errorBuilder: (_, __, ___) => const Icon(
-              Icons.business,
-              size: 40,
-            ),
-          );
+    return Image.asset(
+      'assets/images/min-deporte.png',
+      width: 60,
+      height: 60,
+      errorBuilder: (_, __, ___) => const Icon(
+        Icons.business,
+        size: 40,
+      ),
+    );
   }
 
   Widget _buildTitle() {

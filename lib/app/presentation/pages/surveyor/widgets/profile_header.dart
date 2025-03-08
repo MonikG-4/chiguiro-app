@@ -35,23 +35,15 @@ class ProfileHeader extends StatelessWidget {
     return CircleAvatar(
       backgroundColor: Colors.transparent,
       child: ClipOval(
-        child: avatarPath.startsWith('http')
-            ? Image.network(
-                avatarPath,
-                width: 40,
-                height: 40,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.person, size: 40);
-                },
-              )
-            : Image.asset(
-                avatarPath,
-                width: 40,
-                height: 40,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.person, size: 40);
-                },
-              ),
+        child: Image.asset(
+          avatarPath,
+        width: 60,
+        height: 60,
+        errorBuilder: (_, __, ___) => const Icon(
+          Icons.business,
+          size: 40,
+        ),
+      ),
       ),
     );
   }

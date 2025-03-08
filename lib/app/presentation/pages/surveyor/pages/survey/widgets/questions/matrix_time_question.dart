@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
-import '../matrix_cell.dart';
 import '../matrix_table.dart';
+import '../custom_select.dart';
 
 class MatrixTimeQuestion extends StatelessWidget {
   final SurveyQuestion question;
@@ -20,8 +20,8 @@ class MatrixTimeQuestion extends StatelessWidget {
     final rows = question.meta;
     final columns = question.meta2 ?? [];
 
-    // Creamos un mapa de controladores para las celdas
-    final Map<String, TextEditingController> cellControllers = {};
+    final Map<String, GlobalKey> dropdownKeys = {};
+    final Map<String, GlobalKey<FormFieldState>> formFieldKeys = {};
 
     return MatrixTable(
       question: question,
@@ -31,20 +31,48 @@ class MatrixTimeQuestion extends StatelessWidget {
       cellBuilder: (rowLabel, colLabel, initialValue, onChanged) {
         final cellKey = '$rowLabel-$colLabel';
 
-        // Si no existe, se crea el controlador con el valor inicial
-        if (!cellControllers.containsKey(cellKey)) {
-          cellControllers[cellKey] = TextEditingController(text: initialValue);
-        } else {
-          // Si el valor en `responses` cambia, actualizamos el texto del controlador
-          if (cellControllers[cellKey]!.text != initialValue) {
-            cellControllers[cellKey]!.text = initialValue;
-          }
+        final uniqueKey = Key('$cellKey-$initialValue');
+
+        if (!dropdownKeys.containsKey(cellKey)) {
+          dropdownKeys[cellKey] = GlobalKey();
+        }
+        if (!formFieldKeys.containsKey(cellKey)) {
+          formFieldKeys[cellKey] = GlobalKey<FormFieldState>();
         }
 
-        return MatrixCell(
-          controller: cellControllers[cellKey]!,
-          hinText: rowLabel,
-          onChanged: onChanged,
+        List<String> options = [];
+
+        if (rowLabel.toLowerCase().contains('segundo')) {
+          options = List.generate(60, (i) => i.toString().padLeft(2, '0'));
+        } else if (rowLabel.toLowerCase().contains('minuto')) {
+          options = List.generate(60, (i) => i.toString().padLeft(2, '0'));
+        } else if (rowLabel.toLowerCase().contains('hora')) {
+          options = List.generate(24, (i) => i.toString().padLeft(2, '0'));
+        } else {
+          options = List.generate(60, (i) => i.toString().padLeft(2, '0'));
+        }
+
+        return FormField<String>(
+          key: uniqueKey,
+          initialValue: initialValue,
+          validator: (_) => null,
+          builder: (FormFieldState<String> state) {
+            return CustomSelect(
+              keyDropdown: dropdownKeys[cellKey]!,
+              value: initialValue.isEmpty ? null : initialValue,
+              items: options,
+              label: rowLabel,
+              state: state,
+              maxHeight: 300.0,
+              onSelected: (String? newValue) {
+                if (newValue != null) {
+                  onChanged(newValue);
+                } else {
+                  onChanged('');
+                }
+              },
+            );
+          },
         );
       },
     );

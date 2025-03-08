@@ -7,14 +7,14 @@ import '../../app/domain/entities/survey.dart';
 import '../../app/domain/entities/survey_statistics.dart';
 import '../../app/domain/entities/surveyor.dart';
 
-
 class LocalStorageService {
   final _surveysBox = Hive.box<SurveyModel>('surveysBox');
   final _statisticsBox = Hive.box<SurveyStatisticsModel>('statisticsBox');
   final _surveyorBox = Hive.box<SurveyorModel>('surveyorBox');
 
   void saveSurveys(List<Survey> surveys) {
-    final projectsModels = surveys.map((s) => SurveyModel.fromEntity(s)).toList();
+    final projectsModels =
+        surveys.map((s) => SurveyModel.fromEntity(s)).toList();
     for (final project in projectsModels) {
       _surveysBox.put(project.id, project);
     }
@@ -25,11 +25,13 @@ class LocalStorageService {
   }
 
   void saveStatisticsSurvey(int surveyId, SurveyStatistics surveyStatistics) {
-    _statisticsBox.put(surveyId, SurveyStatisticsModel.fromEntity(surveyStatistics));
+    _statisticsBox.put(
+        surveyId, SurveyStatisticsModel.fromEntity(surveyStatistics));
   }
 
-  SurveyStatistics? getStatisticsSurvey(int surveyId) {
-    return _statisticsBox.get(surveyId)?.toEntity();
+  SurveyStatistics getStatisticsSurvey(int surveyId) {
+    return _statisticsBox.get(surveyId)?.toEntity() ??
+        SurveyStatisticsModel.empty().toEntity();
   }
 
   void saveSurveyor(Surveyor surveyor) {

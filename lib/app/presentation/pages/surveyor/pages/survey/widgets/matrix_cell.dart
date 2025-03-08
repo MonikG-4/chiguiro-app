@@ -41,10 +41,10 @@ class _MatrixCellState extends State<MatrixCell> {
             widget.onChanged(value);
           });
         },
-        decoration: InputDecoration(
 
+        decoration: InputDecoration(
           hintText: widget.hinText,
-          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           isDense: true,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),

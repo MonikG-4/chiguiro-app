@@ -3,11 +3,14 @@ import 'package:get/get.dart';
 
 import '../../../../../../core/values/app_colors.dart';
 import '../../../../../../core/values/routes.dart';
+import '../../../../../domain/entities/survey.dart';
 import '../../../../widgets/custom_text_button_redirect.dart';
 import '../../../../widgets/primary_button.dart';
 
 class SurveyWithoutResponsesPage extends GetView {
-  const SurveyWithoutResponsesPage({super.key});
+  final Survey? survey;
+
+  SurveyWithoutResponsesPage({super.key}) : survey = Get.arguments['survey'];
 
   @override
   Widget build(BuildContext context) {
@@ -39,15 +42,21 @@ class SurveyWithoutResponsesPage extends GetView {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'No tienes encuestas sin respuestas',
+                  'Aun no tienes encuestas respondidas, responde tu primera encuesta!.',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 64),
                 PrimaryButton(
-                    onPressed: (() => Get.toNamed(Routes.SURVEY)),
+                    onPressed: (() => Get.offNamed(
+                          Routes.SURVEY,
+                          arguments: {
+                            'survey': survey,
+                          },
+                        )),
                     isLoading: false,
                     child: 'Iniciar encuesta'),
                 const SizedBox(height: 16),

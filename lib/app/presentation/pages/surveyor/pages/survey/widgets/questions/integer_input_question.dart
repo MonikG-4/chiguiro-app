@@ -21,40 +21,47 @@ class IntegerInputQuestion extends StatefulWidget {
 }
 
 class _IntegerInputQuestionState extends State<IntegerInputQuestion> {
-  late TextEditingController _textController;
+  late final TextEditingController _textController;
 
   @override
   void initState() {
     super.initState();
-    final initialValue = widget.controller.responses[widget.question.id]?['value'];
-    _textController = TextEditingController(
-      text: initialValue != null && initialValue != 0 ? initialValue.toString() : '',
-    );
-
-    _textController.addListener(() {
-      final value = int.tryParse(_textController.text);
-      if (value != null && value != 0) {
-        widget.controller.responses[widget.question.id] = {
-          'question': widget.question.question,
-          'type': widget.question.type,
-          'value': value,
-        };
-      } else {
-        widget.controller.responses.remove(widget.question.id);
-      }
-      setState(() {});
-    });
+    _textController = TextEditingController();
+    _updateControllerText();
+    _textController.addListener(_onTextChanged);
   }
 
   @override
   void didUpdateWidget(covariant IntegerInputQuestion oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _updateControllerText();
+  }
+
+  void _updateControllerText() {
     final currentValue = widget.controller.responses[widget.question.id]?['value'];
-    final currentText = currentValue != null && currentValue != 0 ? currentValue.toString() : '';
+    final currentText = currentValue != null && currentValue != 0
+        ? currentValue.toString()
+        : '';
 
     if (_textController.text != currentText) {
       _textController.text = currentText;
+      _textController.selection = TextSelection.collapsed(offset: _textController.text.length);
     }
+  }
+
+  void _onTextChanged() {
+    final value = int.tryParse(_textController.text);
+
+    if (value != null && value != 0) {
+      widget.controller.responses[widget.question.id] = {
+        'question': widget.question.question,
+        'type': widget.question.type,
+        'value': value,
+      };
+    } else {
+      widget.controller.responses.remove(widget.question.id);
+    }
+    widget.controller.responses.refresh();
   }
 
   @override
@@ -69,6 +76,8 @@ class _IntegerInputQuestionState extends State<IntegerInputQuestion> {
       },
       builder: (FormFieldState<String> state) {
         return Obx(() {
+          _updateControllerText();
+
           final hasValue = widget.controller.responses[widget.question.id]?['value'] != null;
 
           return Column(
@@ -102,5 +111,11 @@ class _IntegerInputQuestionState extends State<IntegerInputQuestion> {
         });
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
   }
 }

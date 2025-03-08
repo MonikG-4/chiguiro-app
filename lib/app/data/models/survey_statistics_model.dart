@@ -5,8 +5,7 @@ import '../../domain/entities/survey_statistics.dart';
 part 'survey_statistics_model.g.dart';
 
 @HiveType(typeId: 6)
-class SurveyStatisticsModel extends HiveObject{
-
+class SurveyStatisticsModel extends HiveObject {
   @HiveField(0)
   final int totalEntries;
   @HiveField(1)
@@ -38,11 +37,23 @@ class SurveyStatisticsModel extends HiveObject{
 
   factory SurveyStatisticsModel.fromJson(Map<String, dynamic> json) {
     return SurveyStatisticsModel(
-      totalEntries: json['totalEntries'],
-      totalCompleted: json['totalCompleted'],
-      totalUncompleted: json['totalUncompleted'],
-      completedPercentage: json['completedPercentage'],
-      lastSurvey: DateTime.parse(json['lastSurvey']),
+      totalEntries: json['totalEntries'] ?? 0,
+      totalCompleted: json['totalCompleted'] ?? 0,
+      totalUncompleted: json['totalUncompleted'] ?? 0,
+      completedPercentage: json['completedPercentage'] ?? '0',
+      lastSurvey: json['lastSurvey'] != null
+          ? DateTime.parse(json['lastSurvey'])
+          : DateTime(1970),
+    );
+  }
+
+  factory SurveyStatisticsModel.empty() {
+    return SurveyStatisticsModel(
+      totalEntries: 0,
+      totalCompleted: 0,
+      totalUncompleted: 0,
+      completedPercentage: '0',
+      lastSurvey: DateTime(1970),
     );
   }
 
@@ -65,5 +76,4 @@ class SurveyStatisticsModel extends HiveObject{
       'lastSurvey': lastSurvey.toIso8601String(),
     };
   }
-
 }

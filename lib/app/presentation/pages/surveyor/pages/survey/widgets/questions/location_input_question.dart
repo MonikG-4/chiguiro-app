@@ -153,7 +153,6 @@ class LocationInputQuestion extends StatelessWidget {
   void _setLocationValueAt(String questionId, int index, String value) {
     final currentValues = getLocationValueList(questionId);
 
-    // Ajustar el tamaño de la lista si es necesario
     while (currentValues.length <= index) {
       currentValues.add('');
     }

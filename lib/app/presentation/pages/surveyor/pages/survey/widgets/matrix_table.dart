@@ -29,19 +29,17 @@ class MatrixTable extends StatelessWidget {
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: GetBuilder<SurveyController>(
-              id: 'matrix_${question.id}',
-              builder: (_) {
-                final responses = controller.responses[question.id]?['value'] as List<Map<String, String>>? ?? [];
-                return Table(
-                  defaultColumnWidth: const IntrinsicColumnWidth(),
-                  children: [
-                    _buildHeader(),
-                    ...rows.map((row) => _buildRow(row, columns, responses, state)),
-                  ],
-                );
-              },
-            ),
+            child: Obx(() {
+              final responses = controller.responses[question.id]?['value'] as List<Map<String, String>>? ?? [];
+
+              return Table(
+                defaultColumnWidth: const IntrinsicColumnWidth(),
+                children: [
+                  _buildHeader(),
+                  ...rows.map((row) => _buildRow(row, columns, responses, state)),
+                ],
+              );
+            }),
           ),
           if (state.hasError)
             Padding(
@@ -77,7 +75,9 @@ class MatrixTable extends StatelessWidget {
         ),
         ...columns.map((col) {
           final initialValue = _getCellValue(responses, col, row);
+
           return Padding(
+            key: Key('cell_${question.id}_${row}_${col}_$initialValue'),
             padding: const EdgeInsets.all(4.0),
             child: cellBuilder(row, col, initialValue, (value) => _updateResponse(col, row, value, state)),
           );
@@ -113,11 +113,12 @@ class MatrixTable extends StatelessWidget {
       controller.responses.remove(question.id);
     } else {
       currentResponse['value'] = currentValues;
-      controller.responses[question.id] = currentResponse;
+      controller.responses[question.id] = Map<String, dynamic>.from(currentResponse);
     }
 
     state.didChange(currentValues);
     state.validate();
+
     controller.update(['matrix_${question.id}']);
   }
 }

@@ -26,14 +26,14 @@ class SurveyorModel extends HiveObject {
 
   factory SurveyorModel.fromJson(Map<String, dynamic> json) {
     return SurveyorModel(
-      totalEntries: json['totalEntries'],
-      lastSurvey: json['lastSurvey'],
+      totalEntries: json['totalEntries'] ?? 0,
+      lastSurvey: json['lastSurvey'] ?? '',
     );
   }
 
   Surveyor toEntity() {
     return Surveyor(
-      totalEntries: totalEntries,
+      totalEntries: totalEntries ,
       lastSurvey: lastSurvey,
     );
   }

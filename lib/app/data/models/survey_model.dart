@@ -48,13 +48,13 @@ class SurveyModel extends HiveObject {
   factory SurveyModel.fromJson(Map<String, dynamic> json) {
     return SurveyModel(
       id: int.tryParse(json['id'].toString()) ?? 0,
-      name: json['name'],
-      active: json['active'],
+      name: json['name'] ?? '',
+      active: json['active'] ?? false,
       closeDate: json['closeDate'] != null ? DateTime.parse(json['closeDate']) : null,
-      entriesCount: json['entriesCount'],
+      entriesCount: json['entriesCount'] ?? 0,
       logoUrl: json['logoUrl'],
-      geoLocation: json['geoLocation'],
-      voiceRecorder: json['voiceRecorder'],
+      geoLocation: json['geoLocation'] ?? false,
+      voiceRecorder: json['voiceRecorder'] ?? false,
       sections: json['sections'] != null ? List<SectionsModel>.from(json['sections'].map((x) => SectionsModel.fromJson(x))) : [],
 
     );

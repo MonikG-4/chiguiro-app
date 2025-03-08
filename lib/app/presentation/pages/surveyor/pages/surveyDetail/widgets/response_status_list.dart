@@ -8,7 +8,7 @@ import '../../../../../controllers/detail_survey_controller.dart';
 class ResponseStatusList extends StatelessWidget {
   final bool shrinkWrap;
   final ScrollPhysics? physics;
-  final double maxHeight;
+  final double? maxHeight;
 
   final DetailSurveyController controller = Get.find();
 
@@ -16,14 +16,14 @@ class ResponseStatusList extends StatelessWidget {
     super.key,
     this.shrinkWrap = false,
     this.physics,
-    this.maxHeight = 340.0,
+    this.maxHeight,
   });
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       return SizedBox(
-        height: MediaQuery.of(context).size.height * 0.4,
+        height: maxHeight,
         child: controller.isLoadingAnswerSurvey.value &&
                 controller.detailSurvey.isEmpty
             ? const Center(
@@ -65,7 +65,7 @@ class ResponseStatusList extends StatelessWidget {
       return 1;
     }
     if (controller.currentPage.value == 1 &&
-        controller.detailSurvey.length < controller.pageSize) {
+        controller.detailSurvey.length < controller.pageSize.value) {
       return controller.detailSurvey.length;
     }
     return controller.detailSurvey.length +
