@@ -27,6 +27,15 @@ class AuthResponse {
         'accessToken': accessToken,
       };
 
+  factory AuthResponse.empty() {
+    return AuthResponse(
+      id: 0,
+      name: '',
+      surname: '',
+      accessToken: '',
+    );
+  }
+
   static int _parseIntSafely(dynamic value) {
     if (value is int) return value;
     if (value is String) return int.tryParse(value) ?? 0;

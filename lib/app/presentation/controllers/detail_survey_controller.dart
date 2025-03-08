@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
+import '../../../core/error/failures/failure.dart';
 import '../../../core/services/cache_storage_service.dart';
 import '../../../core/services/connectivity_service.dart';
 import '../../../core/utils/message_handler.dart';
@@ -12,23 +13,23 @@ import '../../domain/repositories/i_detail_survey_repository.dart';
 
 class DetailSurveyController extends GetxController {
   final IDetailSurveyRepository repository;
-  final ConnectivityService _connectivityService =
-      Get.find<ConnectivityService>();
+  final ConnectivityService _connectivityService = Get.find();
   late final CacheStorageService _storageService;
 
   late ScrollController scrollController;
 
   final detailSurvey = <DetailSurvey>[].obs;
 
-  var isLoadingStatisticSurvey = false.obs;
-  var isLoadingAnswerSurvey = false.obs;
-  var currentPage = 0.obs;
-  var isLastPage = false.obs;
-  final int pageSize = 10;
+  final isLoadingStatisticSurvey = false.obs;
+  final isLoadingAnswerSurvey = false.obs;
+  final currentPage = 0.obs;
+  final isLastPage = false.obs;
+  final pageSize = 0.obs;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
   final Rx<Survey?> survey = Rx<Survey?>(null);
   final Rx<SurveyStatistics?> surveyStatistics = Rx<SurveyStatistics?>(null);
+
   DetailSurveyController(this.repository);
 
   @override
@@ -44,28 +45,39 @@ class DetailSurveyController extends GetxController {
     MessageHandler.setupSnackbarListener(message);
 
     scrollController = ScrollController()..addListener(_scrollListener);
-
-    fetchData();
-
-    _connectivityService.addCallback(true, fetchData);
+    _connectivityService.addCallback(true, () => fetchData(clearData: true));
   }
 
-  void fetchData() {
-    detailSurvey.clear();
-    surveyStatistics.value = null;
-    fecthDetailSurvey();
+  void fetchData({bool clearData = false}) {
+    if (clearData) {
+      detailSurvey.clear();
+      currentPage.value = 0;
+      isLastPage.value = false;
+      surveyStatistics.value = null;
+    }
+
+    fetchDetailSurvey();
     fetchStatisticsSurvey();
   }
 
   Future<void> fetchStatisticsSurvey() async {
+    if (survey.value == null) return;
+
     surveyStatistics.value = null;
+    isLoadingStatisticSurvey.value = true;
 
     try {
-      isLoadingStatisticSurvey.value = true;
-      final newItems = await repository.fetchStatisticsSurvey(
+      final result = await repository.fetchStatisticsSurvey(
           _storageService.authResponse!.id, survey.value!.id);
 
-      surveyStatistics.value = newItems;
+      result.fold(
+              (failure) {
+            _showMessage('Error', _mapFailureToMessage(failure), 'error');
+          },
+              (data) {
+            surveyStatistics.value = data;
+          }
+      );
     } catch (e) {
       _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
@@ -73,27 +85,30 @@ class DetailSurveyController extends GetxController {
     }
   }
 
-  Future<void> fecthDetailSurvey() async {
-    if (isLoadingAnswerSurvey.value || isLastPage.value) return;
+  Future<void> fetchDetailSurvey() async {
+    if (isLoadingAnswerSurvey.value || isLastPage.value || survey.value == null) return;
+
+    isLoadingAnswerSurvey.value = true;
 
     try {
-      isLoadingAnswerSurvey.value = true;
-
-      final newItems = await repository.fetchSurveyDetail(
+      final result = await repository.fetchSurveyDetail(
           _storageService.authResponse!.id,
           survey.value!.id,
           currentPage.value,
-          pageSize);
+          pageSize.value);
 
-      if (newItems.isEmpty) {
-        isLastPage.value = true;
-        isLoadingAnswerSurvey.value = false;
-      } else {
-        detailSurvey.addAll(newItems);
-        currentPage.value++;
-      }
+      result.fold(
+              (failure) {},
+              (data) {
+            if (data.isEmpty) {
+              isLastPage.value = true;
+            } else {
+              detailSurvey.addAll(data);
+              currentPage.value++;
+            }
+          }
+      );
     } catch (e) {
-      isLoadingAnswerSurvey.value = false;
       _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
       isLoadingAnswerSurvey.value = false;
@@ -102,9 +117,22 @@ class DetailSurveyController extends GetxController {
 
   void _scrollListener() {
     if (scrollController.position.pixels >=
-            scrollController.position.maxScrollExtent - 200 &&
+        scrollController.position.maxScrollExtent - 200 &&
         !isLoadingAnswerSurvey.value) {
-      fecthDetailSurvey();
+      fetchDetailSurvey();
+    }
+  }
+
+  String _mapFailureToMessage(Failure failure) {
+    switch (failure.runtimeType) {
+      case ServerFailure _:
+        return failure.message;
+      case NetworkFailure _:
+        return 'Sin conexión a internet. Verifica tu conexión.';
+      case CacheFailure _:
+        return 'No hay datos almacenados. Conecta a internet para obtener datos.';
+      default:
+        return failure.message;
     }
   }
 

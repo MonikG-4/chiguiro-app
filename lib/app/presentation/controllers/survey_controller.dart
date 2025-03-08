@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/services/sync_task_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
@@ -15,19 +16,16 @@ import '../../domain/entities/survey.dart';
 import '../../domain/entities/survey_question.dart';
 import '../../domain/repositories/i_survey_repository.dart';
 import '../../../core/services/location_service.dart';
-import '../../../core/services/connectivity_service.dart';
 
 class SurveyController extends GetxController {
-  final ISurveyRepository _repository;
-  final LocationService _locationService = Get.find<LocationService>();
-  final AudioService _audioService = Get.find<AudioService>();
-  final ConnectivityService _connectivityService =
-      Get.find<ConnectivityService>();
-  final SyncTaskStorageService _taskStorageService =
-      Get.find<SyncTaskStorageService>();
+  final ISurveyRepository repository;
+  late final LocationService _locationService;
+  late final AudioService _audioService;
+  late final SyncTaskStorageService _taskStorageService;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
+  final surveyPending = <Map<String, dynamic>>[].obs;
   final survey = Rx<Survey?>(null);
   final sections = <Sections>[].obs;
   final responses = <String, dynamic>{}.obs;
@@ -42,14 +40,21 @@ class SurveyController extends GetxController {
 
   final timeAnswerStart = DateTime.now().obs;
 
-  SurveyController(this._repository);
+  SurveyController(this.repository);
 
   @override
   void onInit() {
     super.onInit();
 
-    survey.value = Get.arguments['survey'];
-    sections.assignAll(survey.value!.sections);
+    _locationService = Get.find<LocationService>();
+    _audioService = Get.find<AudioService>();
+    _taskStorageService = Get.find<SyncTaskStorageService>();
+
+    survey.value = Get.arguments?['survey'];
+    if (survey.value != null) {
+      sections.assignAll(survey.value!.sections);
+    }
+
     MessageHandler.setupSnackbarListener(message);
     _loadSurveyData();
   }
@@ -60,6 +65,27 @@ class SurveyController extends GetxController {
       _audioService.stopRecording();
     }
     super.onClose();
+  }
+
+  Future<void> fetchSurveys(int surveyorId) async {
+    isLoadingQuestion.value = true;
+
+    try {
+      final result = await repository.fetchSurveys(surveyorId);
+
+      result.fold(
+              (failure) {
+            _showMessage('Error', _mapFailureToMessage(failure), 'error');
+          },
+              (data) {
+            surveyPending.value = data;
+          }
+      );
+    } catch (e) {
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
+    } finally {
+      isLoadingQuestion.value = false;
+    }
   }
 
   void _loadSurveyData() {
@@ -104,49 +130,97 @@ class SurveyController extends GetxController {
     return '$timestamp$randomValue';
   }
 
-  Future<void> saveSurveyResults(int pollsterId) async {
-    if (!validateAllQuestions()) return;
-    String? audioBase64 = '';
-
-    if (isVoiceRecorder.value && _audioService.isRecording.value) {
-      audioBase64 = await _audioService.stopRecording();
-    }
-
+  Future<void> saveSurveyResults(
+      [int? pollsterId, Map<String, dynamic>? entryInputPending]) async {
     isLoadingSendSurvey.value = true;
 
     try {
-      final entryInput =
-          await _createSurveyEntry(survey.value!.id, pollsterId, audioBase64!);
-      //printEntryInput(entryInput.toJson());
-      if (_connectivityService.isConnected.value) {
-        final isSuccess =
-            await _repository.saveSurveyResults(entryInput.toJson());
-        if (!isSuccess) {
-          _showMessage('Encuesta',
-              'Su encuesta no pudo ser enviada al servidor', 'error');
+      String? audioBase64 = '';
+
+      if (entryInputPending == null) {
+        if (!validateAllQuestions()) {
+          isLoadingSendSurvey.value = false;
+          return;
         }
-        _showMessage(
-            'Encuesta', 'Su encuesta fue enviada correctamente', 'success');
-      } else {
-        await _taskStorageService.addTask(SyncTaskModel(
-          id: generateUniqueId(),
-          endpoint: 'saveSurvey',
-          payload: entryInput.toJson(),
-          repositoryKey: 'surveyRepository',
-        ));
-        _showMessage(
-            'Encuesta', 'Su encuesta fue guardada localmente.', 'info');
+
+        if (isVoiceRecorder.value && _audioService.isRecording.value) {
+          audioBase64 = await _audioService.stopRecording();
+        }
       }
-      Get.until((route) => route.settings.name == Routes.SURVEY_DETAIL);
+
+      final entryInput = entryInputPending != null
+          ? entryInputPending['payload'] as SurveyEntryModel
+          : await _createSurveyEntry(
+        survey.value!.id,
+        pollsterId!,
+        audioBase64,
+      );
+
+      //printEntryInput(entryInput.toJson());
+
+      try {
+        final result = await repository.saveSurveyResults(entryInput.toJson());
+
+        result.fold(
+                (failure) {
+              throw Exception(_mapFailureToMessage(failure));
+            },
+                (data) {
+              if (!data) {
+                throw Exception('Fallo al enviar la encuesta al servidor');
+              }
+
+              if (entryInputPending != null) {
+                _taskStorageService.removeTask(entryInputPending['id']);
+              }
+              _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
+            }
+        );
+
+
+      } catch (e) {
+        await _saveSurveyLocally(entryInputPending, entryInput);
+      }
     } catch (e) {
-      _showMessage('Encuesta', 'problemas al registrar la encuesta', 'error');
+      await _saveSurveyLocally(
+          entryInputPending, entryInputPending?['payload'] ?? {});
     } finally {
       isLoadingSendSurvey.value = false;
+      if (survey.value?.entriesCount == 0) {
+        Get.offNamedUntil(
+          Routes.SURVEY_DETAIL,
+              (route) => route.settings.name != Routes.SURVEY,
+          arguments: {'survey': survey.value},
+        );
+      } else {
+        // Si tiene encuestas, regresa normalmente al Dashboard
+        Get.until(
+              (route) => route.settings.name == (entryInputPending != null
+              ? Routes.DASHBOARD_SURVEYOR
+              : Routes.SURVEY_DETAIL),
+        );      }
+
     }
   }
 
+  Future<void> _saveSurveyLocally(
+      Map<String, dynamic>? entryInputPending,
+      SurveyEntryModel entryInput) async {
+    await _taskStorageService.addTask(SyncTaskModel(
+      id: entryInputPending?['id'] ?? generateUniqueId(),
+      endpoint:
+      entryInputPending?['endpoint'] ?? survey.value?.name ?? 'Desconocido',
+      payload: entryInput,
+      repositoryKey: 'surveyRepository',
+    ));
+    _showMessage(
+        'Encuesta',
+        'Encuesta guardada localmente, por favor verificar en ENCUESTAS PENDIENTES.',
+        'info');
+  }
+
   Future<SurveyEntryModel> _createSurveyEntry(
-      int projectId, int pollsterId, String audioBase64) async {
+      int projectId, int pollsterId, String? audioBase64) async {
     return SurveyEntryModel(
       projectId: projectId,
       pollsterId: pollsterId,
@@ -157,14 +231,6 @@ class SurveyController extends GetxController {
       startedOn: timeAnswerStart.value.toIso8601String(),
       finishedOn: DateTime.now().toIso8601String(),
     );
-  }
-
-  Future<void> _handleFailedSubmission(SurveyEntryModel entry) async {
-    message.update((val) {
-      val?.message = 'Error al enviar. Guardada localmente para reintento.';
-      val?.state = 'warning';
-    });
-    Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
   }
 
   List<Map<String, dynamic>> _buildAnswers() {
@@ -225,11 +291,24 @@ class SurveyController extends GetxController {
       List<dynamic> responseValue) {
     return responseValue
         .map<Map<String, String>>((subQuestion) => {
-              'meta2': subQuestion['columna'],
-              'meta': subQuestion['fila'],
-              'result': subQuestion['respuesta'].toString(),
-            })
+      'meta2': subQuestion['columna'],
+      'meta': subQuestion['fila'],
+      'result': subQuestion['respuesta'].toString(),
+    })
         .toList();
+  }
+
+  String _mapFailureToMessage(Failure failure) {
+    switch (failure.runtimeType) {
+      case ServerFailure _:
+        return failure.message;
+      case NetworkFailure _:
+        return 'Sin conexión a internet. Verifica tu conexión.';
+      case CacheFailure _:
+        return 'No hay datos almacenados. Conecta a internet para obtener datos.';
+      default:
+        return failure.message;
+    }
   }
 
   void _showMessage(String title, String msg, String state) {
@@ -249,16 +328,16 @@ class SurveyController extends GetxController {
 
         final response = responses[question.id];
 
-        if (response == null) {
+        if (question.mandatory && response == null) {
           _showMessage('Error',
               'Por favor responde todas las preguntas obligatorias', 'error');
           return false;
         }
 
-        if (question.type == 'Matrix') {
-          final value = response['value'] as List;
+        if (question.type == 'Matrix' && question.mandatory) {
+          final value = response?['value'] as List?;
           final subQuestions = question.meta.length;
-          if (value.length < subQuestions) {
+          if (value == null || value.length < subQuestions) {
             _showMessage('Error',
                 'Por favor responde todas las preguntas obligatorias', 'error');
             return false;
@@ -272,7 +351,7 @@ class SurveyController extends GetxController {
   void handleJumper(SurveyQuestion question, String? selectedValue) {
     final int startSort = question.sort;
     final jumper =
-        question.jumpers?.firstWhereOrNull((j) => j.value == selectedValue);
+    question.jumpers?.firstWhereOrNull((j) => j.value == selectedValue);
     final int? endSort = jumper?.questionNumber;
 
     if (selectedValue == null || jumper == null) {

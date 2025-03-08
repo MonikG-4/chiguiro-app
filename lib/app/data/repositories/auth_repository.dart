@@ -1,4 +1,6 @@
-import '../../../core/error/exceptions/exceptions.dart';
+import 'package:dartz/dartz.dart';
+
+import '../../../core/error/failures/failure.dart';
 import '../../domain/entities/auth_response.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 import '../providers/auth_provider.dart';
@@ -10,30 +12,22 @@ class AuthRepository extends BaseRepository implements IAuthRepository {
   AuthRepository(this.provider);
 
   @override
-  Future<AuthResponse> login(String email, String password) async {
-    final result = await processRequest(() => provider.login(email, password));
-
-    if (result.hasException) {
-      final error = result.exception?.graphqlErrors.first;
-      throw ServerException(error?.message ?? 'Error desconocido');
-    }
-
-    if (result.data == null || result.data!['pollsterLogin'] == null) {
-      throw UnknownException('Datos de login inválidos');
-    }
-
-    return AuthResponse.fromJson(result.data!['pollsterLogin']);
+  Future<Either<Failure, AuthResponse>> login(
+      String email, String password) async {
+    return safeApiCall<AuthResponse>(
+      request: () => provider.login(email, password),
+      onSuccess: (data) => AuthResponse.fromJson(data['pollsterLogin']),
+      dataKey: 'pollsterLogin',
+      unknownErrorMessage: 'Datos de login inválidos',
+    );
   }
 
   @override
-  Future<bool> forgotPassword(String email) async {
-    final result = await processRequest(() => provider.forgotPassword(email));
-
-    if (result.hasException) {
-      final error = result.exception?.graphqlErrors.first;
-      throw ServerException(error?.message ?? 'Error desconocido');
-    }
-
-    return result.data!['pollsterForgotPassword'] == null;
+  Future<Either<Failure, bool>> forgotPassword(String email) async {
+    return safeApiCall<bool>(
+      request: () => provider.forgotPassword(email),
+      onSuccess: (data) => data['pollsterForgotPassword'] == null,
+      dataKey: 'pollsterForgotPassword',
+    );
   }
 }

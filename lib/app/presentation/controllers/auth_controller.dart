@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../core/error/failures/failure.dart';
 import '../../../core/services/cache_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
@@ -10,7 +11,7 @@ import 'session_controller.dart';
 class AuthController extends GetxController {
   final IAuthRepository repository;
   final CacheStorageService _cacheStorageService =
-      Get.find<CacheStorageService>();
+  Get.find<CacheStorageService>();
 
   final isLoading = false.obs;
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
@@ -24,37 +25,56 @@ class AuthController extends GetxController {
   }
 
   Future<void> login(String email, String password) async {
-    try {
-      isLoading.value = true;
+    isLoading.value = true;
 
-      final response = await repository.login(email, password);
+    final result = await repository.login(email, password);
 
-      await _cacheStorageService.saveAuthResponse(response);
-      Get.find<SessionController>().updateAuthStatus();
+    result.fold(
+            (failure) {
+          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+        },
+            (response) async {
+          await _cacheStorageService.saveAuthResponse(response);
+          Get.find<SessionController>().updateAuthStatus();
 
-      Get.closeAllSnackbars();
-      Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
-    } catch (e) {
-      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
-    } finally {
-      isLoading.value = false;
-    }
+          Get.closeAllSnackbars();
+          Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
+        }
+    );
+
+    isLoading.value = false;
   }
 
   Future<void> forgotPassword(String email) async {
-    try {
-      isLoading.value = true;
+    isLoading.value = true;
 
-      final isSuccess = await repository.forgotPassword(email);
+    final result = await repository.forgotPassword(email);
 
-      if (isSuccess) {
-        Get.back();
-        _showMessage('Olvidar Contraseña', 'Se envio un E-Mail con una constraseña temporal.', 'success');
-      }
-    } catch (e) {
-      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
-    } finally {
-      isLoading.value = false;
+    result.fold(
+            (failure) {
+          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+        },
+            (isSuccess) {
+          if (isSuccess) {
+            Get.back();
+            _showMessage('Olvidar Contraseña',
+                'Se envio un E-Mail con una constraseña temporal.',
+                'success');
+          }
+        }
+    );
+
+    isLoading.value = false;
+  }
+
+  String _mapFailureToMessage(Failure failure) {
+    switch (failure.runtimeType) {
+      case ServerFailure _:
+        return failure.message;
+      case NetworkFailure _:
+        return 'Sin conexión a internet. Verifica tu conexión.';
+      default:
+        return failure.message;
     }
   }
 

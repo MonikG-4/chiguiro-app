@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'app/bindings/survey_binding.dart';
 import 'app/data/models/jumper_model.dart';
 import 'app/data/models/sections_model.dart';
 import 'app/data/models/survey_model.dart';
@@ -31,6 +33,7 @@ void main() async {
   await _initHive();
   await _initDependencies();
 
+
   runApp(const MyApp());
 }
 
@@ -48,13 +51,22 @@ Future<void> _initDependencies() async {
     return AudioService();
   }, permanent: true);
 
+
   Get.put(LocalStorageService(), permanent: true);
   Get.put(SyncTaskStorageService());
-  Get.put(SyncService(), permanent: true).onInit();
-  final connectivityService = Get.put(ConnectivityService(), permanent: true);
-  await connectivityService.waitForInitialization();
   Get.put(SessionController(cacheStorageService), permanent: true);
   Get.put(NetworkRequestInterceptor(), permanent: true);
+
+  final syncService = Get.put(SyncService(), permanent: true);
+  syncService.onInit();
+
+  final connectivityService = Get.put(ConnectivityService(syncService), permanent: true);
+  await connectivityService.waitForInitialization();
+
+  SurveyBinding().dependencies();
+
+
+
 }
 
 /// **Inicialización de Hive**

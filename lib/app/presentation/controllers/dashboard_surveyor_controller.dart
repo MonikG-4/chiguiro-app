@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/services/cache_storage_service.dart';
 import '../../../core/services/connectivity_service.dart';
@@ -12,8 +13,7 @@ import '../../../core/services/location_service.dart';
 
 class DashboardSurveyorController extends GetxController {
   final IDashboardSurveyorRepository repository;
-  final ConnectivityService _connectivityService =
-      Get.find<ConnectivityService>();
+  final ConnectivityService _connectivityService = Get.find();
 
   late final LocationService _locationService;
   late final AudioService _audioService;
@@ -23,6 +23,7 @@ class DashboardSurveyorController extends GetxController {
   final dataSurveyor = Rx<Surveyor?>(null);
 
   final isLoading = false.obs;
+  final idSurveyor = 0.obs;
   final nameSurveyor = ''.obs;
   final surnameSurveyor = ''.obs;
 
@@ -39,6 +40,7 @@ class DashboardSurveyorController extends GetxController {
 
     nameSurveyor.value = _storageService.authResponse!.name;
     surnameSurveyor.value = _storageService.authResponse!.surname;
+    idSurveyor.value = _storageService.authResponse!.id;
 
     await fetchSurveys();
 
@@ -47,40 +49,57 @@ class DashboardSurveyorController extends GetxController {
     MessageHandler.setupSnackbarListener(message);
   }
 
-
   Future<void> changePassword(String password) async {
-    try {
-      isLoading.value = true;
+    isLoading.value = true;
 
-      final isSuccess = await repository.changePassword(
-          _storageService.authResponse!.id, password);
+    final result = await repository.changePassword(
+        _storageService.authResponse!.id, password);
 
-      if (isSuccess) {
-        Get.back();
-        _showMessage('Cambio de contraseña', 'Su contraseña fue actualizada correctamente', 'success');
-      }
-    } catch (e) {
-      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
-    } finally {
-      isLoading.value = false;
-    }
+    result.fold(
+            (failure) {
+          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+        },
+            (isSuccess) {
+          if (isSuccess) {
+            Get.back();
+            _showMessage('Cambio de contraseña',
+                'Su contraseña fue actualizada correctamente', 'success');
+          }
+        }
+    );
+
+    isLoading.value = false;
   }
 
-
   Future<void> fetchSurveys() async {
+    surveys.clear();
     isLoading.value = true;
 
     try {
-      
-      final future = await Future.wait([
-        repository.fetchSurveys(_storageService.authResponse!.id),
-        repository.fetchDataSurveyor(_storageService.authResponse!.id),
-      ]);
+      final surveysResult = await repository.fetchSurveys(_storageService.authResponse!.id);
+      final dataSurveyorResult = await repository.fetchDataSurveyor(_storageService.authResponse!.id);
 
-      surveys.value = future[0] as List<Survey>;
-      dataSurveyor.value = future[1] as Surveyor;
+      final surveysList = surveysResult.fold(
+            (failure) {
+          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+          return <Survey>[];
+        },
+            (data) => data,
+      );
 
-      await _handlePermissions(surveys);
+      dataSurveyorResult.fold(
+            (failure) {
+          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+        },
+            (data) {
+          dataSurveyor.value = data;
+        },
+      );
+
+      if (surveysList.isNotEmpty) {
+        surveys.value = surveysList..sort((a, b) => a.id.compareTo(b.id));
+        await _handlePermissions(surveys);
+      }
     } catch (e) {
       _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
@@ -107,7 +126,18 @@ class DashboardSurveyorController extends GetxController {
     }
   }
 
-
+  String _mapFailureToMessage(Failure failure) {
+    switch (failure.runtimeType) {
+      case ServerFailure _:
+        return failure.message;
+      case NetworkFailure _:
+        return 'Sin conexión a internet. Verifica tu conexión.';
+      case CacheFailure _:
+        return 'No hay datos almacenados. Conecta a internet para obtener datos.';
+      default:
+        return failure.message;
+    }
+  }
 
   void _showMessage(String title, String msg, String state) {
     message.update((val) {

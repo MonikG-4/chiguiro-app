@@ -13,6 +13,6 @@ class SurveyBinding extends Bindings {
 
     Get.put(SurveyProvider(graphQLClient), permanent: true);
     Get.put<ISurveyRepository>(SurveyRepository(Get.find<SurveyProvider>()), permanent: true);
-    Get.lazyPut(() => SurveyController(Get.find<ISurveyRepository>()));
+    Get.lazyPut(() => SurveyController(Get.find<ISurveyRepository>()), fenix: true);
   }
 }
