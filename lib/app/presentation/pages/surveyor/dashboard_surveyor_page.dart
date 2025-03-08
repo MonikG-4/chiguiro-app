@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/values/routes.dart';
 import '../../controllers/session_controller.dart';
+import '../../widgets/connectivity_banner.dart';
 import './widgets/survey_card.dart';
 import '../../../../core/values/app_colors.dart';
 import '../../../domain/entities/survey.dart';
@@ -88,7 +89,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   Widget _buildContent() {
     return Container(
       padding: const EdgeInsets.only(
-        top: 85,
+        top: 80,
         left: 16,
         right: 16,
         bottom: 16,
@@ -101,6 +102,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                ConnectivityBanner(),
                 _buildSectionHeader('Mis encuestas', isActive: true),
                 const SizedBox(height: 16),
                 _buildSurveysList(controller.surveys),
@@ -184,16 +186,21 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
     );
   }
 
-  void _redirectToSurvey(Survey survey) {
+  Future<void> _redirectToSurvey(Survey survey) async {
     if (survey.entriesCount > 0) {
-      Get.toNamed(
+      await Get.toNamed(
         Routes.SURVEY_DETAIL,
         arguments: {
           'survey': survey,
         },
-      );
+      )?.then((_) => controller.fetchSurveys());
     } else {
-      Get.toNamed(Routes.SURVEY_WITHOUT_RESPONSE);
+      Get.toNamed(
+        Routes.SURVEY_WITHOUT_RESPONSE,
+        arguments: {
+          'survey': survey,
+        },
+      );
     }
   }
 

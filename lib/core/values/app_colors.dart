@@ -6,9 +6,12 @@ class AppColors {
   static const Color secondary = Color(0xFF748299);
   static const Color tertiary = Color(0xFF0D9488);
 
+  static const Color infoText = Color(0xFF2563EB);
   static const Color successText = Color(0xFF04763D);
   static const Color warningText = Color(0xFF92400E);
   static const Color errorText = Color(0xFFB91C1C);
+
+  static const Color withOutWifiText = Color(0xFF0D47A1);
 
   //Boton
   static const Color primaryButton = Color(0xFF0D9488);
@@ -24,9 +27,13 @@ class AppColors {
     ],
   );
 
+  static const Color infoBackground = Color(0xFFF0F5FF);
   static const Color successBackground = Color(0xFFEDFCF3);
   static const Color warningBackground = Color(0xFFFFF4E5);
   static const Color errorBackground = Color(0xFFFFF1F2);
+
+  static const Color withOutWifiBackground = Color(0xFFC9E4FA);
+
 
   //Borde
   static const Color inputs = Color(0xFF748299);

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../../../core/values/app_colors.dart';
 import '../../../../../../core/values/routes.dart';
 import '../../../../controllers/detail_survey_controller.dart';
+import '../../../../widgets/connectivity_banner.dart';
 import '../../../../widgets/primary_button.dart';
 import 'widgets/response_status_list.dart';
 import '../../widgets/profile_header.dart';
@@ -14,67 +14,100 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
 
   @override
   Widget build(BuildContext context) {
+    final availableHeight = MediaQuery.of(context).size.height - 520;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final estimatedPageSize = (availableHeight / 30).floor();
+
+      controller.pageSize.value = estimatedPageSize;
+      controller.fetchData(clearData: true);
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: RefreshIndicator(
-        onRefresh: () async {
-          controller.fetchData();
-        },
-        child: Stack(
-          children: [
-            CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 240.0,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        _buildAppBarBackground(context),
-                        Positioned(
-                          top: 120.0,
-                          left: 16.0,
-                          right: 16.0,
-                          child: Obx(() {
-                            return SurveyDetailCard(
-                              isLoading: controller.isLoadingStatisticSurvey.value,
-                              responses: controller
-                                      .surveyStatistics.value?.totalEntries ??
-                                  0,
-                              lastSurveyDate: controller
-                                      .surveyStatistics.value?.lastSurvey.toIso8601String() ??
-                                  '-- -- -- --',
-                              values: [
-                                controller.surveyStatistics.value
-                                        ?.totalCompleted ??
+      body: Column(
+        children: [
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                controller.fetchData(clearData: true);
+              },
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 230.0,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          _buildAppBarBackground(context),
+                          Positioned(
+                            top: 120.0,
+                            left: 16.0,
+                            right: 16.0,
+                            child: Obx(() {
+                              return SurveyDetailCard(
+                                isLoading:
+                                    controller.isLoadingStatisticSurvey.value,
+                                responses: controller
+                                        .surveyStatistics.value?.totalEntries ??
                                     0,
-                                controller.surveyStatistics.value
-                                        ?.totalUncompleted ??
-                                    0,
-                              ],
-                              weekDays: const ['Completas', 'Incompletas'],
-                            );
-                          }),
-                        ),
-                      ],
+                                lastSurveyDate: (controller
+                                            .surveyStatistics.value?.lastSurvey
+                                            .toIso8601String() ==
+                                        '1970-01-01T00:00:00.000')
+                                    ? '-- -- -- --'
+                                    : controller
+                                            .surveyStatistics.value?.lastSurvey
+                                            .toIso8601String() ??
+                                        '-- -- -- --',
+                                values: [
+                                  controller.surveyStatistics.value
+                                          ?.totalCompleted ??
+                                      0,
+                                  controller.surveyStatistics.value
+                                          ?.totalUncompleted ??
+                                      0,
+                                ],
+                                weekDays: const ['Completas', 'Incompletas'],
+                              );
+                            }),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: _buildContent(),
-                ),
-              ],
+                  SliverToBoxAdapter(
+                    child: _buildContent(availableHeight),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10, left: 16, right: 16),
+            child: PrimaryButton(
+              onPressed: (() async {
+                await Get.toNamed(
+                  Routes.SURVEY,
+                  arguments: {
+                    'survey': controller.survey.value,
+                  },
+                )?.then((_) => controller.fetchData(clearData: true));
+              }),
+              isLoading: false,
+              child: 'Iniciar encuesta',
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildAppBarBackground(BuildContext context) {
     var logoUrl =
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFe4BEwG37Mv0M724WYCTjsNP2UojEL3Oa0Q&s';
+        'assets/images/min-deporte.png';
 
     return Container(
       decoration: const BoxDecoration(
@@ -90,9 +123,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
         titleSpacing: -15,
         title: ProfileHeader(
           name: controller.survey.value!.name,
-          role: controller.survey.value!.active
-              ? 'En proceso'
-              : 'Finazalida xxxx',
+          role: controller.survey.value!.active ? 'En proceso' : 'Finalizada',
           avatarPath: logoUrl,
         ),
       ),
@@ -113,11 +144,11 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(double availableHeight) {
     return Container(
       color: AppColors.background,
       padding: const EdgeInsets.only(
-        top: 145,
+        top: 155,
         left: 16,
         right: 16,
         bottom: 16,
@@ -125,6 +156,8 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          ConnectivityBanner(),
+
           _buildSectionHeader('Mis respuestas'),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 8),
@@ -169,19 +202,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
             ),
           ),
           const Divider(height: 1, color: Color(0xFFE8EDF4)),
-          ResponseStatusList(),
-          PrimaryButton(
-            onPressed: (() async {
-              await Get.toNamed(
-                Routes.SURVEY,
-                arguments: {
-                  'survey': controller.survey.value,
-                },
-              )?.then((_) => controller.fetchData());
-            }),
-            isLoading: false,
-            child: 'Iniciar encuesta',
-          ),
+          ResponseStatusList(maxHeight: availableHeight),
         ],
       ),
     );

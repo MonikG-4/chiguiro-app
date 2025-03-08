@@ -6,15 +6,17 @@ import 'sync_service.dart';
 
 
 class ConnectivityService extends GetxService {
+  final SyncService _syncService;
 
   late final Connectivity _connectivity;
   final RxBool isConnected = false.obs;
-  final SyncService _syncService = Get.find();
   StreamSubscription<List<ConnectivityResult>>? _subscription;
   final Completer<void> _initCompleter = Completer<void>();
 
   final List<Function()> _onConnectedCallbacks = [];
   final List<Function()> _onDisconnectedCallbacks = [];
+
+  ConnectivityService(this._syncService);
 
   @override
   void onInit() {
@@ -43,7 +45,7 @@ class ConnectivityService extends GetxService {
 
     if (isConnected.value != newConnectionStatus) {
       isConnected.value = newConnectionStatus;
-      if (newConnectionStatus) {
+      if (newConnectionStatus && !_syncService.isSyncing.value) {
         await _syncService.syncPendingTasks();
       }
       _triggerCallbacks(newConnectionStatus);
