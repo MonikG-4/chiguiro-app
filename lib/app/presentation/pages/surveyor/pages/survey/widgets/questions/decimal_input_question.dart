@@ -22,21 +22,22 @@ class DecimalInputQuestion extends StatefulWidget {
 
 class _DecimalInputQuestionState extends State<DecimalInputQuestion> {
   late final TextEditingController _textController;
-  String? _lastValue;
 
   @override
   void initState() {
     super.initState();
-    final initialValue = widget.controller.responses[widget.question.id]?['value'];
-    _textController = TextEditingController(
-      text: initialValue != null && initialValue != 0 ? initialValue.toString() : '',
-    );
+    _textController = TextEditingController();
+    _updateControllerText();
     _textController.addListener(_onTextChanged);
   }
 
   @override
   void didUpdateWidget(covariant DecimalInputQuestion oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _updateControllerText();
+  }
+
+  void _updateControllerText() {
     final currentValue = widget.controller.responses[widget.question.id]?['value'];
     final currentText = currentValue != null && currentValue != 0.0
         ? currentValue.toString()
@@ -44,25 +45,23 @@ class _DecimalInputQuestionState extends State<DecimalInputQuestion> {
 
     if (_textController.text != currentText) {
       _textController.text = currentText;
+      _textController.selection = TextSelection.collapsed(offset: _textController.text.length);
     }
   }
 
   void _onTextChanged() {
     final value = _parseDecimal(_textController.text);
 
-    if (_lastValue == _textController.text) return;
-
     if (value != null && value != 0.0) {
       widget.controller.responses[widget.question.id] = {
         'question': widget.question.question,
         'type': widget.question.type,
-        'value': double.tryParse(value.toString()),
+        'value': value,
       };
     } else {
       widget.controller.responses.remove(widget.question.id);
     }
-
-    _lastValue = _textController.text;
+    widget.controller.responses.refresh();
   }
 
   double? _parseDecimal(String value) {
@@ -82,6 +81,8 @@ class _DecimalInputQuestionState extends State<DecimalInputQuestion> {
       },
       builder: (FormFieldState<String> state) {
         return Obx(() {
+          _updateControllerText();
+
           final hasValue = widget.controller.responses[widget.question.id]?['value'] != null;
 
           return Column(
@@ -115,5 +116,11 @@ class _DecimalInputQuestionState extends State<DecimalInputQuestion> {
         });
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
   }
 }

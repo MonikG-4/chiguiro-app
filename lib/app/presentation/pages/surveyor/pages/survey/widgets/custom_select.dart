@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'custom_input.dart';
 
 class CustomSelect extends StatelessWidget {
@@ -9,6 +8,7 @@ class CustomSelect extends StatelessWidget {
   final ValueChanged<String?> onSelected;
   final FormFieldState? state;
   final GlobalKey keyDropdown;
+  final double maxHeight;
 
   const CustomSelect({
     super.key,
@@ -18,6 +18,7 @@ class CustomSelect extends StatelessWidget {
     required this.onSelected,
     this.state,
     required this.keyDropdown,
+    this.maxHeight = 300.0,
   });
 
   @override
@@ -36,7 +37,7 @@ class CustomSelect extends StatelessWidget {
             offset.dx,
             offset.dy + renderBox.size.height,
             offset.dx + renderBox.size.width,
-            offset.dy + renderBox.size.height + 200,
+            offset.dy + renderBox.size.height + maxHeight,
           ),
           color: Colors.white,
           items: items.map((item) {
@@ -51,6 +52,7 @@ class CustomSelect extends StatelessWidget {
           constraints: BoxConstraints(
             minWidth: renderBox.size.width,
             maxWidth: renderBox.size.width,
+            maxHeight: maxHeight,
           ),
         );
 
@@ -65,7 +67,7 @@ class CustomSelect extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
-              value ?? 'Selecciona $label',
+              value ?? label,
               style: TextStyle(
                 color: value != null ? Colors.black : Colors.grey,
               ),

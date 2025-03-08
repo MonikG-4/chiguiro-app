@@ -108,6 +108,15 @@ class MyApp extends StatelessWidget {
         defaultTransition: Transition.fade,
         initialRoute: initialRoute,
         getPages: AppPages.routes,
+        locale: const Locale('es', 'ES'), // Español
+        supportedLocales: const [
+          Locale('es', 'ES'), // Español
+        ],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
       ),
     );
   }
