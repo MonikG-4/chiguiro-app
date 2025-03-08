@@ -18,6 +18,7 @@ class SelectInputQuestion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GlobalKey selectKey = GlobalKey(debugLabel: question.id);
+    final FocusNode focusNode = FocusNode();
 
     return FormField<String>(
       validator: controller.validatorMandatory(question),
@@ -28,25 +29,31 @@ class SelectInputQuestion extends StatelessWidget {
             Obx(() {
               final selectedValue = controller.responses[question.id]?['value'];
 
-              return CustomSelect(
-                value: selectedValue,
-                items: question.meta,
-                label: 'una opción',
-                keyDropdown: selectKey,
-                state: state,
-                onSelected: (value) {
-                  if (value == null) {
-                    controller.responses.remove(question.id);
-                  } else {
-                    controller.responses[question.id] = {
-                      'question': question.question,
-                      'type': question.type,
-                      'value': value,
-                    };
-                  }
-                  state.didChange(value);
-                  state.validate();
-                },
+              return Focus(
+                focusNode: focusNode,
+                child: CustomSelect(
+                  value: selectedValue,
+                  items: question.meta,
+                  label: 'una opción',
+                  keyDropdown: selectKey,
+                  state: state,
+                  onSelected: (value) {
+                    // Establecer un nuevo nodo de foco
+                    FocusScope.of(context).requestFocus(FocusNode());
+
+                    if (value == null) {
+                      controller.responses.remove(question.id);
+                    } else {
+                      controller.responses[question.id] = {
+                        'question': question.question,
+                        'type': question.type,
+                        'value': value,
+                      };
+                    }
+                    state.didChange(value);
+                    state.validate();
+                  },
+                ),
               );
             }),
             if (state.hasError)
