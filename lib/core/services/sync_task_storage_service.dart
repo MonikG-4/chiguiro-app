@@ -8,8 +8,10 @@ class SyncTaskStorageService {
     await _taskBox.put(task.id, task);
   }
 
-  List<SyncTaskModel> getPendingTasks() {
-    return _taskBox.values.where((task) => !task.isProcessing).toList();
+  List<SyncTaskModel> getPendingTasks(int userId) {
+    return _taskBox.values
+        .where((task) => !task.isProcessing && task.payload.pollsterId == userId)
+        .toList();
   }
 
   Future<void> markTaskProcessing(String taskId, bool processing) async {

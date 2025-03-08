@@ -19,7 +19,7 @@ class SyncTaskModelAdapter extends TypeAdapter<SyncTaskModel> {
     return SyncTaskModel(
       id: fields[0] as String,
       endpoint: fields[1] as String,
-      payload: (fields[2] as Map).cast<String, dynamic>(),
+      payload: fields[2] as SurveyEntryModel,
       isProcessing: fields[3] as bool,
       repositoryKey: fields[4] as String,
     );

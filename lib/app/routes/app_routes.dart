@@ -4,11 +4,11 @@ import '../../core/values/routes.dart';
 import '../bindings/auth_binding.dart';
 import '../bindings/dashboard_surveyor_binding.dart';
 import '../bindings/detail_survey_binding.dart';
-import '../bindings/survey_binding.dart';
 import '../presentation/pages/changePassword/change_password_page.dart';
 import '../presentation/pages/forgotPassword/forgot_password_page.dart';
 import '../presentation/pages/surveyor/dashboard_surveyor_page.dart';
 import '../presentation/pages/login/login_page.dart';
+import '../presentation/pages/surveyor/pages/pendingSurveys/pending_surveys_page.dart';
 import '../presentation/pages/surveyor/pages/survey/survey_page.dart';
 import '../presentation/pages/surveyor/pages/surveyDetail/survey_detail_page.dart';
 import '../presentation/pages/surveyor/pages/surveyWithoutResponses/survey_without_responses_page.dart';
@@ -21,8 +21,12 @@ class AppPages {
         middlewares: [SessionMiddleware()],
         binding: DashboardSurveyorBinding()),
     GetPage(
+        name: Routes.PENDING_SURVEYS,
+        page: () => PendingSurveysPage(),
+        middlewares: [SessionMiddleware()]),
+    GetPage(
       name: Routes.SURVEY_WITHOUT_RESPONSE,
-      page: () => const SurveyWithoutResponsesPage(),
+      page: () => SurveyWithoutResponsesPage(),
       middlewares: [SessionMiddleware()],
     ),
     GetPage(
@@ -33,8 +37,7 @@ class AppPages {
     GetPage(
         name: Routes.SURVEY,
         page: () => SurveyPage(),
-        middlewares: [SessionMiddleware()],
-        binding: SurveyBinding()),
+        middlewares: [SessionMiddleware()]),
     GetPage(
         name: Routes.LOGIN,
         page: () => const LoginPage(),
@@ -47,6 +50,6 @@ class AppPages {
         name: Routes.CHANGE_PASSWORD,
         page: () => const ChangePasswordPage(),
         middlewares: [SessionMiddleware()],
-        binding: AuthBinding()),
+        binding: DashboardSurveyorBinding()),
   ];
 }

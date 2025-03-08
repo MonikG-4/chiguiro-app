@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 
+import 'survey_entry_model.dart';
+
 part 'sync_task_model.g.dart';
 
 @HiveType(typeId: 0)
@@ -11,7 +13,7 @@ class SyncTaskModel extends HiveObject {
   String endpoint;
 
   @HiveField(2)
-  Map<String, dynamic> payload;
+  SurveyEntryModel payload;
 
   @HiveField(3)
   bool isProcessing;

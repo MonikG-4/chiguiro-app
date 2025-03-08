@@ -1,6 +1,7 @@
 class Routes {
   // Surveyor
   static const DASHBOARD_SURVEYOR = '/dashboard-surveyor';
+  static const PENDING_SURVEYS = '/pending-surveys';
   static const SURVEY_DETAIL = '/survey-detail';
   static const SURVEY_WITHOUT_RESPONSE = '/survey-without-response';
   static const SURVEY = '/survey';
