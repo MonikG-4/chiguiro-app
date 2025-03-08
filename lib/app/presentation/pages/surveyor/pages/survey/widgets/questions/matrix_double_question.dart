@@ -70,6 +70,7 @@ class MatrixDoubleQuestion extends StatelessWidget {
   String _mergeParts(String v1, String v2, String v3) {
     final firstPart = '$v1$v2'.trim();
     final secondPart = v3.trim();
-    return secondPart.isEmpty ? firstPart : '$firstPart.$secondPart';
+
+    return firstPart.isEmpty ? '0.$secondPart' : secondPart.isEmpty ? '$firstPart.0' : '$firstPart.$secondPart';
   }
 }

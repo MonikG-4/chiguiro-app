@@ -36,9 +36,6 @@ class SurveyRepository extends BaseRepository implements ISurveyRepository {
       onSuccess: (data) => data['entry'].isNotEmpty,
       dataKey: 'entry',
       unknownErrorMessage: 'No se logró enviar la encuesta, intente nuevamente',
-    ).then((either) => either.fold(
-            (failure) => const Right<Failure, bool>(false),
-            (success) => Right<Failure, bool>(success)
-    ));
+    );
   }
 }
