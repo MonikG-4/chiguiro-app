@@ -18,14 +18,12 @@ class LocationInputQuestion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey countryKey =
-    GlobalKey(debugLabel: '${question.id}_country');
-    final GlobalKey departmentKey =
-    GlobalKey(debugLabel: '${question.id}_department');
-    final GlobalKey municipalityKey =
-    GlobalKey(debugLabel: '${question.id}_municipality');
+    final GlobalKey departmentKey = GlobalKey(debugLabel: '${question.id}_department');
+    final GlobalKey municipalityKey = GlobalKey(debugLabel: '${question.id}_municipality');
 
     final countries = LocationData.getLocationData()['countries'] as List;
+    final colombia = countries.firstWhere((c) => c['name'] == 'Colombia');
+    final departments = (colombia['departments'] as List).map((d) => d['departamento'] as String).toList();
 
     return FormField<List<String>>(
       validator: controller.validatorMandatory(question),
@@ -35,42 +33,7 @@ class LocationInputQuestion extends StatelessWidget {
           children: [
             Obx(() {
               final selectedValues = getLocationValueList(question.id);
-              final countryValue = selectedValues.isNotEmpty ? selectedValues[0] : null;
-
-              return CustomSelect(
-                keyDropdown: countryKey,
-                value: countryValue,
-                items: countries.map((c) => c['name'] as String).toList(),
-                label: 'País',
-                state: state,
-                onSelected: (value) {
-                  if (value == null) {
-                    _clearAfterIndex(question.id, 0);
-                  } else {
-                    _setLocationValueAt(question.id, 0, value);
-                    _clearAfterIndex(question.id, 1);
-                  }
-                  _updateResponses(question, state);
-                },
-              );
-            }),
-            const SizedBox(height: 8),
-            Obx(() {
-              final selectedValues = getLocationValueList(question.id);
-              if (selectedValues.isEmpty) return const SizedBox.shrink();
-
-              final selectedCountry = selectedValues[0];
-              final countryData =
-              countries.firstWhereOrNull((c) => c['name'] == selectedCountry);
-
-              if (countryData == null) return const SizedBox.shrink();
-
-              final departments = (countryData['departments'] as List)
-                  .map((d) => d['departamento'] as String)
-                  .toList();
-
-              final departmentValue =
-              selectedValues.length > 1 ? selectedValues[1] : null;
+              final departmentValue = selectedValues.length > 1 ? selectedValues[1] : null;
 
               return CustomSelect(
                 keyDropdown: departmentKey,
@@ -94,23 +57,16 @@ class LocationInputQuestion extends StatelessWidget {
               final selectedValues = getLocationValueList(question.id);
               if (selectedValues.length < 2) return const SizedBox.shrink();
 
-              final selectedCountry = selectedValues[0];
               final selectedDepartment = selectedValues[1];
-
-              final countryData =
-              countries.firstWhereOrNull((c) => c['name'] == selectedCountry);
-
-              final departmentData = (countryData?['departments'] as List?)
-                  ?.firstWhereOrNull(
-                      (d) => d['departamento'] == selectedDepartment);
+              final departmentData = (colombia['departments'] as List?)
+                  ?.firstWhereOrNull((d) => d['departamento'] == selectedDepartment);
 
               if (departmentData == null) return const SizedBox.shrink();
 
-              final municipalities =
-              (departmentData['ciudades'] as List).cast<String>();
-
-              final municipalityValue =
-              selectedValues.length > 2 ? selectedValues[2] : null;
+              final municipalities = (departmentData['ciudades'] as List)
+                  .map<String>((city) => city is Map ? city['name'] as String : city)
+                  .toList();
+              final municipalityValue = selectedValues.length > 2 ? selectedValues[2] : null;
 
               return CustomSelect(
                 keyDropdown: municipalityKey,
@@ -142,21 +98,24 @@ class LocationInputQuestion extends StatelessWidget {
     );
   }
 
-  String? getLocationValue(String questionId, int index) =>
-      getLocationValueList(questionId).length > index
-          ? getLocationValueList(questionId)[index]
-          : null;
-
   List<String> getLocationValueList(String questionId) =>
       (controller.responses[questionId]?['value'] as List<String>?) ?? [];
 
   void _setLocationValueAt(String questionId, int index, String value) {
     final currentValues = getLocationValueList(questionId);
 
+    if (index == 1) {
+      if (currentValues.isEmpty) {
+        currentValues.add('Colombia');
+      }
+      if (currentValues.length > 2) {
+        currentValues.removeRange(2, currentValues.length);
+      }
+    }
+
     while (currentValues.length <= index) {
       currentValues.add('');
     }
-
     currentValues[index] = value;
 
     controller.responses[questionId] = {
@@ -173,7 +132,6 @@ class LocationInputQuestion extends StatelessWidget {
       controller.responses[questionId]?['value'] = currentValues.sublist(0, index + 1);
     }
   }
-
 
   void _updateResponses(SurveyQuestion question, FormFieldState<List<String>> state) {
     final values = getLocationValueList(question.id);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../../../core/values/app_colors.dart';
 import '../../../../../../domain/entities/survey_question.dart';
 import '../../../../../controllers/survey_controller.dart';
 import 'questions/date_input_question.dart';
@@ -24,7 +25,7 @@ class QuestionWidgetFactory {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _QuestionHeader(question: question),
+        _QuestionHeader(question: question, controller: controller),
         const SizedBox(height: 8),
         _QuestionBody(question: question, controller: controller),
       ],
@@ -34,29 +35,66 @@ class QuestionWidgetFactory {
 
 class _QuestionHeader extends StatelessWidget {
   final SurveyQuestion question;
+  final SurveyController controller;
 
-  const _QuestionHeader({required this.question});
+  const _QuestionHeader({required this.question, required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text.rich(
-          TextSpan(
-            children: [
-              if (question.mandatory)
-                const TextSpan(
-                  text: '* ',
-                  style: TextStyle(color: Colors.red),
+        Row(
+          children: [
+            Expanded(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    if (question.mandatory)
+                      const TextSpan(
+                        text: '* ',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    TextSpan(
+                      text: 'Pregunta ${question.sort}',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 12),
+                    ),
+                  ],
                 ),
-              TextSpan(
-                text: 'Pregunta ${question.sort}',
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
-            ],
-          ),
+            ),
+            if (question.type == 'Location')
+              InkWell(
+                onTap: () => controller.getLocation(question),
+                borderRadius: BorderRadius.circular(8), // Alineado con el Container
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.successBackground,
+                    border: Border.all(color: AppColors.successBorder),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(Icons.location_on, size: 16, color: AppColors.successText),
+                      SizedBox(width: 2),
+                      Text(
+                        'Ubicar',
+                        style: TextStyle(
+                          color: AppColors.successText,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+
+          ],
         ),
         Text(question.question,
             style: const TextStyle(fontWeight: FontWeight.w600)),
