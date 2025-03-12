@@ -10,9 +10,9 @@ import '../../widgets/profile_header.dart';
 import 'widgets/survey_detail_card.dart';
 
 class SurveyDetailPage extends GetView<DetailSurveyController> {
-  final String? codeHouse;
+  final String? homeCode;
 
-  SurveyDetailPage({super.key}) : codeHouse = Get.arguments['codeHouse'];
+  SurveyDetailPage({super.key}) : homeCode = Get.arguments['homeCode'];
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +95,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
                   Routes.SURVEY,
                   arguments: {
                     'survey': controller.survey.value,
-                    'codeHouse': codeHouse,
+                    'homeCode': homeCode,
                   },
                 )?.then((_) => controller.fetchData(clearData: true));
               }),

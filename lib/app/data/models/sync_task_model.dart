@@ -10,7 +10,7 @@ class SyncTaskModel extends HiveObject {
   String id;
 
   @HiveField(1)
-  String endpoint;
+  String surveyName;
 
   @HiveField(2)
   SurveyEntryModel payload;
@@ -23,7 +23,7 @@ class SyncTaskModel extends HiveObject {
 
   SyncTaskModel({
     required this.id,
-    required this.endpoint,
+    required this.surveyName,
     required this.payload,
     this.isProcessing = false,
     required this.repositoryKey,

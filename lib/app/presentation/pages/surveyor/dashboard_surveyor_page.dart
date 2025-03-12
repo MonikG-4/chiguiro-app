@@ -65,15 +65,38 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               color: AppColors.background,
               child: PrimaryButton(
-                onPressed: () {
-                  controller.showContent.value = false;
-                  homeCodeController.resetHomeCode();
-                },
+                onPressed: () => _showConfirmationDialog(context, homeCodeController),
                 isLoading: false,
                 child: 'Finalizar hogar',
               ),
             )
           : const SizedBox.shrink()),
+    );
+  }
+
+  void _showConfirmationDialog(BuildContext context, HomeCodeController homeCodeController) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirmación"),
+          content: const Text("¿Estás seguro de que deseas finalizar el hogar?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Cancelar"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                controller.showContent.value = false;
+                homeCodeController.resetHomeCode();
+              },
+              child: const Text("Aceptar"),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -112,7 +135,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
           HomeCodeWidget(
             onCodeGenerated: (homeCode) {
               controller.showContent.value = true;
-              controller.codeHouse.value = homeCode;
+              controller.homeCode.value = homeCode;
             },
           ),
           Obx(() => controller.showContent.value
@@ -216,7 +239,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         Routes.SURVEY_DETAIL,
         arguments: {
           'survey': survey,
-          'codeHouse': controller.codeHouse.value,
+          'homeCode': controller.homeCode.value,
         },
       )?.then((_) => controller.fetchSurveys());
     } else {
@@ -224,7 +247,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         Routes.SURVEY_WITHOUT_RESPONSE,
         arguments: {
           'survey': survey,
-          'codeHouse': controller.codeHouse.value,
+          'homeCode': controller.homeCode.value,
         },
       );
     }

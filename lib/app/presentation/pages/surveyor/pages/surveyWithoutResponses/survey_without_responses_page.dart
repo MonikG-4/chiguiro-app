@@ -9,11 +9,11 @@ import '../../../../widgets/primary_button.dart';
 
 class SurveyWithoutResponsesPage extends GetView {
   final Survey? survey;
-  final String? codeHouse;
+  final String? homeCode;
 
   SurveyWithoutResponsesPage({super.key})
       : survey = Get.arguments['survey'],
-        codeHouse = Get.arguments['codeHouse'];
+        homeCode = Get.arguments['homeCode'];
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class SurveyWithoutResponsesPage extends GetView {
                           Routes.SURVEY,
                           arguments: {
                             'survey': survey,
-                            'codeHouse': codeHouse,
+                            'homeCode': homeCode,
                           },
                         )),
                     isLoading: false,

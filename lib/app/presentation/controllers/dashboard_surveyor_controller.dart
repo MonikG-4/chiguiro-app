@@ -28,7 +28,7 @@ class DashboardSurveyorController extends GetxController {
   final surnameSurveyor = ''.obs;
 
   final showContent = false.obs;
-  final codeHouse = ''.obs;
+  final homeCode = ''.obs;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 

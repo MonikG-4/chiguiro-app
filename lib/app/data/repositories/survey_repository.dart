@@ -18,7 +18,7 @@ class SurveyRepository extends BaseRepository implements ISurveyRepository {
     try {
       final tasks = _syncTaskStorageService.getPendingTasks(surveyorId);
       final result = tasks.map((task) => {
-        'endpoint': task.endpoint,
+        'surveyName': task.surveyName,
         'id': task.id,
         'payload': task.payload,
       }).toList();

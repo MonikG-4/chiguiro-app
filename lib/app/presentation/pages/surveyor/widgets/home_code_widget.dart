@@ -80,7 +80,7 @@ class HomeCodeWidget extends StatelessWidget {
                   ),
                 ),
               )),
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
           Obx(
             () => controller.isCodeGenerated.value
                 ? const SizedBox()

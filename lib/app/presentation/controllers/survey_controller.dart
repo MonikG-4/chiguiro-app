@@ -30,7 +30,7 @@ class SurveyController extends GetxController {
   final surveyPending = <Map<String, dynamic>>[].obs;
   final survey = Rx<Survey?>(null);
   final sections = <Sections>[].obs;
-  final codeHouse = ''.obs;
+  final homeCode = RxnString();
   final responses = <String, dynamic>{}.obs;
   final hiddenQuestions = <String>{}.obs;
   final RxMap<int, Set<String>> jumperHiddenQuestions =
@@ -54,7 +54,7 @@ class SurveyController extends GetxController {
     _taskStorageService = Get.find<SyncTaskStorageService>();
 
     survey.value = Get.arguments?['survey'];
-    codeHouse.value = Get.arguments?['codeHouse'];
+    homeCode.value = Get.arguments?['homeCode'];
 
     if (survey.value != null) {
       sections.assignAll(survey.value!.sections);
@@ -174,7 +174,7 @@ class SurveyController extends GetxController {
               audioBase64,
             );
 
-      printEntryInput(entryInput.toJson());
+      //printEntryInput(entryInput.toJson());
 
       try {
         final result = await repository.saveSurveyResults(entryInput.toJson());
@@ -221,8 +221,8 @@ class SurveyController extends GetxController {
       SurveyEntryModel entryInput) async {
     await _taskStorageService.addTask(SyncTaskModel(
       id: entryInputPending?['id'] ?? generateUniqueId(),
-      endpoint:
-          entryInputPending?['endpoint'] ?? survey.value?.name ?? 'Desconocido',
+      surveyName:
+          entryInputPending?['surveyName'] ?? survey.value?.name ?? 'Desconocido',
       payload: entryInput,
       repositoryKey: 'surveyRepository',
     ));
@@ -235,6 +235,7 @@ class SurveyController extends GetxController {
   Future<SurveyEntryModel> _createSurveyEntry(
       int projectId, int pollsterId, String? audioBase64) async {
     return SurveyEntryModel(
+      homeCode: homeCode.value ?? '',
       projectId: projectId,
       pollsterId: pollsterId,
       audio: audioBase64,
