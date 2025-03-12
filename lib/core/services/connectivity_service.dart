@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 
 import 'sync_service.dart';
-
 
 class ConnectivityService extends GetxService {
   final SyncService _syncService;
@@ -28,20 +30,44 @@ class ConnectivityService extends GetxService {
 
   Future<void> _initConnectivity() async {
     final result = await _connectivity.checkConnectivity();
-    _updateConnectionStatus(result);
+    await _updateConnectionStatus(result);
     _initCompleter.complete();
   }
 
   Future<void> waitForInitialization() => _initCompleter.future;
 
   void _setupConnectivityStream() {
-    _subscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    _subscription = _connectivity.onConnectivityChanged.listen((result) async {
+      await _updateConnectionStatus(result);
+    });
+  }
+
+  Future<bool> hasInternetConnection() async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse('https://www.google.com'),
+          )
+          .timeout(const Duration(seconds: 5));
+
+      return response.statusCode == 200;
+    } on SocketException catch (_) {
+      return false;
+    } on TimeoutException catch (_) {
+      return false;
+    } on http.ClientException catch (_) {
+      return false;
+    } catch (e) {
+      return false;
+    }
   }
 
   Future<void> _updateConnectionStatus(dynamic result) async {
-    bool newConnectionStatus = result is ConnectivityResult
-        ? result != ConnectivityResult.none
-        : result.isNotEmpty && result.any((r) => r != ConnectivityResult.none);
+    bool newConnectionStatus = result != ConnectivityResult.none;
+
+    if (newConnectionStatus) {
+      newConnectionStatus = await hasInternetConnection();
+    }
 
     if (isConnected.value != newConnectionStatus) {
       isConnected.value = newConnectionStatus;
@@ -53,7 +79,8 @@ class ConnectivityService extends GetxService {
   }
 
   void _triggerCallbacks(bool isConnected) {
-    final callbacks = isConnected ? _onConnectedCallbacks : _onDisconnectedCallbacks;
+    final callbacks =
+        isConnected ? _onConnectedCallbacks : _onDisconnectedCallbacks;
     for (var callback in callbacks) {
       callback();
     }
@@ -81,4 +108,3 @@ class ConnectivityService extends GetxService {
     super.onClose();
   }
 }
-
