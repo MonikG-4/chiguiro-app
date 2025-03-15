@@ -47,7 +47,7 @@ class DashboardSurveyorController extends GetxController {
 
     await fetchSurveys();
 
-    _connectivityService.addCallback(true, fetchSurveys);
+    _connectivityService.addCallback(true, 2, fetchSurveys);
 
     MessageHandler.setupSnackbarListener(message);
   }
@@ -58,18 +58,15 @@ class DashboardSurveyorController extends GetxController {
     final result = await repository.changePassword(
         _storageService.authResponse!.id, password);
 
-    result.fold(
-            (failure) {
-          _showMessage('Error', _mapFailureToMessage(failure), 'error');
-        },
-            (isSuccess) {
-          if (isSuccess) {
-            Get.back();
-            _showMessage('Cambio de contraseña',
-                'Su contraseña fue actualizada correctamente', 'success');
-          }
-        }
-    );
+    result.fold((failure) {
+      _showMessage('Error', _mapFailureToMessage(failure), 'error');
+    }, (isSuccess) {
+      if (isSuccess) {
+        Get.back();
+        _showMessage('Cambio de contraseña',
+            'Su contraseña fue actualizada correctamente', 'success');
+      }
+    });
 
     isLoading.value = false;
   }
@@ -79,22 +76,24 @@ class DashboardSurveyorController extends GetxController {
     isLoading.value = true;
 
     try {
-      final surveysResult = await repository.fetchSurveys(_storageService.authResponse!.id);
-      final dataSurveyorResult = await repository.fetchDataSurveyor(_storageService.authResponse!.id);
+      final surveysResult =
+          await repository.fetchSurveys(_storageService.authResponse!.id);
+      final dataSurveyorResult =
+          await repository.fetchDataSurveyor(_storageService.authResponse!.id);
 
       final surveysList = surveysResult.fold(
-            (failure) {
+        (failure) {
           _showMessage('Error', _mapFailureToMessage(failure), 'error');
           return <Survey>[];
         },
-            (data) => data,
+        (data) => data,
       );
 
       dataSurveyorResult.fold(
-            (failure) {
+        (failure) {
           _showMessage('Error', _mapFailureToMessage(failure), 'error');
         },
-            (data) {
+        (data) {
           dataSurveyor.value = data;
         },
       );
@@ -119,13 +118,15 @@ class DashboardSurveyorController extends GetxController {
         await _locationService.requestLocationPermission();
         locationPermissionRequested = true;
         await Future.delayed(const Duration(seconds: 1));
-        continue;
       }
+
       if (survey.voiceRecorder == true && !audioPermissionRequested) {
         await _audioService.requestAudioPermission();
         audioPermissionRequested = true;
         await Future.delayed(const Duration(seconds: 1));
       }
+
+      if (locationPermissionRequested && audioPermissionRequested) break;
     }
   }
 

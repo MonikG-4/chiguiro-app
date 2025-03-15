@@ -58,6 +58,13 @@ class SurveyController extends GetxController {
 
     if (survey.value != null) {
       sections.assignAll(survey.value!.sections);
+
+      final bool permissionsGranted = await _checkRequiredPermissions();
+      if (!permissionsGranted) {
+        Get.back();
+        return;
+      }
+
       await _loadSurveyData();
     }
 
@@ -70,6 +77,36 @@ class SurveyController extends GetxController {
       _audioService.stopRecording();
     }
     super.onClose();
+  }
+
+  Future<bool> _checkRequiredPermissions() async {
+    bool permissionsGranted = true;
+
+    if (survey.value?.geoLocation == true) {
+      final hasLocationPermission = await _locationService.requestLocationPermission();
+      if (!hasLocationPermission) {
+        _showMessage(
+            'Permisos necesarios',
+            'Esta encuesta requiere acceso a tu ubicación. Por favor, otorga los permisos necesarios.',
+            'warning'
+        );
+        permissionsGranted = false;
+      }
+    }
+
+    if (survey.value?.voiceRecorder == true) {
+      final hasAudioPermission = await _audioService.requestAudioPermission();
+      if (!hasAudioPermission) {
+        _showMessage(
+            'Permisos necesarios',
+            'Esta encuesta requiere acceso a tu micrófono. Por favor, otorga los permisos necesarios.',
+            'warning'
+        );
+        permissionsGranted = false;
+      }
+    }
+
+    return permissionsGranted;
   }
 
   Future<void> getLocation(SurveyQuestion question) async {
@@ -112,7 +149,7 @@ class SurveyController extends GetxController {
       isVoiceRecorder.value = survey.value!.voiceRecorder;
 
       if (isVoiceRecorder.value) {
-        _audioService.startRecording();
+        await _audioService.startRecording();
       }
 
       if (isGeoLocation.value) {
