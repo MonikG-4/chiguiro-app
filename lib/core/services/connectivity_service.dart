@@ -1,24 +1,21 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 
-import 'sync_service.dart';
-
 class ConnectivityService extends GetxService {
-  final SyncService _syncService;
-
   late final Connectivity _connectivity;
   final RxBool isConnected = false.obs;
+  final RxBool isStableConnection = false.obs;
+
   StreamSubscription<List<ConnectivityResult>>? _subscription;
   final Completer<void> _initCompleter = Completer<void>();
 
-  final List<Function()> _onConnectedCallbacks = [];
-  final List<Function()> _onDisconnectedCallbacks = [];
+  final List<MapEntry<int, Function()>> _onConnectedCallbacks = [];
+  final List<MapEntry<int, Function()>> _onDisconnectedCallbacks = [];
 
-  ConnectivityService(this._syncService);
+  ConnectivityService();
 
   @override
   void onInit() {
@@ -38,8 +35,17 @@ class ConnectivityService extends GetxService {
 
   void _setupConnectivityStream() {
     _subscription = _connectivity.onConnectivityChanged.listen((result) async {
+      isStableConnection.value = false;
+      await Future.delayed(const Duration(seconds: 2));
+      isStableConnection.value = await hasInternetConnection();
       await _updateConnectionStatus(result);
     });
+  }
+
+  Future<void> waitForStableConnection() async {
+    while (!isStableConnection.value) {
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
   }
 
   Future<bool> hasInternetConnection() async {
@@ -71,34 +77,35 @@ class ConnectivityService extends GetxService {
 
     if (isConnected.value != newConnectionStatus) {
       isConnected.value = newConnectionStatus;
-      if (newConnectionStatus && !_syncService.isSyncing.value) {
-        await _syncService.syncPendingTasks();
+      if (newConnectionStatus) {
+        _triggerCallbacks(newConnectionStatus);
       }
-      _triggerCallbacks(newConnectionStatus);
     }
   }
 
-  void _triggerCallbacks(bool isConnected) {
+  Future<void> _triggerCallbacks(bool isConnected) async {
     final callbacks =
         isConnected ? _onConnectedCallbacks : _onDisconnectedCallbacks;
+    callbacks.sort((a, b) => a.key.compareTo(b.key));
     for (var callback in callbacks) {
-      callback();
+      await callback.value();
     }
   }
 
-  void addCallback(bool onConnected, Function() callback) {
+  void addCallback(bool onConnected, int priority, Function() callback) {
+    final entry = MapEntry(priority, callback);
     if (onConnected) {
-      _onConnectedCallbacks.add(callback);
+      _onConnectedCallbacks.add(entry);
     } else {
-      _onDisconnectedCallbacks.add(callback);
+      _onDisconnectedCallbacks.add(entry);
     }
   }
 
   void removeCallback(bool onConnected, Function() callback) {
     if (onConnected) {
-      _onConnectedCallbacks.remove(callback);
+      _onConnectedCallbacks.removeWhere((entry) => entry.value == callback);
     } else {
-      _onDisconnectedCallbacks.remove(callback);
+      _onDisconnectedCallbacks.removeWhere((entry) => entry.value == callback);
     }
   }
 

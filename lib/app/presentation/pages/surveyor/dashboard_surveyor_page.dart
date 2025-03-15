@@ -268,10 +268,11 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
               ListTile(
                 leading: const Icon(Icons.watch_later_outlined),
                 title: const Text('Encuestas pendientes'),
-                onTap: () {
-                  Get.toNamed(Routes.PENDING_SURVEYS, arguments: {
+                onTap: () async {
+                  await Get.toNamed(Routes.PENDING_SURVEYS, arguments: {
                     'surveyorId': controller.idSurveyor.value,
-                  });
+                  })?.then((_) => controller.fetchSurveys());
+
                 },
               ),
               ListTile(

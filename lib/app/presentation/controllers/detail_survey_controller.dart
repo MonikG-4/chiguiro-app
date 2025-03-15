@@ -45,7 +45,7 @@ class DetailSurveyController extends GetxController {
     MessageHandler.setupSnackbarListener(message);
 
     scrollController = ScrollController()..addListener(_scrollListener);
-    _connectivityService.addCallback(true, () => fetchData(clearData: true));
+    _connectivityService.addCallback(true, 2, () => fetchData(clearData: true));
   }
 
   void fetchData({bool clearData = false}) {
@@ -63,21 +63,17 @@ class DetailSurveyController extends GetxController {
   Future<void> fetchStatisticsSurvey() async {
     if (survey.value == null) return;
 
-    surveyStatistics.value = null;
     isLoadingStatisticSurvey.value = true;
 
     try {
       final result = await repository.fetchStatisticsSurvey(
           _storageService.authResponse!.id, survey.value!.id);
 
-      result.fold(
-              (failure) {
-            _showMessage('Error', _mapFailureToMessage(failure), 'error');
-          },
-              (data) {
-            surveyStatistics.value = data;
-          }
-      );
+      result.fold((failure) {
+        _showMessage('Error', _mapFailureToMessage(failure), 'error');
+      }, (data) {
+        surveyStatistics.value = data;
+      });
     } catch (e) {
       _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
@@ -86,28 +82,27 @@ class DetailSurveyController extends GetxController {
   }
 
   Future<void> fetchDetailSurvey() async {
-    if (isLoadingAnswerSurvey.value || isLastPage.value || survey.value == null) return;
-
-    isLoadingAnswerSurvey.value = true;
+    if (isLoadingAnswerSurvey.value || isLastPage.value || survey.value == null) {
+      return;
+    }
 
     try {
+      isLoadingAnswerSurvey.value = true;
+
       final result = await repository.fetchSurveyDetail(
           _storageService.authResponse!.id,
           survey.value!.id,
           currentPage.value,
           pageSize.value);
 
-      result.fold(
-              (failure) {},
-              (data) {
-            if (data.isEmpty) {
-              isLastPage.value = true;
-            } else {
-              detailSurvey.addAll(data);
-              currentPage.value++;
-            }
-          }
-      );
+      result.fold((failure) {}, (data) {
+        if (data.isEmpty) {
+          isLastPage.value = true;
+        } else {
+          detailSurvey.addAll(data);
+          currentPage.value++;
+        }
+      });
     } catch (e) {
       _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
@@ -117,7 +112,7 @@ class DetailSurveyController extends GetxController {
 
   void _scrollListener() {
     if (scrollController.position.pixels >=
-        scrollController.position.maxScrollExtent - 200 &&
+            scrollController.position.maxScrollExtent - 200 &&
         !isLoadingAnswerSurvey.value) {
       fetchDetailSurvey();
     }

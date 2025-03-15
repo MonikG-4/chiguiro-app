@@ -1,7 +1,7 @@
-import 'package:chiguiro_front_app/app/data/models/survey_statistics_model.dart';
 import 'package:hive/hive.dart';
 
 import '../../app/data/models/survey_model.dart';
+import '../../app/data/models/survey_statistics_model.dart';
 import '../../app/data/models/surveyor_model.dart';
 import '../../app/domain/entities/survey.dart';
 import '../../app/domain/entities/survey_statistics.dart';
@@ -14,9 +14,12 @@ class LocalStorageService {
 
   void saveSurveys(List<Survey> surveys) {
     final projectsModels =
-        surveys.map((s) => SurveyModel.fromEntity(s)).toList();
+    surveys.map((s) => SurveyModel.fromEntity(s)).toList();
     for (final project in projectsModels) {
-      _surveysBox.put(project.id, project);
+      final existingProject = _surveysBox.get(project.id);
+      if (existingProject == null || existingProject != project) {
+        _surveysBox.put(project.id, project);
+      }
     }
   }
 
@@ -24,9 +27,16 @@ class LocalStorageService {
     return _surveysBox.values.map((s) => s.toEntity()).toList();
   }
 
+  void clearSurveys() {
+    _surveysBox.clear();
+  }
+
   void saveStatisticsSurvey(int surveyId, SurveyStatistics surveyStatistics) {
-    _statisticsBox.put(
-        surveyId, SurveyStatisticsModel.fromEntity(surveyStatistics));
+    final existingStats = _statisticsBox.get(surveyId);
+    final newStats = SurveyStatisticsModel.fromEntity(surveyStatistics);
+    if (existingStats == null || existingStats != newStats) {
+      _statisticsBox.put(surveyId, newStats);
+    }
   }
 
   SurveyStatistics getStatisticsSurvey(int surveyId) {
@@ -34,16 +44,29 @@ class LocalStorageService {
         SurveyStatisticsModel.empty().toEntity();
   }
 
+  void clearStatistics() {
+    _statisticsBox.clear();
+  }
+
   void saveSurveyor(Surveyor surveyor) {
-    _surveyorBox.put('surveyor', SurveyorModel.fromEntity(surveyor));
+    final existingSurveyor = _surveyorBox.get('surveyor');
+    final newSurveyor = SurveyorModel.fromEntity(surveyor);
+    if (existingSurveyor == null || existingSurveyor != newSurveyor) {
+      _surveyorBox.put('surveyor', newSurveyor);
+    }
   }
 
   Surveyor? getSurveyor() {
     return _surveyorBox.get('surveyor')?.toEntity();
   }
 
+  void clearSurveyor() {
+    _surveyorBox.delete('surveyor');
+  }
+
   void clearAll() {
-    _surveysBox.clear();
-    _surveyorBox.clear();
+    clearSurveyor();
+    clearStatistics();
+    clearSurveys();
   }
 }
