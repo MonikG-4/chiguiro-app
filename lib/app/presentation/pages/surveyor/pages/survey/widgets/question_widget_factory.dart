@@ -12,6 +12,7 @@ import 'questions/integer_input_question.dart';
 import 'questions/matrix_double_question.dart';
 import 'questions/matrix_question.dart';
 import 'questions/matrix_time_question.dart';
+import 'questions/photo_input_question.dart';
 import 'questions/radio_input_question.dart';
 import 'questions/scale_question.dart';
 import 'questions/select_input_question.dart';
@@ -67,7 +68,7 @@ class _QuestionHeader extends StatelessWidget {
             if (question.type == 'Location')
               InkWell(
                 onTap: () => controller.getLocation(question),
-                borderRadius: BorderRadius.circular(8), // Alineado con el Container
+                borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -98,7 +99,7 @@ class _QuestionHeader extends StatelessWidget {
         ),
         Text(question.question,
             style: const TextStyle(fontWeight: FontWeight.w600)),
-        if (question.description != null) ...[
+        if (question.description != null && question.description!.isNotEmpty) ...[
           const SizedBox(height: 12),
           Text(question.description!),
         ],
@@ -116,6 +117,8 @@ class _QuestionBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     switch (question.type) {
+      case 'Photo':
+        return PhotoInputQuestion(question: question, controller: controller);
       case 'Date':
         return DateInputQuestion(question: question, controller: controller);
       case 'String':

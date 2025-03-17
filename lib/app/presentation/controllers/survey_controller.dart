@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
@@ -41,6 +44,7 @@ class SurveyController extends GetxController {
   final isGeoLocation = false.obs;
   final isVoiceRecorder = false.obs;
 
+  final Rx<File?> imageFile = Rx<File?>(null);
   final timeAnswerStart = DateTime.now().obs;
 
   SurveyController(this.repository);
@@ -83,13 +87,13 @@ class SurveyController extends GetxController {
     bool permissionsGranted = true;
 
     if (survey.value?.geoLocation == true) {
-      final hasLocationPermission = await _locationService.requestLocationPermission();
+      final hasLocationPermission =
+          await _locationService.requestLocationPermission();
       if (!hasLocationPermission) {
         _showMessage(
             'Permisos necesarios',
             'Esta encuesta requiere acceso a tu ubicación. Por favor, otorga los permisos necesarios.',
-            'warning'
-        );
+            'warning');
         permissionsGranted = false;
       }
     }
@@ -100,8 +104,7 @@ class SurveyController extends GetxController {
         _showMessage(
             'Permisos necesarios',
             'Esta encuesta requiere acceso a tu micrófono. Por favor, otorga los permisos necesarios.',
-            'warning'
-        );
+            'warning');
         permissionsGranted = false;
       }
     }
@@ -123,6 +126,36 @@ class SurveyController extends GetxController {
       'type': question.type,
       'value': ['Colombia', '${location['department']}', '${location['city']}'],
     };
+  }
+
+  Future<void> pickImage(SurveyQuestion question) async {
+    final status = await Permission.camera.request();
+
+    if (status.isGranted) {
+      final picker = ImagePicker();
+      final XFile? pickedFile =
+          await picker.pickImage(source: ImageSource.camera);
+
+      if (pickedFile != null) {
+        final File file = File(pickedFile.path);
+        imageFile.value = file;
+
+        final bytes = await file.readAsBytes();
+        final String base64Image = base64Encode(bytes);
+
+        responses[question.id] = {
+          'question': question.question,
+          'type': question.type,
+          'value': base64Image,
+        };
+        responses.refresh();
+      }
+    } else {
+      _showMessage(
+          'Camara',
+          'Es necesario permitir el acceso a la cámara para tomar fotos.',
+          'error');
+    }
   }
 
   Future<void> fetchSurveys(int surveyorId) async {
@@ -258,8 +291,9 @@ class SurveyController extends GetxController {
       SurveyEntryModel entryInput) async {
     await _taskStorageService.addTask(SyncTaskModel(
       id: entryInputPending?['id'] ?? generateUniqueId(),
-      surveyName:
-          entryInputPending?['surveyName'] ?? survey.value?.name ?? 'Desconocido',
+      surveyName: entryInputPending?['surveyName'] ??
+          survey.value?.name ??
+          'Desconocido',
       payload: entryInput,
       repositoryKey: 'surveyRepository',
     ));
@@ -301,6 +335,7 @@ class SurveyController extends GetxController {
         case 'Double':
         case 'Star':
         case 'Scale':
+        case 'Photo':
           answer['answer'] = responseValue.toString();
           break;
 
