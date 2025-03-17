@@ -8,4 +8,5 @@ abstract class IDashboardSurveyorRepository {
   Future<Either<Failure, bool>> changePassword(int pollsterId, String password);
   Future<Either<Failure, List<Survey>>> fetchSurveys(int surveyorId);
   Future<Either<Failure, Surveyor>> fetchDataSurveyor(int surveyorId);
+  Future<Either<Failure, List<Survey>>> fetchSurveyResponded(String homeCode, int surveyorId);
 }

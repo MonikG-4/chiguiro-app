@@ -8,6 +8,7 @@ import '../../domain/entities/survey.dart';
 import '../../domain/entities/surveyor.dart';
 import '../../domain/repositories/i_dashboard_surveyor_repository.dart';
 import '../models/survey_model.dart';
+import '../models/survey_responded_model.dart';
 import '../models/surveyor_model.dart';
 import '../providers/dashboard_surveyor_provider.dart';
 import 'base_repository.dart';
@@ -59,6 +60,20 @@ class DashboardSurveyorRepository extends BaseRepository
       },
       saveToCache: (surveyor) => _localStorageService.saveSurveyor(surveyor),
       unknownErrorMessage: 'No se encontraron datos del encuestador',
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<Survey>>> fetchSurveyResponded(String homeCode, int surveyorId) async{
+    return safeApiCallWithCache<List<Survey>>(
+      request: () => provider.fetchSurveyResponded(homeCode, surveyorId),
+      onSuccess: (data) => (data['pollsterStatisticHome'] as List)
+          .map((e) => SurveyRespondedModel.fromJson(e).toEntity())
+          .toList(),
+      dataKey: 'pollsterStatisticHome',
+      getCacheData: () async => _localStorageService.getSurveysResponded(),
+      saveToCache: (surveys) => _localStorageService.saveSurveysResponded(surveys),
+      unknownErrorMessage: 'No se encontraron encuestas respondidas',
     );
   }
 }

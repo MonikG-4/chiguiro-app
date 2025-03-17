@@ -1,6 +1,7 @@
 import 'package:hive/hive.dart';
 
 import '../../app/data/models/survey_model.dart';
+import '../../app/data/models/survey_responded_model.dart';
 import '../../app/data/models/survey_statistics_model.dart';
 import '../../app/data/models/surveyor_model.dart';
 import '../../app/domain/entities/survey.dart';
@@ -9,6 +10,7 @@ import '../../app/domain/entities/surveyor.dart';
 
 class LocalStorageService {
   final _surveysBox = Hive.box<SurveyModel>('surveysBox');
+  final _surveysRespondedBox = Hive.box<SurveyRespondedModel>('surveysRespondedBox');
   final _statisticsBox = Hive.box<SurveyStatisticsModel>('statisticsBox');
   final _surveyorBox = Hive.box<SurveyorModel>('surveyorBox');
 
@@ -29,6 +31,25 @@ class LocalStorageService {
 
   void clearSurveys() {
     _surveysBox.clear();
+  }
+
+  void saveSurveysResponded(List<Survey> surveys) {
+    final projectsModels =
+    surveys.map((s) => SurveyRespondedModel.fromEntity(s)).toList();
+    for (final project in projectsModels) {
+      final existingProject = _surveysRespondedBox.get(project.surveyId);
+      if (existingProject == null || existingProject != project) {
+        _surveysRespondedBox.put(project.surveyId, project);
+      }
+    }
+  }
+
+  List<Survey> getSurveysResponded() {
+    return _surveysRespondedBox.values.map((s) => s.toEntity()).toList();
+  }
+
+  void clearSurveysResponded() {
+    _surveysRespondedBox.clear();
   }
 
   void saveStatisticsSurvey(int surveyId, SurveyStatistics surveyStatistics) {
@@ -68,5 +89,6 @@ class LocalStorageService {
     clearSurveyor();
     clearStatistics();
     clearSurveys();
+    clearSurveysResponded();
   }
 }

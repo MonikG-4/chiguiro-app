@@ -2,6 +2,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../graphql/mutations/password_mutations.dart';
 import '../graphql/queries/survey_query.dart';
+import '../graphql/queries/survey_responded_query.dart';
 import '../graphql/queries/surveyor_query.dart';
 
 class DashboardSurveyorProvider {
@@ -52,6 +53,23 @@ class DashboardSurveyorProvider {
       );
 
       final result = await client.query(options);
+      return result;
+    } catch (e) {
+      throw Exception('Error en la conexión: $e');
+    }
+  }
+
+  Future<QueryResult> fetchSurveyResponded(String homeCode, int surveyorId){
+    try {
+      final QueryOptions options = QueryOptions(
+        document: gql(SurveyRespondedQuery.pollsterStatisticHome),
+        variables: {
+          'homeCode': homeCode,
+          'pollsterId': surveyorId,
+        },
+      );
+
+      final result = client.query(options);
       return result;
     } catch (e) {
       throw Exception('Error en la conexión: $e');

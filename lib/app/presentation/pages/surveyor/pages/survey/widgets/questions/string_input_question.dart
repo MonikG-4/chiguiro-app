@@ -62,13 +62,7 @@ class StringInputQuestionState extends State<StringInputQuestion> {
   Widget build(BuildContext context) {
     return FormField(
       key: ValueKey(widget.question.id),
-      validator: (value) {
-        final error = widget.controller.validatorMandatory(widget.question)(value);
-        if (error != null && _textController.text.isNotEmpty) {
-          return null;
-        }
-        return error;
-      },
+      validator: widget.controller.validatorMandatory(widget.question),
       builder: (FormFieldState<String> state) {
         return Obx(() {
           _updateControllerText();

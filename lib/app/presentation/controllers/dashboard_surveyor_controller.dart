@@ -19,10 +19,18 @@ class DashboardSurveyorController extends GetxController {
   late final AudioService _audioService;
   late final CacheStorageService _storageService;
 
+  // Variables reactivas para la UI
   final surveys = <Survey>[].obs;
+  final surveysResponded = <Survey>[].obs;
   final dataSurveyor = Rx<Surveyor?>(null);
 
-  final isLoading = false.obs;
+  // Estados de carga separados para cada operación
+  final isChangePasswordLoading = false.obs;
+  final isSurveysLoading = false.obs;
+  final isSurveysRespondedLoading = false.obs;
+  final isSurveyorDataLoading = false.obs;
+
+  // Datos del encuestador
   final idSurveyor = 0.obs;
   final nameSurveyor = ''.obs;
   final surnameSurveyor = ''.obs;
@@ -35,25 +43,35 @@ class DashboardSurveyorController extends GetxController {
   DashboardSurveyorController(this.repository);
 
   @override
-  Future<void> onInit() async {
+  void onInit() {
     super.onInit();
-    _locationService = Get.find<LocationService>();
-    _audioService = Get.find<AudioService>();
-    _storageService = Get.find<CacheStorageService>();
+    _initializeServices();
+    _initializeUserData();
 
-    nameSurveyor.value = _storageService.authResponse!.name;
-    surnameSurveyor.value = _storageService.authResponse!.surname;
-    idSurveyor.value = _storageService.authResponse!.id;
+    fetchSurveys();
+    fetchDataSurveyor();
 
-    await fetchSurveys();
-
-    _connectivityService.addCallback(true, 2, fetchSurveys);
-
+    _connectivityService.addCallback(true, 2, refreshAllData);
     MessageHandler.setupSnackbarListener(message);
   }
 
+  void _initializeServices() {
+    _locationService = Get.find<LocationService>();
+    _audioService = Get.find<AudioService>();
+    _storageService = Get.find<CacheStorageService>();
+  }
+
+  void _initializeUserData() {
+    final auth = _storageService.authResponse;
+    if (auth != null) {
+      nameSurveyor.value = auth.name;
+      surnameSurveyor.value = auth.surname;
+      idSurveyor.value = auth.id;
+    }
+  }
+
   Future<void> changePassword(String password) async {
-    isLoading.value = true;
+    isChangePasswordLoading.value = true;
 
     final result = await repository.changePassword(
         _storageService.authResponse!.id, password);
@@ -68,64 +86,110 @@ class DashboardSurveyorController extends GetxController {
       }
     });
 
-    isLoading.value = false;
+    isChangePasswordLoading.value = false;
   }
 
-  Future<void> fetchSurveys() async {
-    surveys.clear();
-    isLoading.value = true;
+  void refreshAllData() {
+    fetchSurveys();
+    fetchDataSurveyor();
+    fetchSurveysResponded(homeCode.value);
+  }
+
+  Future<void> fetchSurveysResponded(String homeCode) async {
+    if (isSurveysRespondedLoading.value) return;
+
+    isSurveysRespondedLoading.value = true;
 
     try {
-      final surveysResult =
-          await repository.fetchSurveys(_storageService.authResponse!.id);
-      final dataSurveyorResult =
-          await repository.fetchDataSurveyor(_storageService.authResponse!.id);
+      final userId = _storageService.authResponse!.id;
+      final surveysResult = await repository.fetchSurveyResponded(homeCode, userId);
 
-      final surveysList = surveysResult.fold(
-        (failure) {
-          _showMessage('Error', _mapFailureToMessage(failure), 'error');
-          return <Survey>[];
-        },
-        (data) => data,
-      );
-
-      dataSurveyorResult.fold(
-        (failure) {
+      surveysResult.fold(
+            (failure) {
           _showMessage('Error', _mapFailureToMessage(failure), 'error');
         },
-        (data) {
-          dataSurveyor.value = data;
+            (data) {
+          if (data.isNotEmpty) {
+            surveysResponded.value = data.where((survey) => survey.entriesCount > 0).toList()..sort((a, b) => a.id.compareTo(b.id));
+          } else {
+            surveysResponded.clear();
+          }
         },
       );
-
-      if (surveysList.isNotEmpty) {
-        surveys.value = surveysList..sort((a, b) => a.id.compareTo(b.id));
-        await _handlePermissions(surveys);
-      }
     } catch (e) {
       _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
-      isLoading.value = false;
+      isSurveysRespondedLoading.value = false;
+    }
+  }
+
+  Future<void> fetchSurveys() async {
+    if (isSurveysLoading.value) return;
+
+    isSurveysLoading.value = true;
+
+    try {
+      final userId = _storageService.authResponse!.id;
+      final surveysResult = await repository.fetchSurveys(userId);
+
+      surveysResult.fold(
+            (failure) {
+          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+        },
+            (data) {
+          if (data.isNotEmpty) {
+            surveys.value = data..sort((a, b) => a.id.compareTo(b.id));
+            _handlePermissions(data);
+          } else {
+            surveys.clear();
+          }
+        },
+      );
+    } catch (e) {
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
+    } finally {
+      isSurveysLoading.value = false;
+    }
+  }
+
+  Future<void> fetchDataSurveyor() async {
+    if (isSurveyorDataLoading.value) return;
+
+    isSurveyorDataLoading.value = true;
+
+    try {
+      final userId = _storageService.authResponse!.id;
+      final result = await repository.fetchDataSurveyor(userId);
+
+      result.fold(
+            (failure) {
+          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+        },
+            (data) {
+          dataSurveyor.value = data;
+        },
+      );
+    } catch (e) {
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
+    } finally {
+      isSurveyorDataLoading.value = false;
     }
   }
 
   Future<void> _handlePermissions(List<Survey> surveys) async {
     bool locationPermissionRequested = false;
     bool audioPermissionRequested = false;
-
     for (var survey in surveys) {
       if (survey.geoLocation == true && !locationPermissionRequested) {
         await _locationService.requestLocationPermission();
         locationPermissionRequested = true;
         await Future.delayed(const Duration(seconds: 1));
       }
-
       if (survey.voiceRecorder == true && !audioPermissionRequested) {
         await _audioService.requestAudioPermission();
         audioPermissionRequested = true;
         await Future.delayed(const Duration(seconds: 1));
       }
-
       if (locationPermissionRequested && audioPermissionRequested) break;
     }
   }

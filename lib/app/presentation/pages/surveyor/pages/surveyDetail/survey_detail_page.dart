@@ -126,7 +126,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
         titleSpacing: -15,
         title: ProfileHeader(
           name: controller.survey.value!.name,
-          role: controller.survey.value!.active ? 'En proceso' : 'Finalizada',
+          role: controller.survey.value!.active! ? 'En proceso' : 'Finalizada',
           avatarPath: logoUrl,
         ),
       ),

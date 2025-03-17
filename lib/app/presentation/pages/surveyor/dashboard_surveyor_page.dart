@@ -23,7 +23,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
       backgroundColor: AppColors.background,
       body: RefreshIndicator(
         onRefresh: () async {
-          await controller.fetchSurveys();
+          controller.refreshAllData();
         },
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -41,7 +41,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
                       right: 16.0,
                       child: Obx(() {
                         return SurveyorBalanceCard(
-                          isLoading: controller.isLoading.value,
+                          isLoading: controller.isSurveyorDataLoading.value,
                           responses:
                               controller.dataSurveyor.value?.totalEntries ?? 0,
                           lastSurveyDate:
@@ -136,10 +136,11 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
             onCodeGenerated: (homeCode) {
               controller.showContent.value = true;
               controller.homeCode.value = homeCode;
+              controller.fetchSurveysResponded(homeCode);
             },
           ),
           Obx(() => controller.showContent.value
-              ? controller.isLoading.value
+              ? controller.isSurveysLoading.value
                   ? const Padding(
                       padding: EdgeInsets.only(top: 20),
                       child: Center(child: CircularProgressIndicator()),
@@ -154,7 +155,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
                         _buildSectionHeader('Rango de edad encuestados'),
                         const SizedBox(height: 16),
                         _buildSurveysList(
-                          controller.surveys,
+                          controller.surveysResponded,
                           isHistorical: true,
                         )
                       ],
@@ -202,11 +203,8 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   }
 
   Widget _buildSurveysList(List<Survey> surveys, {bool isHistorical = false}) {
-    final filteredSurveys = isHistorical
-        ? surveys.where((survey) => !survey.active).toList()
-        : surveys.where((survey) => survey.active).toList();
 
-    if (filteredSurveys.isEmpty) {
+    if (surveys.isEmpty) {
       return const Card(
         color: Colors.white,
         child: Padding(
@@ -223,7 +221,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
     }
 
     return Column(
-      children: filteredSurveys.map((survey) {
+      children: surveys.map((survey) {
         return SurveyCard(
           survey: survey,
           isHistorical: isHistorical,
@@ -241,7 +239,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
           'survey': survey,
           'homeCode': controller.homeCode.value,
         },
-      )?.then((_) => controller.fetchSurveys());
+      )?.then((_) => controller.refreshAllData());
     } else {
       Get.toNamed(
         Routes.SURVEY_WITHOUT_RESPONSE,
@@ -271,7 +269,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
                 onTap: () async {
                   await Get.toNamed(Routes.PENDING_SURVEYS, arguments: {
                     'surveyorId': controller.idSurveyor.value,
-                  })?.then((_) => controller.fetchSurveys());
+                  })?.then((_) => controller.refreshAllData());
 
                 },
               ),

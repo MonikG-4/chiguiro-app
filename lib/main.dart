@@ -9,6 +9,7 @@ import 'app/data/models/jumper_model.dart';
 import 'app/data/models/sections_model.dart';
 import 'app/data/models/survey_model.dart';
 import 'app/data/models/survey_question_model.dart';
+import 'app/data/models/survey_responded_model.dart';
 import 'app/data/models/survey_statistics_model.dart';
 import 'app/data/models/surveyor_model.dart';
 import 'app/routes/app_routes.dart';
@@ -67,6 +68,7 @@ Future<void> _initHive() async {
   Hive.registerAdapter(SyncTaskModelAdapter());
   Hive.registerAdapter(SurveyorModelAdapter());
   Hive.registerAdapter(SurveyStatisticsModelAdapter());
+  Hive.registerAdapter(SurveyRespondedModelAdapter());
   Hive.registerAdapter(SurveyModelAdapter());
   Hive.registerAdapter(SurveyQuestionModelAdapter());
   Hive.registerAdapter(JumperModelAdapter());
@@ -76,6 +78,7 @@ Future<void> _initHive() async {
     Hive.openBox('authBox'),
     Hive.openBox<SyncTaskModel>('sync_tasks'),
     Hive.openBox<SurveyModel>('surveysBox'),
+    Hive.openBox<SurveyRespondedModel>('surveysRespondedBox'),
     Hive.openBox<SurveyStatisticsModel>('statisticsBox'),
     Hive.openBox<SurveyorModel>('surveyorBox'),
   ]);
