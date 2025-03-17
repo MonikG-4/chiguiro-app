@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/services/cache_storage_service.dart';
@@ -14,7 +13,6 @@ import '../../../core/services/location_service.dart';
 class DashboardSurveyorController extends GetxController {
   final IDashboardSurveyorRepository repository;
   final ConnectivityService _connectivityService = Get.find();
-
   late final LocationService _locationService;
   late final AudioService _audioService;
   late final CacheStorageService _storageService;
@@ -34,10 +32,8 @@ class DashboardSurveyorController extends GetxController {
   final idSurveyor = 0.obs;
   final nameSurveyor = ''.obs;
   final surnameSurveyor = ''.obs;
-
   final showContent = false.obs;
   final homeCode = ''.obs;
-
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
   DashboardSurveyorController(this.repository);

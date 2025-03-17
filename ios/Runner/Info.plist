@@ -45,5 +45,49 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
+
+    <!--  Permiso para notificaciones -->
+    <key>NSUserNotificationAlertStyle</key>
+    <string>alert</string>
+    <key>UNUserNotificationCenterDelegate</key>
+    <true/>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>remote-notification</string>
+    </array>
+
+    <!--  Permisos para ubicación -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Esta aplicación necesita acceso a tu ubicación mientras la usas.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Esta aplicación necesita acceso a tu ubicación en segundo plano.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Esta aplicación necesita acceso a tu ubicación para funciones avanzadas.</string>
+
+    <!--  Permisos para cámara -->
+    <key>NSCameraUsageDescription</key>
+    <string>Esta aplicación necesita acceso a la cámara para capturar fotos.</string>
+
+    <!--  Permisos para micrófono -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Esta aplicación necesita acceso al micrófono para grabar audio.</string>
+
+    <!--  Permisos para almacenamiento -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Esta aplicación necesita acceso a la galería para guardar imágenes.</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Esta aplicación necesita guardar imágenes en tu galería.</string>
+
+    <!--  Firebase Configuración -->
+    <key>FirebaseAppDelegateProxyEnabled</key>
+    <false/>
+
 </dict>
 </plist>

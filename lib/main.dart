@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'dart:convert';
+import 'package:geocoding/geocoding.dart';
 
 import 'app/bindings/app_binding.dart';
 import 'app/data/models/jumper_model.dart';
@@ -24,41 +27,87 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await _initHive();
-  await AppBinding().initAsyncDependencies();
+  final flutterLocalNotificationsPlugin = await initializeFlutterLocalNotifications();
+
+  await AppBinding().initAsyncDependencies(flutterLocalNotificationsPlugin);
 
   runApp(const MyApp());
 }
 
+Future<FlutterLocalNotificationsPlugin> initializeFlutterLocalNotifications() async {
+  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  const AndroidInitializationSettings initializationSettingsAndroid =
+  AndroidInitializationSettings('@mipmap/icon');
+
+  const DarwinInitializationSettings initializationSettingsApple =
+  DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestSoundPermission: true,
+      requestBadgePermission: true);
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsApple,
+      macOS: initializationSettingsApple);
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+  return flutterLocalNotificationsPlugin;
+}
+
 /// **Inicialización de dependencias y servicios**
 Future<void> _initDependencies() async {
-  final cacheStorageService = await Get.putAsync<CacheStorageService>(() async {
-    return CacheStorageService();
-  }, permanent: true);
-
-  await Get.putAsync<LocationService>(() async {
-    return LocationService();
-  }, permanent: true);
-
-  await Get.putAsync<AudioService>(() async {
-    return AudioService();
-  }, permanent: true);
-
-
-  Get.put(LocalStorageService(), permanent: true);
-  Get.put(SyncTaskStorageService());
-  Get.put(SessionController(cacheStorageService), permanent: true);
-  Get.put(NetworkRequestInterceptor(), permanent: true);
-
-  final syncService = Get.put(SyncService(), permanent: true);
-  syncService.onInit();
-
-  final connectivityService = Get.put(ConnectivityService(syncService), permanent: true);
-  await connectivityService.waitForInitialization();
-
-  SurveyBinding().dependencies();
-
-
-
+  // Future<void> enrichLocationData() async {
+  //   final locationData = LocationData.getLocationData();
+  //
+  //   for (var country in locationData['countries']) {
+  //     for (var department in country['departments']) {
+  //       final departmentName = "${department['departamento']}, ${country['name']}";
+  //       try {
+  //         var depLocation = await locationFromAddress(departmentName);
+  //         department['latitude'] = depLocation.first.latitude;
+  //         department['longitude'] = depLocation.first.longitude;
+  //       } catch (e) {
+  //         print('No se encontró ubicación para $departmentName');
+  //       }
+  //
+  //       // Convertimos la lista de ciudades a objetos con latitud y longitud
+  //       final updatedCities = <Map<String, dynamic>>[];
+  //
+  //       for (var city in department['ciudades']) {
+  //         final cityName = "$city, ${department['departamento']}, ${country['name']}";
+  //         try {
+  //           var cityLocation = await locationFromAddress(cityName);
+  //           updatedCities.add({
+  //             'name': city,
+  //             'latitude': cityLocation.first.latitude,
+  //             'longitude': cityLocation.first.longitude
+  //           });
+  //         } catch (e) {
+  //           print('No se encontró ubicación para $cityName');
+  //           updatedCities.add({'name': city}); // Mantiene el nombre aunque no tenga ubicación
+  //         }
+  //
+  //       }
+  //
+  //       department['ciudades'] = updatedCities;
+  //       print('Ubicación actualizada para $departmentName');
+  //     }
+  //   }
+  //
+  //   final jsonString = const JsonEncoder.withIndent('  ').convert(locationData);
+  //   const int chunkSize = 800;
+  //   for (int i = 0; i < jsonString.length; i += chunkSize) {
+  //     print(jsonString.substring(
+  //         i,
+  //         i + chunkSize > jsonString.length
+  //             ? jsonString.length
+  //             : i + chunkSize));
+  //   }
+  // }
+  //
+  // await enrichLocationData();
 }
 
 /// **Inicialización de Hive**
