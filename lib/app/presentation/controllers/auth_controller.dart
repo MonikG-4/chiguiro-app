@@ -15,7 +15,6 @@ class AuthController extends GetxController {
   Get.find<CacheStorageService>();
   final NotificationController _notificationController = Get.find();
 
-  final deviceToken = ''.obs;
   final isLoading = false.obs;
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
@@ -25,20 +24,19 @@ class AuthController extends GetxController {
   void onInit() {
     super.onInit();
     MessageHandler.setupSnackbarListener(message);
-    deviceToken.value = _notificationController.deviceToken.value!;
   }
 
   Future<void> login(String email, String password) async {
     isLoading.value = true;
 
-    final result = await repository.login(email, password, deviceToken.value);
+    final result = await repository.login(email, password, _notificationController.deviceToken.value!);
 
     result.fold(
             (failure) {
           _showMessage('Error', _mapFailureToMessage(failure), 'error');
         },
             (response) async {
-              print('Token enviado: ${deviceToken.value}');
+              print('Token enviado: ${_notificationController.deviceToken.value!}');
           await _cacheStorageService.saveAuthResponse(response);
           Get.find<SessionController>().updateAuthStatus();
 
