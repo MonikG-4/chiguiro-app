@@ -8,13 +8,14 @@ class AuthProvider {
 
   AuthProvider(this.client);
 
-  Future<QueryResult> login(String email, String password) async {
+  Future<QueryResult> login(String email, String password, String deviceToken) async {
     try {
       final QueryOptions options = QueryOptions(
         document: gql(LoginQuery.pollsterLogin),
         variables: {
           "email": email,
           "password": password,
+          "appCode": deviceToken
         },
       );
       final result = await client.query(options);

@@ -25,7 +25,6 @@ class NotificationController extends GetxController {
     await _requestPermissions();
 
     deviceToken.value = await _repository.getDeviceToken();
-    print('Token actual: ${deviceToken.value}');
 
     await _repository.configure(
       onForeground: _handleForegroundMessage,
