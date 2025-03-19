@@ -52,8 +52,7 @@ class DateInputQuestion extends StatelessWidget {
         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
       ];
 
-      final List<String> years = List.generate(201, (index) => (1900 + index).toString());
-
+final List<String> years = List.generate(DateTime.now().year - 1900 + 2, (index) => (1900 + index).toString());
       void updateDate() {
         int maxDays = getDaysInMonth(selectedYear.value, selectedMonth.value);
         if (selectedDay.value > maxDays) {

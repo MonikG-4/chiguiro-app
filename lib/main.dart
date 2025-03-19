@@ -1,11 +1,16 @@
+// import 'dart:io';
+// import 'package:flutter/services.dart' show rootBundle;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'dart:convert';
-import 'package:geocoding/geocoding.dart';
+// import 'dart:convert';
+// import 'package:geocoding/geocoding.dart';
+// import 'package:csv/csv.dart';
+// import 'package:diacritic/diacritic.dart';
 
 import 'app/bindings/app_binding.dart';
 import 'app/data/models/jumper_model.dart';
@@ -21,6 +26,7 @@ import 'core/network/graphql_config.dart';
 import 'app/data/models/survey_entry_model.dart';
 import 'app/data/models/sync_task_model.dart';
 import 'app/presentation/controllers/session_controller.dart';
+// import 'core/values/location.dart';
 import 'core/values/routes.dart';
 
 void main() async {
@@ -31,6 +37,7 @@ void main() async {
 
   await AppBinding().initAsyncDependencies(flutterLocalNotificationsPlugin);
 
+  // await enrichLocationData();
   runApp(const MyApp());
 }
 
@@ -56,59 +63,77 @@ Future<FlutterLocalNotificationsPlugin> initializeFlutterLocalNotifications() as
   return flutterLocalNotificationsPlugin;
 }
 
-/// **Inicialización de dependencias y servicios**
-Future<void> _initDependencies() async {
-  // Future<void> enrichLocationData() async {
-  //   final locationData = LocationData.getLocationData();
-  //
-  //   for (var country in locationData['countries']) {
-  //     for (var department in country['departments']) {
-  //       final departmentName = "${department['departamento']}, ${country['name']}";
-  //       try {
-  //         var depLocation = await locationFromAddress(departmentName);
-  //         department['latitude'] = depLocation.first.latitude;
-  //         department['longitude'] = depLocation.first.longitude;
-  //       } catch (e) {
-  //         print('No se encontró ubicación para $departmentName');
-  //       }
-  //
-  //       // Convertimos la lista de ciudades a objetos con latitud y longitud
-  //       final updatedCities = <Map<String, dynamic>>[];
-  //
-  //       for (var city in department['ciudades']) {
-  //         final cityName = "$city, ${department['departamento']}, ${country['name']}";
-  //         try {
-  //           var cityLocation = await locationFromAddress(cityName);
-  //           updatedCities.add({
-  //             'name': city,
-  //             'latitude': cityLocation.first.latitude,
-  //             'longitude': cityLocation.first.longitude
-  //           });
-  //         } catch (e) {
-  //           print('No se encontró ubicación para $cityName');
-  //           updatedCities.add({'name': city}); // Mantiene el nombre aunque no tenga ubicación
-  //         }
-  //
-  //       }
-  //
-  //       department['ciudades'] = updatedCities;
-  //       print('Ubicación actualizada para $departmentName');
-  //     }
-  //   }
-  //
-  //   final jsonString = const JsonEncoder.withIndent('  ').convert(locationData);
-  //   const int chunkSize = 800;
-  //   for (int i = 0; i < jsonString.length; i += chunkSize) {
-  //     print(jsonString.substring(
-  //         i,
-  //         i + chunkSize > jsonString.length
-  //             ? jsonString.length
-  //             : i + chunkSize));
-  //   }
-  // }
-  //
-  // await enrichLocationData();
-}
+// Future<void> enrichLocationData() async {
+//   final locationData = LocationData.getLocationData(); // JSON existente
+//
+//   try {
+//     // 📌 Leer el archivo CSV
+//     final csvString = await rootBundle.loadString('assets/dane.csv');
+//     final csvRows = const CsvToListConverter(fieldDelimiter: ';', eol: '\n')
+//         .convert(csvString);
+//
+//     // 📌 Mapas para búsqueda rápida
+//     final Map<String, String> departmentCodes = {};
+//     final Map<String, Map<String, String>> cityCodes = {};
+//
+//     for (var row in csvRows.skip(1)) {
+//       if (row.length >= 4) {
+//         String deptCode = row[0].toString();
+//         String cityCode = row[1].toString();
+//         String department = row[2].toString().trim();
+//         String city = row[3].toString().trim();
+//
+//         // 🔹 Normalizar nombres eliminando acentos y caracteres especiales
+//         String deptKey = normalizeText(department);
+//         String cityKey = normalizeText(city);
+//
+//         departmentCodes[deptKey] = deptCode;
+//         cityCodes.putIfAbsent(deptKey, () => {});
+//         cityCodes[deptKey]![cityKey] = cityCode;
+//       }
+//     }
+//
+//     // 📌 Recorrer el JSON y agregar los códigos sin modificar los nombres
+//     for (var country in locationData['countries']) {
+//       for (var department in country['departments']) {
+//         String departmentName = department['departamento'].toString().trim();
+//         String deptKey = normalizeText(departmentName);
+//
+//         if (departmentCodes.containsKey(deptKey)) {
+//           department['departamento'] =
+//           "${departmentCodes[deptKey]} - $departmentName";
+//         }
+//
+//         for (var city in department['ciudades']) {
+//           String cityName = city['name'].toString().trim();
+//           String cityKey = normalizeText(cityName);
+//
+//           if (cityCodes.containsKey(deptKey) &&
+//               cityCodes[deptKey]!.containsKey(cityKey)) {
+//             city['name'] = "${cityCodes[deptKey]![cityKey]} - $cityName";
+//           }
+//         }
+//       }
+//     }
+//
+// // 📌 Guardar el JSON actualizado
+//     final jsonString = const JsonEncoder.withIndent('  ').convert(locationData);
+//
+// // 🔹 debugPrint() con wrapWidth para imprimir absolutamentetodo
+//     debugPrint(jsonString, wrapWidth: 1024);
+//   } catch (e) {
+//     print("❌ Error al cargar el archivo CSV: $e");
+//   }
+// }
+//
+// String normalizeText(String text) {
+//   return removeDiacritics(text) // 📌 Elimina acentos (Ej: "Pacó" -> "Paco")
+//       .toLowerCase()
+//       .replaceAll(RegExp(r'\(.*?\)'), '') // 📌 Elimina contenido entre paréntesis
+//       .replaceAll(RegExp(r'[^a-z\s]'), '') // 📌 Elimina caracteres no alfabéticos
+//       .trim();
+// }
+
 
 /// **Inicialización de Hive**
 Future<void> _initHive() async {

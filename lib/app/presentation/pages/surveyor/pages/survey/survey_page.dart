@@ -241,7 +241,7 @@ class SurveyPage extends GetView<SurveyController> {
               controller.responses[question.id] = {
                 'question': question.question,
                 'type': question.type,
-                'value': ['Colombia', 'Meta', 'Villavicencio'],
+                'value': ['Colombia', '50 - Meta', '50001 - Villavicencio'],
               };
               break;
 

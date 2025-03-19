@@ -128,46 +128,96 @@ class _CustomPopupMenuRoute<T> extends PopupRoute<T> {
         child: Container(
           width: menuWidth,
           constraints: BoxConstraints(maxHeight: maxHeight, minHeight: 0),
-          child: ScrollConfiguration(
-            behavior:
-                ScrollConfiguration.of(context).copyWith(scrollbars: false),
-            child: ListView.builder(
-              controller: ScrollController(
-                initialScrollOffset:
-                    selectedIndex >= 0 ? selectedIndex * 48.0 : 0.0,
-              ),
-              padding: EdgeInsets.zero,
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                return InkWell(
-                  onTap: () {
-                    Navigator.of(context).pop(items[index]);
-                  },
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
-                    child: Text(
-                      items[index],
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: index == selectedIndex
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+          child: _PopupMenuList(
+            items: items,
+            selectedIndex: selectedIndex,
           ),
         ),
       ),
     );
   }
 }
+
+class _PopupMenuList extends StatefulWidget {
+  final List<String> items;
+  final int selectedIndex;
+
+  const _PopupMenuList({
+    required this.items,
+    required this.selectedIndex,
+  });
+
+  @override
+  State<_PopupMenuList> createState() => _PopupMenuListState();
+}
+
+class _PopupMenuListState extends State<_PopupMenuList> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToSelected();
+    });
+  }
+
+  void _scrollToSelected() {
+    if (widget.selectedIndex >= 0 && widget.selectedIndex < widget.items.length) {
+      double offset = (widget.selectedIndex * 44.0).clamp(
+        0.0,
+        _scrollController.position.maxScrollExtent,
+      );
+
+      _scrollController.animateTo(
+        offset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: EdgeInsets.zero,
+        itemCount: widget.items.length,
+        itemBuilder: (context, index) {
+          return InkWell(
+            onTap: () {
+              Navigator.of(context).pop(widget.items[index]);
+            },
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              child: Text(
+                widget.items[index],
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: index == widget.selectedIndex
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+}
+
 
 class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   final RelativeRect position;
