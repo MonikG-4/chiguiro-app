@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:426825613455:android:42e3f846bfd3cb9332b0fa",
+        "mobilesdk_app_id": "1:426825613455:android:5716457cc59799e632b0fa",
         "android_client_info": {
-          "package_name": "com.proyen.chiguiro.app"
+          "package_name": "com.proyen.chiguiroapp"
         }
       },
       "oauth_client": [],

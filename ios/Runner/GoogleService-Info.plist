@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.proyen.chiguiro.app</string>
+	<string>com.proyen.chiguiroapp</string>
 	<key>PROJECT_ID</key>
 	<string>com-proyen-chiguiro-app</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:426825613455:ios:0dbbadabb3b70aba32b0fa</string>
+	<string>1:426825613455:ios:79337154057e75b132b0fa</string>
 </dict>
 </plist>
