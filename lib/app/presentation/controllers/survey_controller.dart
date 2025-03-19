@@ -208,6 +208,33 @@ class SurveyController extends GetxController {
         return 'Esta pregunta es obligatoria';
       }
 
+      if ((question.type == 'Matrix') && responseValue is List) {
+        final subQuestions = question.meta;
+        for (var subQuestion in subQuestions) {
+          bool hasAnswered = responseValue.any((element) =>
+              element.containsKey(subQuestion) && element[subQuestion] != null);
+          if (!hasAnswered) {
+            return 'Por favor, selecciona una respuesta para todas las subpreguntas';
+          }
+        }
+      }
+
+      if ((question.type == 'MatrixTime' || question.type == 'MatrixDouble')) {
+        final subQuestions = question.meta2 ?? [];
+        final subQuestions2 = question.meta;
+
+        for (var subQuestion in subQuestions) {
+          for (var subQuestion2 in subQuestions2) {
+            bool hasAnswered = responseValue.any((element) =>
+                element['columna'] == subQuestion &&
+                element['fila'] == subQuestion2 &&
+                element['respuesta'] != null);
+            if (!hasAnswered) {
+              return 'Por favor, selecciona una respuesta para todas las intersecciones';
+            }
+          }
+        }
+      }
       return null;
     };
   }

@@ -26,14 +26,13 @@ class CustomSelect extends StatefulWidget {
 }
 
 class _CustomSelectState extends State<CustomSelect> {
-
   Future<void> _showDropdownMenu(BuildContext context) async {
     final RenderBox renderBox =
-    widget.keyDropdown.currentContext!.findRenderObject() as RenderBox;
+        widget.keyDropdown.currentContext!.findRenderObject() as RenderBox;
     final Offset offset = renderBox.localToGlobal(Offset.zero);
 
     final int selectedIndex =
-    widget.value != null ? widget.items.indexOf(widget.value!) : -1;
+        widget.value != null ? widget.items.indexOf(widget.value!) : -1;
 
     final selectedValue = await Navigator.of(context).push(
       _CustomPopupMenuRoute<String>(
@@ -59,27 +58,35 @@ class _CustomSelectState extends State<CustomSelect> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomInput(
-      key: widget.keyDropdown,
-      hasError: widget.state?.hasError ?? false,
-      hasValue: widget.value != null,
-      onTap: () => _showDropdownMenu(context),
-      children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              widget.value ?? widget.label,
-              style: TextStyle(
-                color: widget.value != null ? Colors.black : Colors.grey,
+    final FocusNode focusNode = FocusNode();
+
+    return Focus(
+      focusNode: focusNode,
+      child: CustomInput(
+        key: widget.keyDropdown,
+        hasError: widget.state?.hasError ?? false,
+        hasValue: widget.value != null,
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+          _showDropdownMenu(context);
+        },
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                widget.value ?? widget.label,
+                style: TextStyle(
+                  color: widget.value != null ? Colors.black : Colors.grey,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
             ),
           ),
-        ),
-        const Icon(Icons.arrow_drop_down),
-      ],
+          const Icon(Icons.arrow_drop_down),
+        ],
+      ),
     );
   }
 }
@@ -112,7 +119,8 @@ class _CustomPopupMenuRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
     return CustomSingleChildLayout(
       delegate: _PopupMenuRouteLayout(position),
       child: Material(
@@ -121,10 +129,12 @@ class _CustomPopupMenuRoute<T> extends PopupRoute<T> {
           width: menuWidth,
           constraints: BoxConstraints(maxHeight: maxHeight, minHeight: 0),
           child: ScrollConfiguration(
-            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            behavior:
+                ScrollConfiguration.of(context).copyWith(scrollbars: false),
             child: ListView.builder(
               controller: ScrollController(
-                initialScrollOffset: selectedIndex >= 0 ? selectedIndex * 48.0 : 0.0,
+                initialScrollOffset:
+                    selectedIndex >= 0 ? selectedIndex * 48.0 : 0.0,
               ),
               padding: EdgeInsets.zero,
               itemCount: items.length,
@@ -137,12 +147,15 @@ class _CustomPopupMenuRoute<T> extends PopupRoute<T> {
                   highlightColor: Colors.transparent,
                   child: Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
                     child: Text(
                       items[index],
                       style: TextStyle(
                         color: Colors.black,
-                        fontWeight: index == selectedIndex ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: index == selectedIndex
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                     ),
                   ),
@@ -154,7 +167,6 @@ class _CustomPopupMenuRoute<T> extends PopupRoute<T> {
       ),
     );
   }
-
 }
 
 class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
