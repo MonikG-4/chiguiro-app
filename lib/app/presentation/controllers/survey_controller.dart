@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../core/error/failures/failure.dart';
@@ -138,16 +139,20 @@ class SurveyController extends GetxController {
 
       if (pickedFile != null) {
         final File file = File(pickedFile.path);
-        imageFile.value = file;
 
-        final bytes = await file.readAsBytes();
-        final String base64Image = base64Encode(bytes);
-
-        responses[question.id] = {
-          'question': question.question,
-          'type': question.type,
-          'value': base64Image,
-        };
+        if (responses.containsKey(question.id)) {
+          if (responses[question.id]['value'] is List<File>) {
+            (responses[question.id]['value'] as List<File>).add(file);
+          } else {
+            responses[question.id]['value'] = <File>[file];
+          }
+        } else {
+          responses[question.id] = {
+            'question': question.question,
+            'type': question.type,
+            'value': <File>[file],
+          };
+        }
         responses.refresh();
       }
     } else {
@@ -235,6 +240,11 @@ class SurveyController extends GetxController {
           }
         }
       }
+
+      if (question.type == 'Photo' && responseValue == null) {
+        return 'Debe tomar al menos una foto';
+      }
+
       return null;
     };
   }
@@ -289,9 +299,13 @@ class SurveyController extends GetxController {
           _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
         });
       } catch (e) {
+        _showMessage(
+            'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
         await _saveSurveyLocally(entryInputPending, entryInput);
       }
     } catch (e) {
+      _showMessage(
+          'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
       await _saveSurveyLocally(
           entryInputPending, entryInputPending?['payload'] ?? {});
     } finally {
@@ -337,7 +351,7 @@ class SurveyController extends GetxController {
       projectId: projectId,
       pollsterId: pollsterId,
       audio: audioBase64,
-      answers: _buildAnswers(),
+      answers: await _buildAnswers(),
       latitude: _locationService.cachedPosition?.latitude.toString(),
       longitude: _locationService.cachedPosition?.longitude.toString(),
       startedOn: timeAnswerStart.value.toIso8601String(),
@@ -345,8 +359,10 @@ class SurveyController extends GetxController {
     );
   }
 
-  List<Map<String, dynamic>> _buildAnswers() {
-    return responses.entries.map((entry) {
+  Future<List<Map<String, dynamic>>> _buildAnswers() async {
+    List<Map<String, dynamic>> answers = [];
+
+    for (var entry in responses.entries) {
       final questionId = int.parse(entry.key);
       final responseValue = entry.value['value'];
       final questionType = entry.value['type'];
@@ -362,8 +378,17 @@ class SurveyController extends GetxController {
         case 'Double':
         case 'Star':
         case 'Scale':
-        case 'Photo':
           answer['answer'] = responseValue.toString();
+          break;
+
+        case 'Photo':
+          if (responseValue is List<File> && responseValue.isNotEmpty) {
+            final bytes = await responseValue.first.readAsBytes();
+            final String base64Image = base64Encode(bytes);
+            answer['answer'] = base64Image;
+          } else {
+            answer['answer'] = null;
+          }
           break;
 
         case 'Check':
@@ -384,8 +409,10 @@ class SurveyController extends GetxController {
           answer['matrixResults'] = _buildMatrixTimeResults(responseValue);
           break;
       }
-      return answer;
-    }).toList();
+      answers.add(answer);
+    }
+
+    return answers;
   }
 
   List<Map<String, String>> _buildMatrixResults(List<dynamic> responseValue) {
@@ -451,6 +478,21 @@ class SurveyController extends GetxController {
           final value = response?['value'] as List?;
           final subQuestions = question.meta.length;
           if (value == null || value.length < subQuestions) {
+            _showMessage('Error',
+                'Por favor responde todas las preguntas obligatorias', 'error');
+            return false;
+          }
+        }
+
+        if ((question.type == 'MatrixTime' ||
+                question.type == 'MatrixDouble') &&
+            question.mandatory) {
+          final value = response?['value'] as List;
+          final subQuestions = question.meta2 ?? [];
+          final subQuestions2 = question.meta;
+
+          if (value.length < subQuestions.length * subQuestions2.length ||
+              value.any((element) => element['respuesta'] == null)) {
             _showMessage('Error',
                 'Por favor responde todas las preguntas obligatorias', 'error');
             return false;
@@ -559,27 +601,26 @@ class SurveyController extends GetxController {
     };
   }
 
-  void printEntryInput(Map<String, dynamic> entryInput) {
-    final jsonString = const JsonEncoder.withIndent('  ').convert(
-      entryInput.map((key, value) {
-        if (value is DateTime) {
-          return MapEntry(key, value.toIso8601String());
-        } else if (value is Map) {
-          return MapEntry(
-              key, _convertDateTimeInMap(value.cast<String, dynamic>()));
-        } else if (value is List) {
-          return MapEntry(key, _convertDateTimeInList(value));
-        }
-        return MapEntry(key, value);
-      }),
-    );
-    const int chunkSize = 800;
-    for (int i = 0; i < jsonString.length; i += chunkSize) {
-      print(jsonString.substring(
-          i,
-          i + chunkSize > jsonString.length
-              ? jsonString.length
-              : i + chunkSize));
+  Future<void> printEntryInput(Map<String, dynamic> entryInput) async {
+    final jsonString = const JsonEncoder.withIndent('  ').convert(entryInput);
+
+    try {
+      // Obtiene el directorio de almacenamiento externo
+      Directory? directory = await getExternalStorageDirectory();
+      if (directory == null) {
+        print("No se pudo obtener el directorio externo.");
+        return;
+      }
+
+      final String filePath = '${directory.path}/debug_data.json';
+      final File jsonFile = File(filePath);
+      await jsonFile.writeAsString(jsonString);
+
+      print("\n=== ARCHIVO JSON GUARDADO ===");
+      print("Ruta: $filePath");
+    } catch (e) {
+      print("\n=== ERROR AL GUARDAR ARCHIVO ===");
+      print("Error: $e");
     }
   }
 
