@@ -1,2 +1,2 @@
-# chiguiro-app
+# Chigüiro 
 Es una aplicación para la recolección de encuestas, permitiendo a los encuestadores completar formularios con o sin conexión a internet. Ofrece diversos tipos de preguntas, como opción única, múltiple, escalas, matrices, numéricas, texto abierto, fecha y foto. Además, cuenta con lógica de saltos para adaptar las encuestas según las respuestas y permite capturar evidencia adicional mediante audio y geolocalización. Los datos se sincronizan automáticamente al recuperar la conexión.
