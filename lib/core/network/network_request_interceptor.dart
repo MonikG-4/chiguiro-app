@@ -19,13 +19,10 @@ class NetworkRequestInterceptor {
 
     if (result.hasException) {
       final errorMessages = result.exception?.graphqlErrors.map((e) => e.message).toList() ?? [];
-
       if (errorMessages.contains("No user Logged!")) {
         _sessionController.handleSessionExpired();
         throw Exception("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
       }
-
-      throw Exception(errorMessages.join('\n'));
     }
 
     return result;

@@ -255,93 +255,87 @@ class SurveyController extends GetxController {
     return '$timestamp$randomValue';
   }
 
-  Future<void> saveSurveyResults(
-      [int? pollsterId, Map<String, dynamic>? entryInputPending]) async {
+  Future<void> saveLocalSurvey(int surveyorId) async {
     isLoadingSendSurvey.value = true;
+    String? audioBase64 = '';
+
+    if (!validateAllQuestions()) {
+      isLoadingSendSurvey.value = false;
+      return;
+    }
+
+    if (isVoiceRecorder.value && _audioService.isRecording.value) {
+      audioBase64 = await _audioService.stopRecording();
+    }
+
+    final entryInput = await _createSurveyEntry(
+      survey.value!.id,
+      surveyorId,
+      audioBase64,
+    );
+
+    //printEntryInput(entryInput.toJson());
 
     try {
-      String? audioBase64 = '';
+      await _saveSurveyLocally(entryInput);
 
-      if (entryInputPending == null) {
-        if (!validateAllQuestions()) {
-          isLoadingSendSurvey.value = false;
-          return;
-        }
-
-        if (isVoiceRecorder.value && _audioService.isRecording.value) {
-          audioBase64 = await _audioService.stopRecording();
-        }
-      }
-
-      final entryInput = entryInputPending != null
-          ? entryInputPending['payload'] as SurveyEntryModel
-          : await _createSurveyEntry(
-              survey.value!.id,
-              pollsterId!,
-              audioBase64,
-            );
-
-      //printEntryInput(entryInput.toJson());
-
-      try {
-        final result = await repository.saveSurveyResults(entryInput.toJson());
-
-        result.fold((failure) {
-          throw Exception(_mapFailureToMessage(failure));
-        }, (data) {
-          if (!data) {
-            throw Exception('Fallo al enviar la encuesta al servidor');
-          }
-
-          if (entryInputPending != null) {
-            _taskStorageService.removeTask(entryInputPending['id']);
-          }
-          _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
-        });
-      } catch (e) {
-        _showMessage(
-            'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
-        await _saveSurveyLocally(entryInputPending, entryInput);
-      }
-    } catch (e) {
-      _showMessage(
-          'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
-      await _saveSurveyLocally(
-          entryInputPending, entryInputPending?['payload'] ?? {});
-    } finally {
-      isLoadingSendSurvey.value = false;
       if (survey.value?.entriesCount == 0) {
         Get.offNamedUntil(
           Routes.SURVEY_DETAIL,
-          (route) => route.settings.name != Routes.SURVEY,
+              (route) => route.settings.name != Routes.SURVEY,
           arguments: {'survey': survey.value},
         );
       } else {
         Get.until(
-          (route) =>
-              route.settings.name ==
-              (entryInputPending != null
-                  ? Routes.DASHBOARD_SURVEYOR
-                  : Routes.SURVEY_DETAIL),
+              (route) => route.settings.name == Routes.SURVEY_DETAIL,
         );
       }
+
+    } catch (e){
+      _showMessage('Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
+    } finally {
+      isLoadingSendSurvey.value = false;
     }
   }
 
-  Future<void> _saveSurveyLocally(Map<String, dynamic>? entryInputPending,
+  Future<void> saveSurveyResults(Map<String, dynamic> entryInputPending) async {
+    isLoadingSendSurvey.value = true;
+
+    try {
+      final result = await repository
+          .saveSurveyResults(entryInputPending['payload'].toJson());
+
+      result.fold((failure) {
+        throw Exception(_mapFailureToMessage(failure));
+      }, (data) {
+        if (!data) {
+          throw Exception('Fallo al enviar la encuesta al servidor');
+        }
+
+        _taskStorageService.removeTask(entryInputPending['id']);
+        _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
+        Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
+      });
+    } catch (e) {
+      _showMessage(
+          'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
+    } finally {
+      isLoadingSendSurvey.value = false;
+    }
+  }
+
+  Future<void> _saveSurveyLocally(
       SurveyEntryModel entryInput) async {
     await _taskStorageService.addTask(SyncTaskModel(
-      id: entryInputPending?['id'] ?? generateUniqueId(),
-      surveyName: entryInputPending?['surveyName'] ??
-          survey.value?.name ??
-          'Desconocido',
+      id: generateUniqueId(),
+      surveyName: survey.value?.name ?? 'Desconocido',
       payload: entryInput,
       repositoryKey: 'surveyRepository',
     ));
     _showMessage(
         'Encuesta',
-        'Encuesta guardada localmente, por favor verificar en ENCUESTAS PENDIENTES.',
-        'info');
+        'Encuesta guardada correctamente.',
+        'success');
   }
 
   Future<SurveyEntryModel> _createSurveyEntry(

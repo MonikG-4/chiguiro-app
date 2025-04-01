@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:dartz/dartz.dart';
@@ -24,6 +26,7 @@ abstract class BaseRepository {
     required T Function(Map<String, dynamic> data) onSuccess,
     required String dataKey,
     String offlineErrorMessage = 'Sin conexión a internet',
+    String errorSendingDataMessage = 'Error al enviar los datos',
     String unknownErrorMessage = 'Error desconocido',
   }) async {
 
@@ -35,9 +38,9 @@ abstract class BaseRepository {
       final result = await processRequest(request);
 
       if (result.hasException) {
-        final networkException = result.exception?.linkException;
-        if (networkException != null) {
-          return Left(NetworkFailure(offlineErrorMessage));
+        final networkException = result.exception!.linkException;
+        if (networkException is TimeoutException) {
+          return Left(NetworkFailure(errorSendingDataMessage));
         }
 
         final error = result.exception?.graphqlErrors.firstOrNull;

@@ -1,11 +1,11 @@
+import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
+import '../../../core/services/graphql_service.dart';
 import '../graphql/queries/detail_survey_query.dart';
 
 class DetailSurveyProvider {
-  final GraphQLClient client;
-
-  DetailSurveyProvider(this.client);
+  final GraphQLClient client = Get.find<GraphQLService>().client.value;
 
   Future<QueryResult> fetchStatisticsSurvey(int surveyorId, int surveyId) async {
     try {

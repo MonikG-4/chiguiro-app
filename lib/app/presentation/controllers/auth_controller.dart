@@ -55,7 +55,7 @@ class AuthController extends GetxController {
 
     result.fold(
             (failure) {
-          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+          _showMessage('Error', _mapFailureToMessage(failure).replaceAll("Exception:", ""), 'error');
         },
             (isSuccess) {
           if (isSuccess) {

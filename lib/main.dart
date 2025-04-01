@@ -21,6 +21,7 @@ import 'app/data/models/survey_responded_model.dart';
 import 'app/data/models/survey_statistics_model.dart';
 import 'app/data/models/surveyor_model.dart';
 import 'app/routes/app_routes.dart';
+import 'core/services/graphql_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/network/graphql_config.dart';
 import 'app/data/models/survey_entry_model.dart';
@@ -169,7 +170,7 @@ class MyApp extends StatelessWidget {
         : Routes.LOGIN;
 
     return GraphQLProvider(
-      client: GraphQLConfig.initializeClient(),
+      client: Get.find<GraphQLService>().client,
       child: GetMaterialApp(
         title: 'Chigüiro',
         theme: AppTheme.theme,

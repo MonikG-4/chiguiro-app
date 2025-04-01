@@ -270,14 +270,18 @@ class SurveyPage extends GetView<SurveyController> {
               break;
 
             case 'MatrixTime':
-              final matrixTimeResults = question.meta.map((meta) {
-                return {
-                  'fila': meta,
-                  'columna':
-                      question.meta2![Random().nextInt(question.meta2!.length)],
-                  'respuesta': Random().nextInt(24).toString()
-                };
-              }).toList();
+              final matrixTimeResults = <Map<String, String>>[];
+              if (question.meta2 != null) {
+                for (final row in question.meta) {
+                  for (final column in question.meta2!) {
+                    matrixTimeResults.add({
+                      'fila': row,
+                      'columna': column,
+                      'respuesta': Random().nextInt(24).toString(),
+                    });
+                  }
+                }
+              }
               controller.responses[question.id] = {
                 'question': question.question,
                 'type': question.type,
@@ -286,15 +290,18 @@ class SurveyPage extends GetView<SurveyController> {
               break;
 
             case 'MatrixDouble':
-              final matrixDoubleResults = question.meta.map((meta) {
-                return {
-                  'fila': meta,
-                  'columna':
-                      question.meta2![Random().nextInt(question.meta2!.length)],
-                  'respuesta': Random().nextInt(100).toString()
-                };
-              }).toList();
-
+              final matrixDoubleResults = <Map<String, String>>[];
+              if (question.meta2 != null) {
+                for (final row in question.meta) {
+                  for (final column in question.meta2!) {
+                    matrixDoubleResults.add({
+                      'fila': row,
+                      'columna': column,
+                      'respuesta': Random().nextDouble().toString(),
+                    });
+                  }
+                }
+              }
               controller.responses[question.id] = {
                 'question': question.question,
                 'type': question.type,
@@ -343,7 +350,7 @@ class SurveyPage extends GetView<SurveyController> {
 
   Future<void> _submitSurvey() async {
     if (_formKey.currentState!.validate() & controller.validateAllQuestions()) {
-      controller.saveSurveyResults(authResponse.id);
+      controller.saveLocalSurvey(authResponse.id);
     }
   }
 }

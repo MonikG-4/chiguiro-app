@@ -5,6 +5,7 @@ import '../../core/network/network_request_interceptor.dart';
 import '../../core/services/audio_service.dart';
 import '../../core/services/cache_storage_service.dart';
 import '../../core/services/connectivity_service.dart';
+import '../../core/services/graphql_service.dart';
 import '../../core/services/local_storage_service.dart';
 import '../../core/services/location_service.dart';
 import '../../core/services/sync_service.dart';
@@ -36,6 +37,7 @@ class AppBinding {
     SurveyBinding().dependencies();
     final syncService = Get.put(SyncService(), permanent: true);
     syncService.onInit();
+    await Get.putAsync(() => GraphQLService().init());
 
     // Notifications
     Get.put<INotificationRepository>(

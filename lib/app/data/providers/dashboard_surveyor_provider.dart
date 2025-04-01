@@ -1,14 +1,14 @@
+import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
+import '../../../core/services/graphql_service.dart';
 import '../graphql/mutations/password_mutations.dart';
 import '../graphql/queries/survey_query.dart';
 import '../graphql/queries/survey_responded_query.dart';
 import '../graphql/queries/surveyor_query.dart';
 
 class DashboardSurveyorProvider {
-  final GraphQLClient client;
-
-  DashboardSurveyorProvider(this.client);
+  final GraphQLClient client = Get.find<GraphQLService>().client.value;
 
   Future<QueryResult> changePassword(int pollsterId, String password) async {
     try {

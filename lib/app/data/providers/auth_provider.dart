@@ -1,12 +1,12 @@
+import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
+import '../../../core/services/graphql_service.dart';
 import '../graphql/mutations/password_mutations.dart';
 import '../graphql/queries/login_query.dart';
 
 class AuthProvider {
-  final GraphQLClient client;
-
-  AuthProvider(this.client);
+  final GraphQLClient client = Get.find<GraphQLService>().client.value;
 
   Future<QueryResult> login(String email, String password, String deviceToken) async {
     try {
