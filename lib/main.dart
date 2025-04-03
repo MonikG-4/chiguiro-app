@@ -171,6 +171,7 @@ class MyApp extends StatelessWidget {
     return GraphQLProvider(
       client: GraphQLConfig.initializeClient(),
       child: GetMaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Chigüiro',
         theme: AppTheme.theme,
         defaultTransition: Transition.fade,
