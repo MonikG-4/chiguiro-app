@@ -50,7 +50,7 @@
         <!-- Configuración del icono de notificación -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/icon" />
+            android:resource="@mipmap/ic_launcher" />
 
         <!-- Color de la notificación -->
         <meta-data
