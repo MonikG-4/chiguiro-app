@@ -20,7 +20,7 @@ class SurveyModelAdapter extends TypeAdapter<SurveyModel> {
       id: fields[0] as int,
       name: fields[1] as String,
       active: fields[2] as bool,
-      closeDate: fields[3] as DateTime?,
+      lastSurvey: fields[3] as DateTime?,
       entriesCount: fields[4] as int,
       logoUrl: fields[5] as String?,
       geoLocation: fields[6] as bool,
@@ -40,7 +40,7 @@ class SurveyModelAdapter extends TypeAdapter<SurveyModel> {
       ..writeByte(2)
       ..write(obj.active)
       ..writeByte(3)
-      ..write(obj.closeDate)
+      ..write(obj.lastSurvey)
       ..writeByte(4)
       ..write(obj.entriesCount)
       ..writeByte(5)

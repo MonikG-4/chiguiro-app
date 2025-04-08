@@ -5,39 +5,24 @@ import '../../app/data/models/sync_task_model.dart';
 import '../../app/domain/repositories/i_survey_repository.dart';
 import '../utils/message_handler.dart';
 import '../utils/snackbar_message_model.dart';
+import 'connectivity_service.dart';
 import 'sync_task_storage_service.dart';
 
 class SyncService extends GetxService {
   final SyncTaskStorageService _taskStorageService = Get.find();
   final CacheStorageService _authResponse = Get.find();
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
+  final ConnectivityService _connectivityService = Get.find();
 
   final RxBool isSyncing = false.obs;
-  final RxInt pendingTaskCount = 0.obs;
   final RxList<String> processingTasks = <String>[].obs;
-
-  final _syncStatusController = StreamController<String>.broadcast();
-  Stream<String> get syncStatus => _syncStatusController.stream;
 
   @override
   void onInit() {
     super.onInit();
     MessageHandler.setupSnackbarListener(message);
-    _updatePendingTaskCount();
-  }
-
-  @override
-  void onClose() {
-    _syncStatusController.close();
-    super.onClose();
-  }
-
-  void _updatePendingTaskCount() {
-    if (_authResponse.authResponse != null) {
-      pendingTaskCount.value = _taskStorageService
-          .getPendingTasks(_authResponse.authResponse!.id)
-          .length;
-    }
+    syncPendingTasks();
+    _connectivityService.addCallback(true, 1, () => syncPendingTasks());
   }
 
   Future<void> syncPendingTasks() async {
@@ -47,7 +32,6 @@ class SyncService extends GetxService {
 
     try {
       isSyncing.value = true;
-      _syncStatusController.add('Iniciando sincronización...');
 
       final userId = _authResponse.authResponse!.id;
       final pendingTasks = _taskStorageService.getPendingTasks(userId);
@@ -56,14 +40,12 @@ class SyncService extends GetxService {
       List<String> failedTaskIds = [];
 
       if (pendingTasks.isEmpty) {
-        _syncStatusController.add('No hay encuestas pendientes');
         return;
       }
 
       final results = await Future.wait(
           pendingTasks.map((task) async {
             final success = await _processTask(task);
-            _syncStatusController.add('Procesando: ${task.id} - ${success ? 'Éxito' : 'Fallido'}');
             return MapEntry(task.id, success);
           })
       );
@@ -75,8 +57,6 @@ class SyncService extends GetxService {
           failedTaskIds.add(result.key);
         }
       }
-
-      _updatePendingTaskCount();
 
       if (tasksProcessed > 0 && failedTaskIds.isEmpty) {
         _showMessage(
@@ -105,7 +85,6 @@ class SyncService extends GetxService {
       );
     } finally {
       isSyncing.value = false;
-      _syncStatusController.add('Sincronización finalizada');
     }
   }
 
@@ -126,7 +105,6 @@ class SyncService extends GetxService {
         return false;
       }
     } catch (e) {
-      print('Error procesando tarea ${task.id}: $e');
       await _taskStorageService.markTaskProcessing(task.id, false);
       processingTasks.remove(task.id);
       return false;
@@ -147,7 +125,6 @@ class SyncService extends GetxService {
           throw Exception('Repositorio no reconocido: ${task.repositoryKey}');
       }
     } catch (e) {
-      print('Error al enviar encuesta a través de GraphQL: $e');
       return false;
     }
   }

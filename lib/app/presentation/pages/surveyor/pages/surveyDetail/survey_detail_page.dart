@@ -7,10 +7,12 @@ import '../../../../widgets/connectivity_banner.dart';
 import '../../../../widgets/primary_button.dart';
 import 'widgets/response_status_list.dart';
 import '../../widgets/profile_header.dart';
-import '../../widgets/survey_detail_card.dart';
+import 'widgets/survey_detail_card.dart';
 
 class SurveyDetailPage extends GetView<DetailSurveyController> {
-  const SurveyDetailPage({super.key});
+  final String? homeCode;
+
+  SurveyDetailPage({super.key}) : homeCode = Get.arguments['homeCode'];
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +95,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
                   Routes.SURVEY,
                   arguments: {
                     'survey': controller.survey.value,
+                    'homeCode': homeCode,
                   },
                 )?.then((_) => controller.fetchData(clearData: true));
               }),
@@ -123,7 +126,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
         titleSpacing: -15,
         title: ProfileHeader(
           name: controller.survey.value!.name,
-          role: controller.survey.value!.active ? 'En proceso' : 'Finalizada',
+          role: controller.survey.value!.active! ? 'En proceso' : 'Finalizada',
           avatarPath: logoUrl,
         ),
       ),

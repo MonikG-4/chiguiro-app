@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/values/app_colors.dart';
+import '../../../../../../../core/values/app_colors.dart';
 
 class WeeklyBarChart extends StatelessWidget {
   final List<double> values;

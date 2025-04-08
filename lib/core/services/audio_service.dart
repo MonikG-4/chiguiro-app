@@ -28,23 +28,25 @@ class AudioService extends GetxService {
     MessageHandler.setupSnackbarListener(message);
   }
 
-  Future<void> requestAudioPermission() async {
-    final permissionGranted = await _checkPermission();
-    if (!permissionGranted) {
-      _showSettingsDialog('audio');
-    }
+  Future<bool> requestAudioPermission() async {
+    return await _checkPermission();
   }
 
   Future<bool> _checkPermission() async {
-    final status = await Permission.microphone.request();
+    PermissionStatus status = await Permission.microphone.status;
+
+    if (status.isDenied) {
+      status = await Permission.microphone.request();
+    }
 
     if (status.isPermanentlyDenied) {
       await _showSettingsDialog('micrófono');
-
       return false;
     }
-    return status.isGranted;
+
+    return status.isGranted || status.isLimited;
   }
+
 
   Future<void> _initializeRecorder() async {
     if (isInitialized.value) return;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/values/app_colors.dart';
-import 'custom_card.dart';
+import '../../../../../../../core/values/app_colors.dart';
+import '../../../widgets/custom_card.dart';
 import 'weekly_bar_chart.dart';
 
 class SurveyDetailCard extends StatefulWidget {

@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/services/cache_storage_service.dart';
@@ -14,80 +13,151 @@ import '../../../core/services/location_service.dart';
 class DashboardSurveyorController extends GetxController {
   final IDashboardSurveyorRepository repository;
   final ConnectivityService _connectivityService = Get.find();
-
   late final LocationService _locationService;
   late final AudioService _audioService;
   late final CacheStorageService _storageService;
 
+  // Variables reactivas para la UI
   final surveys = <Survey>[].obs;
+  final surveysResponded = <Survey>[].obs;
   final dataSurveyor = Rx<Surveyor?>(null);
 
-  final isLoading = false.obs;
+  // Estados de carga separados para cada operación
+  final isChangePasswordLoading = false.obs;
+  final isSurveysLoading = false.obs;
+  final isSurveysRespondedLoading = false.obs;
+  final isSurveyorDataLoading = false.obs;
+
+  // Datos del encuestador
   final idSurveyor = 0.obs;
   final nameSurveyor = ''.obs;
   final surnameSurveyor = ''.obs;
-
+  final showContent = false.obs;
+  final homeCode = ''.obs;
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
   DashboardSurveyorController(this.repository);
 
   @override
-  Future<void> onInit() async {
+  void onInit() {
     super.onInit();
-    _locationService = Get.find<LocationService>();
-    _audioService = Get.find<AudioService>();
-    _storageService = Get.find<CacheStorageService>();
+    _initializeServices();
+    _initializeUserData();
 
-    nameSurveyor.value = _storageService.authResponse!.name;
-    surnameSurveyor.value = _storageService.authResponse!.surname;
-    idSurveyor.value = _storageService.authResponse!.id;
+    fetchSurveys();
+    fetchDataSurveyor();
 
-    await fetchSurveys();
-
-    _connectivityService.addCallback(true, fetchSurveys);
-
+    _connectivityService.addCallback(true, 2, refreshAllData);
     MessageHandler.setupSnackbarListener(message);
   }
 
+  void _initializeServices() {
+    _locationService = Get.find<LocationService>();
+    _audioService = Get.find<AudioService>();
+    _storageService = Get.find<CacheStorageService>();
+  }
+
+  void _initializeUserData() {
+    final auth = _storageService.authResponse;
+    if (auth != null) {
+      nameSurveyor.value = auth.name;
+      surnameSurveyor.value = auth.surname;
+      idSurveyor.value = auth.id;
+    }
+  }
+
   Future<void> changePassword(String password) async {
-    isLoading.value = true;
+    isChangePasswordLoading.value = true;
 
     final result = await repository.changePassword(
         _storageService.authResponse!.id, password);
 
-    result.fold(
+    result.fold((failure) {
+      _showMessage('Error', _mapFailureToMessage(failure), 'error');
+    }, (isSuccess) {
+      if (isSuccess) {
+        Get.back();
+        _showMessage('Cambio de contraseña',
+            'Su contraseña fue actualizada correctamente', 'success');
+      }
+    });
+
+    isChangePasswordLoading.value = false;
+  }
+
+  void refreshAllData() {
+    fetchSurveys();
+    fetchDataSurveyor();
+    fetchSurveysResponded(homeCode.value);
+  }
+
+  Future<void> fetchSurveysResponded(String homeCode) async {
+    if (isSurveysRespondedLoading.value) return;
+
+    isSurveysRespondedLoading.value = true;
+
+    try {
+      final userId = _storageService.authResponse!.id;
+      final surveysResult = await repository.fetchSurveyResponded(homeCode, userId);
+
+      surveysResult.fold(
             (failure) {
           _showMessage('Error', _mapFailureToMessage(failure), 'error');
         },
-            (isSuccess) {
-          if (isSuccess) {
-            Get.back();
-            _showMessage('Cambio de contraseña',
-                'Su contraseña fue actualizada correctamente', 'success');
+            (data) {
+          if (data.isNotEmpty) {
+            surveysResponded.value = data.where((survey) => survey.entriesCount > 0).toList()..sort((a, b) => a.id.compareTo(b.id));
+          } else {
+            surveysResponded.clear();
           }
-        }
-    );
-
-    isLoading.value = false;
+        },
+      );
+    } catch (e) {
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
+    } finally {
+      isSurveysRespondedLoading.value = false;
+    }
   }
 
   Future<void> fetchSurveys() async {
-    surveys.clear();
-    isLoading.value = true;
+    if (isSurveysLoading.value) return;
+
+    isSurveysLoading.value = true;
 
     try {
-      final surveysResult = await repository.fetchSurveys(_storageService.authResponse!.id);
-      final dataSurveyorResult = await repository.fetchDataSurveyor(_storageService.authResponse!.id);
+      final userId = _storageService.authResponse!.id;
+      final surveysResult = await repository.fetchSurveys(userId);
 
-      final surveysList = surveysResult.fold(
+      surveysResult.fold(
             (failure) {
           _showMessage('Error', _mapFailureToMessage(failure), 'error');
-          return <Survey>[];
         },
-            (data) => data,
+            (data) {
+          if (data.isNotEmpty) {
+            surveys.value = data..sort((a, b) => a.id.compareTo(b.id));
+            _handlePermissions(data);
+          } else {
+            surveys.clear();
+          }
+        },
       );
+    } catch (e) {
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
+    } finally {
+      isSurveysLoading.value = false;
+    }
+  }
 
-      dataSurveyorResult.fold(
+  Future<void> fetchDataSurveyor() async {
+    if (isSurveyorDataLoading.value) return;
+
+    isSurveyorDataLoading.value = true;
+
+    try {
+      final userId = _storageService.authResponse!.id;
+      final result = await repository.fetchDataSurveyor(userId);
+
+      result.fold(
             (failure) {
           _showMessage('Error', _mapFailureToMessage(failure), 'error');
         },
@@ -95,34 +165,28 @@ class DashboardSurveyorController extends GetxController {
           dataSurveyor.value = data;
         },
       );
-
-      if (surveysList.isNotEmpty) {
-        surveys.value = surveysList..sort((a, b) => a.id.compareTo(b.id));
-        await _handlePermissions(surveys);
-      }
     } catch (e) {
       _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
-      isLoading.value = false;
+      isSurveyorDataLoading.value = false;
     }
   }
 
   Future<void> _handlePermissions(List<Survey> surveys) async {
     bool locationPermissionRequested = false;
     bool audioPermissionRequested = false;
-
     for (var survey in surveys) {
       if (survey.geoLocation == true && !locationPermissionRequested) {
         await _locationService.requestLocationPermission();
         locationPermissionRequested = true;
         await Future.delayed(const Duration(seconds: 1));
-        continue;
       }
       if (survey.voiceRecorder == true && !audioPermissionRequested) {
         await _audioService.requestAudioPermission();
         audioPermissionRequested = true;
         await Future.delayed(const Duration(seconds: 1));
       }
+      if (locationPermissionRequested && audioPermissionRequested) break;
     }
   }
 

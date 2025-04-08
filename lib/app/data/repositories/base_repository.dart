@@ -26,7 +26,8 @@ abstract class BaseRepository {
     String offlineErrorMessage = 'Sin conexión a internet',
     String unknownErrorMessage = 'Error desconocido',
   }) async {
-    if (!_connectivityService.isConnected.value) {
+
+    if (!_connectivityService.isStableConnection.value) {
       return Left(NetworkFailure(offlineErrorMessage));
     }
 
@@ -34,6 +35,11 @@ abstract class BaseRepository {
       final result = await processRequest(request);
 
       if (result.hasException) {
+        final networkException = result.exception?.linkException;
+        if (networkException != null) {
+          return Left(NetworkFailure(offlineErrorMessage));
+        }
+
         final error = result.exception?.graphqlErrors.firstOrNull;
         return Left(ServerFailure(error?.message ?? unknownErrorMessage));
       }

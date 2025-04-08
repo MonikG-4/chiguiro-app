@@ -3,8 +3,8 @@ import 'sections.dart';
 class Survey {
   final int id;
   final String name;
-  final bool active;
-  final DateTime? closeDate;
+  final bool? active;
+  final DateTime? lastSurvey;
   final int entriesCount;
   final String? logoUrl;
   final bool geoLocation;
@@ -14,8 +14,8 @@ class Survey {
   Survey({
     required this.id,
     required this.name,
-    required this.active,
-    this.closeDate,
+    this.active,
+    this.lastSurvey,
     required this.entriesCount,
     this.logoUrl,
     required this.geoLocation,

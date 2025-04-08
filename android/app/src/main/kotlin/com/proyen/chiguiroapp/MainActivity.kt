@@ -1,4 +1,4 @@
-package com.example.chiguiro_front_app
+package com.proyen.chiguiroapp
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -22,8 +22,8 @@ class LocationService extends GetxService {
     cachedPosition = await _getCurrentLocation(forceRefresh: true);
   }
 
-  Future<void> requestLocationPermission() async {
-    await _checkPermission();
+  Future<bool> requestLocationPermission() async {
+    return await _checkPermission();
 
   }
 
@@ -41,7 +41,6 @@ class LocationService extends GetxService {
 
     if (permission == LocationPermission.deniedForever) {
       await _showSettingsDialog('ubicación');
-      return false;
     }
 
     hasPermission.value = permission == LocationPermission.whileInUse || permission == LocationPermission.always;

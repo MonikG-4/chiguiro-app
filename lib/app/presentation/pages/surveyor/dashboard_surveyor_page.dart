@@ -3,10 +3,12 @@ import 'package:get/get.dart';
 import '../../../../core/values/routes.dart';
 import '../../controllers/session_controller.dart';
 import '../../widgets/connectivity_banner.dart';
+import '../../widgets/primary_button.dart';
 import './widgets/survey_card.dart';
 import '../../../../core/values/app_colors.dart';
 import '../../../domain/entities/survey.dart';
 import '../../controllers/dashboard_surveyor_controller.dart';
+import 'widgets/home_code_widget.dart';
 import 'widgets/surveyor_balance_card.dart';
 import 'widgets/profile_header.dart';
 
@@ -15,54 +17,86 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
 
   @override
   Widget build(BuildContext context) {
+    final homeCodeController = Get.find<HomeCodeController>();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: RefreshIndicator(
         onRefresh: () async {
-          await controller.fetchSurveys();
+          controller.refreshAllData();
         },
-        child: Stack(
-          children: [
-            CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 178.0,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        _buildAppBarBackground(context),
-                        Positioned(
-                          top: 130.0,
-                          left: 16.0,
-                          right: 16.0,
-                          child: Obx(() {
-                            return SurveyorBalanceCard(
-                              isLoading: controller.isLoading.value,
-                              responses:
-                                  controller.dataSurveyor.value?.totalEntries ??
-                                      0,
-                              lastSurveyDate:
-                                  controller.dataSurveyor.value?.lastSurvey ??
-                                      '-- -- -- --',
-                            );
-                          }),
-                        ),
-                      ],
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 178.0,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _buildAppBarBackground(context),
+                    Positioned(
+                      top: 130.0,
+                      left: 16.0,
+                      right: 16.0,
+                      child: Obx(() {
+                        return SurveyorBalanceCard(
+                          isLoading: controller.isSurveyorDataLoading.value,
+                          responses:
+                              controller.dataSurveyor.value?.totalEntries ?? 0,
+                          lastSurveyDate:
+                              controller.dataSurveyor.value?.lastSurvey ??
+                                  '-- -- -- --',
+                        );
+                      }),
                     ),
-                  ),
+                  ],
                 ),
-                SliverToBoxAdapter(
-                  child: Obx(() {
-                    return _buildContent();
-                  }),
-                ),
-              ],
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: _buildContent(),
             ),
           ],
         ),
       ),
+      bottomNavigationBar: Obx(() => controller.showContent.value
+          ? Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: AppColors.background,
+              child: PrimaryButton(
+                onPressed: () => _showConfirmationDialog(context, homeCodeController),
+                isLoading: false,
+                child: 'Finalizar hogar',
+              ),
+            )
+          : const SizedBox.shrink()),
+    );
+  }
+
+  void _showConfirmationDialog(BuildContext context, HomeCodeController homeCodeController) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirmación"),
+          content: const Text("¿Estás seguro de que deseas finalizar el hogar?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Cancelar"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                controller.showContent.value = false;
+                homeCodeController.resetHomeCode();
+              },
+              child: const Text("Aceptar"),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -89,32 +123,46 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   Widget _buildContent() {
     return Container(
       padding: const EdgeInsets.only(
-        top: 80,
+        top: 70,
         left: 16,
         right: 16,
         bottom: 16,
       ),
-      child: (controller.isLoading.value)
-          ? const Padding(
-              padding: EdgeInsets.only(top: 40),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ConnectivityBanner(),
-                _buildSectionHeader('Mis encuestas', isActive: true),
-                const SizedBox(height: 16),
-                _buildSurveysList(controller.surveys),
-                const SizedBox(height: 24),
-                _buildSectionHeader('Historial de encuestas'),
-                const SizedBox(height: 16),
-                _buildSurveysList(
-                  controller.surveys,
-                  isHistorical: true,
-                ),
-              ],
-            ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ConnectivityBanner(),
+          HomeCodeWidget(
+            onCodeGenerated: (homeCode) {
+              controller.showContent.value = true;
+              controller.homeCode.value = homeCode;
+              controller.fetchSurveysResponded(homeCode);
+            },
+          ),
+          Obx(() => controller.showContent.value
+              ? controller.isSurveysLoading.value
+                  ? const Padding(
+                      padding: EdgeInsets.only(top: 20),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader('Rango de edad'),
+                        const SizedBox(height: 16),
+                        _buildSurveysList(controller.surveys),
+                        const SizedBox(height: 24),
+                        _buildSectionHeader('Rango de edad encuestados'),
+                        const SizedBox(height: 16),
+                        _buildSurveysList(
+                          controller.surveysResponded,
+                          isHistorical: true,
+                        )
+                      ],
+                    )
+              : const SizedBox()),
+        ],
+      ),
     );
   }
 
@@ -155,11 +203,8 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   }
 
   Widget _buildSurveysList(List<Survey> surveys, {bool isHistorical = false}) {
-    final filteredSurveys = isHistorical
-        ? surveys.where((survey) => !survey.active).toList()
-        : surveys.where((survey) => survey.active).toList();
 
-    if (filteredSurveys.isEmpty) {
+    if (surveys.isEmpty) {
       return const Card(
         color: Colors.white,
         child: Padding(
@@ -176,7 +221,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
     }
 
     return Column(
-      children: filteredSurveys.map((survey) {
+      children: surveys.map((survey) {
         return SurveyCard(
           survey: survey,
           isHistorical: isHistorical,
@@ -192,13 +237,15 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         Routes.SURVEY_DETAIL,
         arguments: {
           'survey': survey,
+          'homeCode': controller.homeCode.value,
         },
-      )?.then((_) => controller.fetchSurveys());
+      )?.then((_) => controller.refreshAllData());
     } else {
       Get.toNamed(
         Routes.SURVEY_WITHOUT_RESPONSE,
         arguments: {
           'survey': survey,
+          'homeCode': controller.homeCode.value,
         },
       );
     }
@@ -219,10 +266,11 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
               ListTile(
                 leading: const Icon(Icons.watch_later_outlined),
                 title: const Text('Encuestas pendientes'),
-                onTap: () {
-                  Get.toNamed(Routes.PENDING_SURVEYS, arguments: {
+                onTap: () async {
+                  await Get.toNamed(Routes.PENDING_SURVEYS, arguments: {
                     'surveyorId': controller.idSurveyor.value,
-                  });
+                  })?.then((_) => controller.refreshAllData());
+
                 },
               ),
               ListTile(

@@ -9,7 +9,8 @@ class MatrixTable extends StatelessWidget {
   final SurveyController controller;
   final List<String> rows;
   final List<String> columns;
-  final Widget Function(String row, String col, String initialValue, Function(String) onChanged) cellBuilder;
+  final Widget Function(String row, String col, String initialValue,
+      Function(String) onChanged) cellBuilder;
 
   const MatrixTable({
     super.key,
@@ -25,18 +26,21 @@ class MatrixTable extends StatelessWidget {
     return FormField<List<Map<String, String>>>(
       validator: controller.validatorMandatory(question),
       builder: (state) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Obx(() {
-              final responses = controller.responses[question.id]?['value'] as List<Map<String, String>>? ?? [];
+              final responses = controller.responses[question.id]?['value']
+                      as List<Map<String, String>>? ??
+                  [];
 
               return Table(
                 defaultColumnWidth: const IntrinsicColumnWidth(),
                 children: [
                   _buildHeader(),
-                  ...rows.map((row) => _buildRow(row, columns, responses, state)),
+                  ...rows
+                      .map((row) => _buildRow(row, columns, responses, state)),
                 ],
               );
             }),
@@ -57,47 +61,71 @@ class MatrixTable extends StatelessWidget {
   TableRow _buildHeader() {
     return TableRow(
       children: [
-        const SizedBox(width: 120),
+        const SizedBox(width: 90),
         ...columns.map((col) => Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(col, style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-        )),
+              padding: const EdgeInsets.all(8.0),
+              child: Text(col,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center),
+            )),
       ],
     );
   }
 
-  TableRow _buildRow(String row, List<String> columns, List<Map<String, String>> responses, FormFieldState<List<Map<String, String>>> state) {
+  TableRow _buildRow(
+      String row,
+      List<String> columns,
+      List<Map<String, String>> responses,
+      FormFieldState<List<Map<String, String>>> state) {
     return TableRow(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(row, style: const TextStyle(fontWeight: FontWeight.bold)),
+        TableCell(
+          verticalAlignment: TableCellVerticalAlignment.middle,
+          child: Text(
+            row,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
         ),
+
         ...columns.map((col) {
           final initialValue = _getCellValue(responses, col, row);
-
-          return Padding(
-            key: Key('cell_${question.id}_${row}_${col}_$initialValue'),
-            padding: const EdgeInsets.all(4.0),
-            child: cellBuilder(row, col, initialValue, (value) => _updateResponse(col, row, value, state)),
+          return TableCell(
+            verticalAlignment: TableCellVerticalAlignment.middle,
+            child: Padding(
+              key: Key('cell${question.id}_${row}_${col}_$initialValue'),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: cellBuilder(row, col, initialValue,
+                  (value) => _updateResponse(col, row, value, state)),
+            ),
           );
         }),
       ],
     );
   }
 
-  String _getCellValue(List<Map<String, String>> responses, String col, String row) {
+  String _getCellValue(
+      List<Map<String, String>> responses, String col, String row) {
     return responses.firstWhere(
           (e) => e['columna'] == col && e['fila'] == row,
-      orElse: () => {},
-    )['respuesta'] ?? '';
+          orElse: () => {},
+        )['respuesta'] ??
+        '';
   }
 
-  void _updateResponse(String col, String row, String value, FormFieldState<List<Map<String, String>>> state) {
-    final currentResponse = controller.responses[question.id] ?? {'question': question.question, 'type': question.type, 'value': <Map<String, String>>[]};
-    final List<Map<String, String>> currentValues = List<Map<String, String>>.from(currentResponse['value']);
+  void _updateResponse(String col, String row, String value,
+      FormFieldState<List<Map<String, String>>> state) {
+    final currentResponse = controller.responses[question.id] ??
+        {
+          'question': question.question,
+          'type': question.type,
+          'value': <Map<String, String>>[]
+        };
+    final List<Map<String, String>> currentValues =
+        List<Map<String, String>>.from(currentResponse['value']);
 
-    final index = currentValues.indexWhere((e) => e['columna'] == col && e['fila'] == row);
+    final index = currentValues
+        .indexWhere((e) => e['columna'] == col && e['fila'] == row);
 
     if (index != -1) {
       if (value.isEmpty) {
@@ -113,7 +141,8 @@ class MatrixTable extends StatelessWidget {
       controller.responses.remove(question.id);
     } else {
       currentResponse['value'] = currentValues;
-      controller.responses[question.id] = Map<String, dynamic>.from(currentResponse);
+      controller.responses[question.id] =
+          Map<String, dynamic>.from(currentResponse);
     }
 
     state.didChange(currentValues);

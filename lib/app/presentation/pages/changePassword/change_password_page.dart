@@ -60,14 +60,14 @@ class ChangePasswordPage extends GetView<DashboardSurveyorController> {
           children: [
             const SizedBox(height: 40),
             PrimaryButton(
-              onPressed: controller.isLoading.value
+              onPressed: controller.isChangePasswordLoading.value
                   ? null
                   : () {
                 if (formKey.currentState!.validate()) {
                   controller.changePassword(passwordController.text);
                 }
               },
-              isLoading: controller.isLoading.value,
+              isLoading: controller.isChangePasswordLoading.value,
               child: 'Actualizar contraseña',
             ),
           ],

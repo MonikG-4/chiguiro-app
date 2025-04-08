@@ -16,7 +16,7 @@ class SurveyModel extends HiveObject {
   final bool active;
 
   @HiveField(3)
-  final DateTime? closeDate;
+  final DateTime? lastSurvey;
 
   @HiveField(4)
   final int entriesCount;
@@ -37,7 +37,7 @@ class SurveyModel extends HiveObject {
     required this.id,
     required this.name,
     required this.active,
-    this.closeDate,
+    this.lastSurvey,
     required this.entriesCount,
     this.logoUrl,
     required this.geoLocation,
@@ -50,7 +50,7 @@ class SurveyModel extends HiveObject {
       id: int.tryParse(json['id'].toString()) ?? 0,
       name: json['name'] ?? '',
       active: json['active'] ?? false,
-      closeDate: json['closeDate'] != null ? DateTime.parse(json['closeDate']) : null,
+      lastSurvey: json['lastSurvey'] != null ? DateTime.parse(json['lastSurvey']) : null,
       entriesCount: json['entriesCount'] ?? 0,
       logoUrl: json['logoUrl'],
       geoLocation: json['geoLocation'] ?? false,
@@ -65,8 +65,8 @@ class SurveyModel extends HiveObject {
     return SurveyModel(
       id: survey.id,
       name: survey.name,
-      active: survey.active,
-      closeDate: survey.closeDate,
+      active: survey.active!,
+      lastSurvey: survey.lastSurvey,
       entriesCount: survey.entriesCount,
       logoUrl: survey.logoUrl,
       geoLocation: survey.geoLocation,
@@ -80,7 +80,7 @@ class SurveyModel extends HiveObject {
       id: id,
       name: name,
       active: active,
-      closeDate: closeDate,
+      lastSurvey: lastSurvey,
       entriesCount: entriesCount,
       logoUrl: logoUrl,
       geoLocation: geoLocation,

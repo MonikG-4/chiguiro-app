@@ -39,17 +39,7 @@ class MatrixQuestionState extends State<MatrixQuestion> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FormField<List<Map<String, String>>>(
-          validator: (value) {
-            final responses = controller.responses[question.id]?['value'] ?? [];
-            for (var subQuestion in subQuestions) {
-              bool hasAnswered = responses.any((element) =>
-              element.containsKey(subQuestion) && element[subQuestion] != null);
-              if (!hasAnswered) {
-                return 'Por favor, selecciona una respuesta para todas las subpreguntas';
-              }
-            }
-            return null;
-          },
+          validator: controller.validatorMandatory(question),
           builder: (FormFieldState<List<Map<String, String>>> state) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,

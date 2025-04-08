@@ -17,38 +17,41 @@ class SurveyEntryModelAdapter extends TypeAdapter<SurveyEntryModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return SurveyEntryModel(
-      projectId: fields[0] as int,
-      pollsterId: fields[1] as int,
-      audio: fields[2] as String?,
-      answers: (fields[3] as List)
+      homeCode: fields[0] as String,
+      projectId: fields[1] as int,
+      pollsterId: fields[2] as int,
+      audio: fields[3] as String?,
+      answers: (fields[4] as List)
           .map((dynamic e) => (e as Map).cast<String, dynamic>())
           .toList(),
-      latitude: fields[4] as String?,
-      longitude: fields[5] as String?,
-      startedOn: fields[6] as String,
-      finishedOn: fields[7] as String,
+      latitude: fields[5] as String?,
+      longitude: fields[6] as String?,
+      startedOn: fields[7] as String,
+      finishedOn: fields[8] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, SurveyEntryModel obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
-      ..write(obj.projectId)
+      ..write(obj.homeCode)
       ..writeByte(1)
-      ..write(obj.pollsterId)
+      ..write(obj.projectId)
       ..writeByte(2)
-      ..write(obj.audio)
+      ..write(obj.pollsterId)
       ..writeByte(3)
-      ..write(obj.answers)
+      ..write(obj.audio)
       ..writeByte(4)
-      ..write(obj.latitude)
+      ..write(obj.answers)
       ..writeByte(5)
-      ..write(obj.longitude)
+      ..write(obj.latitude)
       ..writeByte(6)
-      ..write(obj.startedOn)
+      ..write(obj.longitude)
       ..writeByte(7)
+      ..write(obj.startedOn)
+      ..writeByte(8)
       ..write(obj.finishedOn);
   }
 

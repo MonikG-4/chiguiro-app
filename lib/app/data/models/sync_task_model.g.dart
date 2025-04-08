@@ -18,7 +18,7 @@ class SyncTaskModelAdapter extends TypeAdapter<SyncTaskModel> {
     };
     return SyncTaskModel(
       id: fields[0] as String,
-      endpoint: fields[1] as String,
+      surveyName: fields[1] as String,
       payload: fields[2] as SurveyEntryModel,
       isProcessing: fields[3] as bool,
       repositoryKey: fields[4] as String,
@@ -32,7 +32,7 @@ class SyncTaskModelAdapter extends TypeAdapter<SyncTaskModel> {
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.endpoint)
+      ..write(obj.surveyName)
       ..writeByte(2)
       ..write(obj.payload)
       ..writeByte(3)

@@ -1,5 +1,5 @@
 name: chiguiro_front_app
-description: "A new Flutter project."
+description: "Chiwi Censo App"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.3+3
 
 environment:
   sdk: ^3.5.4
@@ -31,27 +31,50 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Language app localization
   flutter_localizations:
     sdk: flutter
+
+  # Main dependencies
   get: ^4.6.6
   graphql_flutter: ^5.1.2
   connectivity_plus: ^6.1.1
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
-  flutter_svg: ^2.0.16
 
+  # Hive dependencies (local DB)
   hive_flutter: ^1.1.0
   hive: ^2.2.3
   build_runner: ^2.4.13
   hive_generator: ^2.0.1
 
+  # Geolocation, audio recording and photo services units
   geolocator: ^13.0.2
   flutter_sound: ^9.23.1
   path_provider: ^2.1.5
+  image_picker: ^1.1.2
   permission_handler: ^11.3.1
+
+  # Other dependencies
   intl: ^0.19.0
   dartz: ^0.10.1
+  http: ^1.3.0
+  flutter_svg: ^2.0.16
+
+  # Notification
+  push: ^3.3.3
+  flutter_local_notifications: ^19.0.0
+
+  #geocoding: ^3.0.0
+  #csv: ^6.0.0
+  #diacritic: ^0.1.6
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  rename: ^3.0.2
+  gql_exec: ^1.1.1-alpha+1699813812660
+  gql_http_link: ^1.1.0
+  gql: ^1.0.1-alpha+1730759315362
+  flutter_native_splash: ^2.4.5
+  flutter_launcher_icons: ^0.14.3
 
 dev_dependencies:
   flutter_test:
@@ -81,6 +104,8 @@ flutter:
     - assets/images/icons/Male.png
     - assets/images/icons/Encuesta.png
     - assets/images/min-deporte.png
+    #- assets/dane.csv
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -111,3 +136,32 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  # To add icons to your application, add an icons section, like this:
+  # command:  flutter pub run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/iconStatic.png"
+  adaptive_icon_background: "assets/images/fondo.png"
+  adaptive_icon_foreground: "assets/images/icon.png"
+  remove_alpha_ios: true
+
+# To add splash screens to your application, add a splash_screen section, like this:
+# command:  flutter pub run flutter_native_splash:create
+flutter_native_splash:
+  color: "#005C53"
+  image: assets/images/splash.png
+  color_dark: "#005C53"
+  image_dark: assets/images/splash.png
+
+  android_gravity: center
+  ios_content_mode: scaleAspectFit
+
+  android_12:
+    image: assets/images/splash.png
+    image_dark: assets/images/splash.png
+    icon_background_color: "#005C53"
+    icon_background_color_dark: "#005C53"
+
+  web: false

@@ -13,9 +13,9 @@ class AuthRepository extends BaseRepository implements IAuthRepository {
 
   @override
   Future<Either<Failure, AuthResponse>> login(
-      String email, String password) async {
+      String email, String password, String deviceToken) async {
     return safeApiCall<AuthResponse>(
-      request: () => provider.login(email, password),
+      request: () => provider.login(email, password, deviceToken),
       onSuccess: (data) => AuthResponse.fromJson(data['pollsterLogin']),
       dataKey: 'pollsterLogin',
       unknownErrorMessage: 'Datos de login inválidos',

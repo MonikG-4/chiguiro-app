@@ -4,6 +4,6 @@ import '../../../core/error/failures/failure.dart';
 import '../entities/auth_response.dart';
 
 abstract class IAuthRepository {
-  Future<Either<Failure, AuthResponse>> login(String email, String password);
+  Future<Either<Failure, AuthResponse>> login(String email, String password, String deviceToken);
   Future<Either<Failure, bool>> forgotPassword(String email);
 }
