@@ -94,7 +94,7 @@ class MatrixTable extends StatelessWidget {
             verticalAlignment: TableCellVerticalAlignment.middle,
             child: Padding(
               key: Key('cell${question.id}_${row}_${col}_$initialValue'),
-              padding: const EdgeInsets.all(4.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: cellBuilder(row, col, initialValue,
                   (value) => _updateResponse(col, row, value, state)),
             ),

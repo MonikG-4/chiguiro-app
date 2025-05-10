@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:label="Chigüiro"
+        android:label="Chiwi"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -50,7 +50,7 @@
         <!-- Configuración del icono de notificación -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/icon" />
+            android:resource="@mipmap/ic_launcher" />
 
         <!-- Color de la notificación -->
         <meta-data
@@ -86,8 +86,6 @@
     <!-- Permiso para ubicacion -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- Para Android 10 (API level 29) y superior -->
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <uses-feature
         android:name="android.hardware.location.gps"

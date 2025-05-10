@@ -62,33 +62,37 @@ class _CustomSelectState extends State<CustomSelect> {
 
     return Focus(
       focusNode: focusNode,
-      child: CustomInput(
-        key: widget.keyDropdown,
-        hasError: widget.state?.hasError ?? false,
-        hasValue: widget.value != null,
-        onTap: () {
-          FocusScope.of(context).requestFocus(FocusNode());
-          _showDropdownMenu(context);
-        },
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text(
-                widget.value ?? widget.label,
-                style: TextStyle(
-                  color: widget.value != null ? Colors.black : Colors.grey,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 80),
+        child: CustomInput(
+          key: widget.keyDropdown,
+          hasError: widget.state?.hasError ?? false,
+          hasValue: widget.value != null,
+          onTap: () {
+            FocusScope.of(context).requestFocus(FocusNode());
+            _showDropdownMenu(context);
+          },
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  widget.value ?? widget.label,
+                  style: TextStyle(
+                    color: widget.value != null ? Colors.black : Colors.grey,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
               ),
             ),
-          ),
-          const Icon(Icons.arrow_drop_down),
-        ],
+            const Icon(Icons.arrow_drop_down),
+          ],
+        ),
       ),
     );
   }
+
 }
 
 class _CustomPopupMenuRoute<T> extends PopupRoute<T> {

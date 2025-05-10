@@ -64,78 +64,6 @@ Future<FlutterLocalNotificationsPlugin> initializeFlutterLocalNotifications() as
   return flutterLocalNotificationsPlugin;
 }
 
-// Future<void> enrichLocationData() async {
-//   final locationData = LocationData.getLocationData(); // JSON existente
-//
-//   try {
-//     // 📌 Leer el archivo CSV
-//     final csvString = await rootBundle.loadString('assets/dane.csv');
-//     final csvRows = const CsvToListConverter(fieldDelimiter: ';', eol: '\n')
-//         .convert(csvString);
-//
-//     // 📌 Mapas para búsqueda rápida
-//     final Map<String, String> departmentCodes = {};
-//     final Map<String, Map<String, String>> cityCodes = {};
-//
-//     for (var row in csvRows.skip(1)) {
-//       if (row.length >= 4) {
-//         String deptCode = row[0].toString();
-//         String cityCode = row[1].toString();
-//         String department = row[2].toString().trim();
-//         String city = row[3].toString().trim();
-//
-//         // 🔹 Normalizar nombres eliminando acentos y caracteres especiales
-//         String deptKey = normalizeText(department);
-//         String cityKey = normalizeText(city);
-//
-//         departmentCodes[deptKey] = deptCode;
-//         cityCodes.putIfAbsent(deptKey, () => {});
-//         cityCodes[deptKey]![cityKey] = cityCode;
-//       }
-//     }
-//
-//     // 📌 Recorrer el JSON y agregar los códigos sin modificar los nombres
-//     for (var country in locationData['countries']) {
-//       for (var department in country['departments']) {
-//         String departmentName = department['departamento'].toString().trim();
-//         String deptKey = normalizeText(departmentName);
-//
-//         if (departmentCodes.containsKey(deptKey)) {
-//           department['departamento'] =
-//           "${departmentCodes[deptKey]} - $departmentName";
-//         }
-//
-//         for (var city in department['ciudades']) {
-//           String cityName = city['name'].toString().trim();
-//           String cityKey = normalizeText(cityName);
-//
-//           if (cityCodes.containsKey(deptKey) &&
-//               cityCodes[deptKey]!.containsKey(cityKey)) {
-//             city['name'] = "${cityCodes[deptKey]![cityKey]} - $cityName";
-//           }
-//         }
-//       }
-//     }
-//
-// // 📌 Guardar el JSON actualizado
-//     final jsonString = const JsonEncoder.withIndent('  ').convert(locationData);
-//
-// // 🔹 debugPrint() con wrapWidth para imprimir absolutamentetodo
-//     debugPrint(jsonString, wrapWidth: 1024);
-//   } catch (e) {
-//     print("❌ Error al cargar el archivo CSV: $e");
-//   }
-// }
-//
-// String normalizeText(String text) {
-//   return removeDiacritics(text) // 📌 Elimina acentos (Ej: "Pacó" -> "Paco")
-//       .toLowerCase()
-//       .replaceAll(RegExp(r'\(.*?\)'), '') // 📌 Elimina contenido entre paréntesis
-//       .replaceAll(RegExp(r'[^a-z\s]'), '') // 📌 Elimina caracteres no alfabéticos
-//       .trim();
-// }
-
-
 /// **Inicialización de Hive**
 Future<void> _initHive() async {
   await initHiveForFlutter();
@@ -172,7 +100,8 @@ class MyApp extends StatelessWidget {
     return GraphQLProvider(
       client: Get.find<GraphQLService>().client,
       child: GetMaterialApp(
-        title: 'Chigüiro',
+        debugShowCheckedModeBanner: false,
+        title: 'Chiwi Censo',
         theme: AppTheme.theme,
         defaultTransition: Transition.fade,
         initialRoute: initialRoute,
