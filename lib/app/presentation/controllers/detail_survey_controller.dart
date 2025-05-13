@@ -70,7 +70,7 @@ class DetailSurveyController extends GetxController {
           _storageService.authResponse!.id, survey.value!.id);
 
       result.fold((failure) {
-        _showMessage('Error', _mapFailureToMessage(failure), 'error');
+        _showMessage('Error', _mapFailureToMessage(failure).replaceAll("Exception:", ""), 'error');
       }, (data) {
         surveyStatistics.value = data;
       });

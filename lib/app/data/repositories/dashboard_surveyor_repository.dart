@@ -3,28 +3,38 @@ import 'package:get/get.dart';
 
 import '../../../core/error/exceptions/exceptions.dart';
 import '../../../core/error/failures/failure.dart';
+import '../../../core/services/graphql_service.dart';
 import '../../../core/services/local_storage_service.dart';
 import '../../domain/entities/survey.dart';
 import '../../domain/entities/surveyor.dart';
 import '../../domain/repositories/i_dashboard_surveyor_repository.dart';
+import '../graphql/mutations/password_mutations.dart';
+import '../graphql/queries/survey_query.dart';
+import '../graphql/queries/survey_responded_query.dart';
+import '../graphql/queries/surveyor_query.dart';
 import '../models/survey_model.dart';
 import '../models/survey_responded_model.dart';
 import '../models/surveyor_model.dart';
-import '../providers/dashboard_surveyor_provider.dart';
 import 'base_repository.dart';
 
 class DashboardSurveyorRepository extends BaseRepository
     implements IDashboardSurveyorRepository {
-  final DashboardSurveyorProvider provider;
+  final GraphQLService _graphqlService = Get.find<GraphQLService>();
   final LocalStorageService _localStorageService = Get.find();
 
-  DashboardSurveyorRepository(this.provider);
+  DashboardSurveyorRepository();
 
   @override
   Future<Either<Failure, bool>> changePassword(
       int pollsterId, String password) async {
     return safeApiCall<bool>(
-      request: () => provider.changePassword(pollsterId, password),
+      request: () => _graphqlService.mutate(
+        document: PasswordMutations.pollsterChangePassword,
+        variables: {
+          "id": pollsterId,
+          "password": password
+        },
+      ),
       onSuccess: (data) => data['pollsterChangePassword'] == null,
       dataKey: 'pollsterChangePassword',
     );
@@ -33,7 +43,12 @@ class DashboardSurveyorRepository extends BaseRepository
   @override
   Future<Either<Failure, List<Survey>>> fetchSurveys(int surveyorId) async {
     return safeApiCallWithCache<List<Survey>>(
-      request: () => provider.fetchSurveys(surveyorId),
+      request: () => _graphqlService.query(
+        document: SurveyQuery.pollstersProjectByPollster,
+        variables: {
+          'pollsterId': surveyorId,
+        },
+      ),
       onSuccess: (data) => (data['pollstersProjectByPollster'] as List)
           .map((e) => SurveyModel.fromJson(e['project']).toEntity())
           .toList(),
@@ -47,7 +62,12 @@ class DashboardSurveyorRepository extends BaseRepository
   @override
   Future<Either<Failure, Surveyor>> fetchDataSurveyor(int surveyorId) async {
     return safeApiCallWithCache<Surveyor>(
-      request: () => provider.fetchDataSurveyor(surveyorId),
+      request: () => _graphqlService.query(
+        document: SurveyorQuery.surveyor,
+        variables: {
+          'id': surveyorId,
+        },
+      ),
       onSuccess: (data) =>
           SurveyorModel.fromJson(data['pollsterHome']).toEntity(),
       dataKey: 'pollsterHome',
@@ -66,7 +86,13 @@ class DashboardSurveyorRepository extends BaseRepository
   @override
   Future<Either<Failure, List<Survey>>> fetchSurveyResponded(String homeCode, int surveyorId) async{
     return safeApiCallWithCache<List<Survey>>(
-      request: () => provider.fetchSurveyResponded(homeCode, surveyorId),
+      request: () => _graphqlService.query(
+        document: SurveyRespondedQuery.pollsterStatisticHome,
+        variables: {
+          'homeCode': homeCode,
+          'pollsterId': surveyorId,
+        },
+      ),
       onSuccess: (data) => (data['pollsterStatisticHome'] as List)
           .map((e) => SurveyRespondedModel.fromJson(e).toEntity())
           .toList(),

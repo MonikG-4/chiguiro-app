@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../../../core/values/app_colors.dart';
@@ -16,7 +18,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
 
   @override
   Widget build(BuildContext context) {
-    final availableHeight = MediaQuery.of(context).size.height - 520;
+    final availableHeight = MediaQuery.of(context).size.height - 540;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final estimatedPageSize = (availableHeight / 30).floor();
@@ -38,48 +40,41 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
                   SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 230.0,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          _buildAppBarBackground(context),
-                          Positioned(
-                            top: 120.0,
-                            left: 16.0,
-                            right: 16.0,
-                            child: Obx(() {
-                              return SurveyDetailCard(
-                                isLoading:
-                                    controller.isLoadingStatisticSurvey.value,
-                                responses: controller
-                                        .surveyStatistics.value?.totalEntries ??
-                                    0,
-                                lastSurveyDate: (controller
-                                            .surveyStatistics.value?.lastSurvey
-                                            .toIso8601String() ==
-                                        '1970-01-01T00:00:00.000')
-                                    ? '-- -- -- --'
-                                    : controller
-                                            .surveyStatistics.value?.lastSurvey
-                                            .toIso8601String() ??
-                                        '-- -- -- --',
-                                values: [
-                                  controller.surveyStatistics.value
-                                          ?.totalCompleted ??
-                                      0,
-                                  controller.surveyStatistics.value
-                                          ?.totalUncompleted ??
-                                      0,
-                                ],
-                                weekDays: const ['Completas', 'Incompletas'],
-                              );
-                            }),
-                          ),
-                        ],
-                      ),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Column(
+                          children: [
+                            _buildAppBarBackground(context),
+                            Container(
+                              height: 80,
+                              color: AppColors.background,
+                            ),
+                          ],
+                        ),
+                        Positioned(
+                          top: 130,
+                          left: 16,
+                          right: 16,
+                          child: Obx(() {
+                            return SurveyDetailCard(
+                              isLoading: controller.isLoadingStatisticSurvey.value,
+                              responses: controller.surveyStatistics.value?.totalEntries ?? 0,
+                              lastSurveyDate: (controller.surveyStatistics.value?.lastSurvey.toIso8601String() == '1970-01-01T00:00:00.000')
+                                  ? '-- -- -- --'
+                                  : controller.surveyStatistics.value?.lastSurvey.toIso8601String() ?? '-- -- -- --',
+                              values: [
+                                controller.surveyStatistics.value?.totalCompleted ?? 0,
+                                controller.surveyStatistics.value?.totalUncompleted ?? 0,
+                              ],
+                              weekDays: const ['Completas', 'Incompletas'],
+                            );
+                          }),
+                        ),
+                      ],
                     ),
                   ),
+
                   SliverToBoxAdapter(
                     child: _buildContent(availableHeight),
                   ),
@@ -88,7 +83,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 10, left: 16, right: 16),
+            padding: const EdgeInsets.only(bottom: 30, left: 16, right: 16),
             child: PrimaryButton(
               onPressed: (() async {
                 await Get.toNamed(
@@ -109,16 +104,17 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
   }
 
   Widget _buildAppBarBackground(BuildContext context) {
-    var logoUrl =
-        'assets/images/min-deporte.png';
+    final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
 
     return Container(
+      height: 170,
+      padding: EdgeInsets.only(top: isIOS ? 10 : 20),
       decoration: const BoxDecoration(
         gradient: AppColors.backgroundSecondary,
       ),
-      padding: const EdgeInsets.only(top: 16, right: 16),
       child: AppBar(
         backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
           onPressed: () => Navigator.of(context).pop(),
@@ -127,11 +123,12 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
         title: ProfileHeader(
           name: controller.survey.value!.name,
           role: controller.survey.value!.active! ? 'En proceso' : 'Finalizada',
-          avatarPath: logoUrl,
+          avatarPath: 'assets/images/min-deporte.png',
         ),
       ),
     );
   }
+
 
   Widget _buildSectionHeader(String title) {
     return Row(

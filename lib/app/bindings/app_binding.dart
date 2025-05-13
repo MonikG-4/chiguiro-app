@@ -1,10 +1,11 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 
-import '../../core/network/network_request_interceptor.dart';
+import '../../core/network/graphql_client_provider.dart';
 import '../../core/services/audio_service.dart';
 import '../../core/services/cache_storage_service.dart';
 import '../../core/services/connectivity_service.dart';
+import '../../core/services/graphql_service.dart';
 import '../../core/services/local_storage_service.dart';
 import '../../core/services/location_service.dart';
 import '../../core/services/sync_service.dart';
@@ -32,10 +33,14 @@ class AppBinding {
 
     final cacheStorageService = Get.find<CacheStorageService>();
     Get.put(SessionController(cacheStorageService), permanent: true);
-    Get.put(NetworkRequestInterceptor(), permanent: true);
     SurveyBinding().dependencies();
     final syncService = Get.put(SyncService(), permanent: true);
     syncService.onInit();
+
+    Get.put<GraphQLService>(
+      GraphQLService(clientProvider: GraphQLClientProvider()),
+      permanent: true,
+    );
 
     // Notifications
     Get.put<INotificationRepository>(

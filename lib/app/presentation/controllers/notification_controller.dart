@@ -34,7 +34,6 @@ class NotificationController extends GetxController {
 
     _repository.onTokenRefresh((newToken) {
       deviceToken.value = newToken;
-      print('Token actualizado: $newToken');
     });
   }
 
@@ -70,7 +69,6 @@ class NotificationController extends GetxController {
   }
 
   void _handleNotificationTap(Map<String?, Object?> message) {
-    print('Usuario tocó la notificación: $message');
 
     tappedNotifications.add(message);
 

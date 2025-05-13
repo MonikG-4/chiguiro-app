@@ -11,7 +11,7 @@ class PushNotificationRepository implements INotificationRepository {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
 
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
 
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
     'high_importance_channel',
@@ -39,9 +39,9 @@ class PushNotificationRepository implements INotificationRepository {
 
   /// 🔹 **Crea el canal de notificaciones en Android**
   Future<void> _createNotificationChannel() async {
-    final androidImplementation = _flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final androidImplementation =
+        _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
 
     await androidImplementation?.createNotificationChannel(_channel);
   }
@@ -52,16 +52,17 @@ class PushNotificationRepository implements INotificationRepository {
     // 📌 iOS
     await _flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>()
+            IOSFlutterLocalNotificationsPlugin>()
         ?.requestPermissions(alert: true, badge: true, sound: true);
 
     // 📌 Android 13+
     if (Platform.isAndroid) {
       final androidImplementation = _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+              AndroidFlutterLocalNotificationsPlugin>();
 
-      final granted = await androidImplementation?.requestNotificationsPermission();
+      final granted =
+          await androidImplementation?.requestNotificationsPermission();
       debugPrint('🔔 Permiso de notificación en Android: $granted');
     }
   }
@@ -141,11 +142,15 @@ class PushNotificationRepository implements INotificationRepository {
     );
 
     const platformChannelSpecifics =
-    NotificationDetails(android: androidPlatformChannelSpecifics);
+        NotificationDetails(android: androidPlatformChannelSpecifics);
 
     final payload = data != null ? jsonEncode(data) : '';
 
     await _flutterLocalNotificationsPlugin.show(
-        0, title, body, platformChannelSpecifics, payload: payload);
+        DateTime.now().second,
+        title,
+        body,
+        platformChannelSpecifics,
+        payload: payload);
   }
 }
