@@ -109,7 +109,7 @@ class _MatrixDoubleQuestionState extends State<MatrixDoubleQuestion> {
             child: CustomSelect(
           keyDropdown: dropdownKeys[cellKey] ?? GlobalKey(), // Changed here
           value: initialValue.isEmpty ? null : initialValue,
-          items: List.generate(10, (index) => index.toString()),
+          items: List.generate(9, (index) => index.toString()),
           label: label,
           state: state,
           onSelected: (String? newValue) {

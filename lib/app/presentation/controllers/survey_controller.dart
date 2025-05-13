@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../core/error/failures/failure.dart';
@@ -114,14 +113,15 @@ class SurveyController extends GetxController {
   }
 
   Future<void> getLocation(SurveyQuestion question) async {
+    await _fetchLocation();
+
     var position = _locationService.cachedPosition;
-    if (position == null) {
-      await _fetchLocation();
-      position = _locationService.cachedPosition;
-    }
+    print(position);
 
     final location =
         getDepartmentAndCityFromCoords(position!.latitude, position.longitude);
+
+    print(location);
     responses[question.id] = {
       'question': question.question,
       'type': question.type,
@@ -274,8 +274,6 @@ class SurveyController extends GetxController {
       audioBase64,
     );
 
-    //printEntryInput(entryInput.toJson());
-
     try {
       await _saveSurveyLocally(entryInput);
 
@@ -300,26 +298,40 @@ class SurveyController extends GetxController {
 
   Future<void> saveSurveyResults(Map<String, dynamic> entryInputPending) async {
     isLoadingSendSurvey.value = true;
-
     try {
-      final result = await repository
-          .saveSurveyResults(entryInputPending['payload'].toJson());
+      final result = await repository.saveSurveyResults(entryInputPending['payload'].toJson());
 
-      result.fold((failure) {
-        throw Exception(_mapFailureToMessage(failure));
-      }, (data) {
-        if (!data) {
-          throw Exception('Fallo al enviar la encuesta al servidor');
-        }
+      // Aquí puedes validar si result contiene "data" válida
+      if (result['data'] == null || result['data']['entry'] == null) {
+        throw Exception('La respuesta del servidor no contiene datos válidos');
+      }
 
-        _taskStorageService.removeTask(entryInputPending['id']);
-        _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
-        Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
-      });
+      _taskStorageService.removeTask(entryInputPending['id']);
+      _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
+      Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
     } catch (e) {
-      _showMessage(
-          'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
-    } finally {
+      _showMessage('Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
+    }
+
+    // try {
+    //   final result = await repository.saveSurveyResults(entryInputPending['payload'].toJson());
+    //
+    //   result.fold((failure) {
+    //     throw Exception(_mapFailureToMessage(failure));
+    //   }, (data) {
+    //     if (!data) {
+    //       throw Exception('Fallo al enviar la encuesta al servidor');
+    //     }
+    //
+    //     _taskStorageService.removeTask(entryInputPending['id']);
+    //     _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
+    //   });
+    //
+    //   Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
+    // } catch (e) {
+    //   _showMessage('Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
+    // }
+    finally {
       isLoadingSendSurvey.value = false;
     }
   }
@@ -544,14 +556,15 @@ class SurveyController extends GetxController {
     _rebuildHiddenQuestions();
   }
 
-  Map<String, String> getDepartmentAndCityFromCoords(double lat, double lon) {
+  Map getDepartmentAndCityFromCoords(double lat, double lon) {
     final locationData = LocationData.getLocationData();
 
-    double calculateDistance(
-        double lat1, double lon1, double lat2, double lon2) {
+    // Función para calcular la distancia entre dos puntos usando la fórmula de Haversine
+    double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
       const earthRadius = 6371; // Radio de la Tierra en km
       final dLat = (lat2 - lat1) * (3.141592653589793 / 180);
       final dLon = (lon2 - lon1) * (3.141592653589793 / 180);
+
       final a = (sin(dLat / 2) * sin(dLat / 2)) +
           cos(lat1 * (3.141592653589793 / 180)) *
               cos(lat2 * (3.141592653589793 / 180)) *
@@ -560,88 +573,42 @@ class SurveyController extends GetxController {
       return earthRadius * c;
     }
 
-    String? closestDepartment;
-    String? closestCity;
-    double minDistance = double.infinity;
+    // Variables para almacenar el resultado
+    String closestDepartmentName = 'Desconocido';
+    String closestCityName = 'Desconocido';
+    double minCityDistance = double.infinity;
 
+    // Buscar directamente la ciudad más cercana entre todas las ciudades
     for (var country in locationData['countries']) {
       for (var department in country['departments']) {
-        final depLat = department['latitude'];
-        final depLon = department['longitude'];
-        final depDistance = calculateDistance(lat, lon, depLat, depLon);
-
-        if (depDistance < minDistance) {
-          minDistance = depDistance;
-          closestDepartment = department['departamento'];
-        }
-
         for (var city in department['ciudades']) {
           final cityLat = city['latitude'];
           final cityLon = city['longitude'];
+
+          // Calcular la distancia entre las coordenadas del usuario y la ciudad
           final cityDistance = calculateDistance(lat, lon, cityLat, cityLon);
 
-          if (cityDistance < minDistance) {
-            minDistance = cityDistance;
-            closestDepartment = department['departamento'];
-            closestCity = city['name'];
+          // Si esta ciudad está más cerca que la anterior más cercana
+          if (cityDistance < minCityDistance) {
+            minCityDistance = cityDistance;
+            closestCityName = city['name'];
+            closestDepartmentName = department['departamento'];
           }
         }
       }
     }
 
+    // Si la distancia es mayor a cierto umbral (por ejemplo, 50 km)
+    // podríamos considerar que está fuera de las áreas registradas
+    if (minCityDistance > 50) {
+      print('Advertencia: La ubicación más cercana está a $minCityDistance km de distancia');
+    }
+
     return {
-      'department': closestDepartment ?? 'Desconocido',
-      'city': closestCity ?? 'Desconocido'
+      'department': closestDepartmentName,
+      'city': closestCityName,
+      'distance': minCityDistance, // Opcional: para información de depuración
     };
   }
 
-  Future<void> printEntryInput(Map<String, dynamic> entryInput) async {
-    final jsonString = const JsonEncoder.withIndent('  ').convert(entryInput);
-
-    try {
-      // Obtiene el directorio de almacenamiento externo
-      Directory? directory = await getExternalStorageDirectory();
-      if (directory == null) {
-        print("No se pudo obtener el directorio externo.");
-        return;
-      }
-
-      final String filePath = '${directory.path}/debug_data.json';
-      final File jsonFile = File(filePath);
-      await jsonFile.writeAsString(jsonString);
-
-      print("\n=== ARCHIVO JSON GUARDADO ===");
-      print("Ruta: $filePath");
-    } catch (e) {
-      print("\n=== ERROR AL GUARDAR ARCHIVO ===");
-      print("Error: $e");
-    }
-  }
-
-  Map<String, dynamic> _convertDateTimeInMap(Map<String, dynamic> map) {
-    return map.map((key, value) {
-      if (value is DateTime) {
-        return MapEntry(key, value.toIso8601String());
-      } else if (value is Map) {
-        return MapEntry(
-            key, _convertDateTimeInMap(value.cast<String, dynamic>()));
-      } else if (value is List) {
-        return MapEntry(key, _convertDateTimeInList(value));
-      }
-      return MapEntry(key, value);
-    });
-  }
-
-  List<dynamic> _convertDateTimeInList(List<dynamic> list) {
-    return list.map((value) {
-      if (value is DateTime) {
-        return value.toIso8601String();
-      } else if (value is Map) {
-        return _convertDateTimeInMap(value.cast<String, dynamic>());
-      } else if (value is List) {
-        return _convertDateTimeInList(value);
-      }
-      return value;
-    }).toList();
-  }
 }

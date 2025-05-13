@@ -26,7 +26,7 @@ class SurveyPage extends GetView<SurveyController> {
     return Scaffold(
       appBar: AppBar(
         title: Text(controller.survey.value!.name),
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.background,
       ),
       backgroundColor: AppColors.background,
       body: Obx(() {
@@ -70,7 +70,7 @@ class SurveyPage extends GetView<SurveyController> {
                 : 40.0,
         left: 16.0,
         right: 16.0,
-        bottom: 160.0,
+        bottom: 100.0,
       ),
       child: Form(
         key: _formKey,
@@ -319,7 +319,7 @@ class SurveyPage extends GetView<SurveyController> {
 
   Widget _buildSubmitButton(BuildContext context) {
     return Positioned(
-      bottom: 0,
+      bottom: 20,
       left: 0,
       right: 0,
       child: Container(
@@ -334,14 +334,14 @@ class SurveyPage extends GetView<SurveyController> {
               isLoading: controller.isLoadingSendSurvey.value,
               child: 'Enviar Encuesta',
             ),
-            const SizedBox(height: 8),
-            PrimaryButton(
-              isLoading: false,
-              onPressed: () async {
-                await _fillSurveyWithRandomResponses();
-              },
-              child: 'Responder Aleatoriamente',
-            ),
+            // const SizedBox(height: 8),
+            // PrimaryButton(
+            //   isLoading: false,
+            //   onPressed: () async {
+            //     await _fillSurveyWithRandomResponses();
+            //   },
+            //   child: 'Responder Aleatoriamente',
+            // ),
           ],
         ),
       ),

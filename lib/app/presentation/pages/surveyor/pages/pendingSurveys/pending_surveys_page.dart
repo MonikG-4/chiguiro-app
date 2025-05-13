@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 import '../../../../../../core/values/app_colors.dart';
@@ -65,9 +62,7 @@ class PendingSurveysPage extends GetView<SurveyController> {
                     trailing: IconButton(
                       icon: const Icon(Icons.save),
                       onPressed: () async {
-                        controller.saveSurveyResults(survey);
-                        // final response = await saveSurveyResults(survey['payload'].toJson());
-                        // print('response: ${response.values}');
+                         controller.saveSurveyResults(survey);
                       },
                     ),
                   ),
@@ -86,36 +81,5 @@ class PendingSurveysPage extends GetView<SurveyController> {
         ],
       ),
     );
-  }
-
-  Future<Map<String, dynamic>> saveSurveyResults(Map<String, dynamic> entryInput) async {
-    try {
-      final response = await http.post(
-        Uri.parse("https://chiguiro.proyen.co:7701/pond"),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          "query": """
-              mutation entry( \$input: EntryInput!) {
-                entry(input: \$input) {
-                  id
-                }
-              }
-          """,
-          "variables": {
-            "input": entryInput,
-          },
-        }),
-      ).timeout(const Duration(seconds: 30)); // 🔥 Ajusta el timeout
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception("Error en la petición: ${response.statusCode} - ${response.body}");
-      }
-    } catch (e) {
-      throw Exception("Error en la conexión: $e");
-    }
   }
 }

@@ -1,17 +1,17 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/sync_task_storage_service.dart';
 import '../../domain/repositories/i_survey_repository.dart';
-import '../providers/survey_provider.dart';
 import 'base_repository.dart';
 
 class SurveyRepository extends BaseRepository implements ISurveyRepository {
-  final SurveyProvider provider;
   final SyncTaskStorageService _syncTaskStorageService = Get.find();
-
-  SurveyRepository(this.provider);
 
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> fetchSurveys(int surveyorId) async {
@@ -30,12 +30,47 @@ class SurveyRepository extends BaseRepository implements ISurveyRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> saveSurveyResults(Map<String, dynamic> entryInput) async {
-    return safeApiCall<bool>(
-      request: () => provider.saveSurveyResults(entryInput),
-      onSuccess: (data) => data['entry'].isNotEmpty,
-      dataKey: 'entry',
-      unknownErrorMessage: 'No se logró enviar la encuesta, intente nuevamente',
-    );
+  Future<Map<String, dynamic>> saveSurveyResults(Map<String, dynamic> entryInput) async {
+    try {
+      final response = await http.post(
+        Uri.parse("https://chiguiro.proyen.co:7701/pond"),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "query": """
+          mutation entry(\$input: EntryInput!) {
+            entry(input: \$input) {
+              id
+            }
+          }
+        """,
+          "variables": {
+            "input": entryInput,
+          },
+        }),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Captura errores del servidor (campo "errors" en GraphQL)
+        if (data['errors'] != null) {
+          final errorMessage = data['errors'][0]['message'] ?? 'Error desconocido del servidor';
+          throw Exception('Error del servidor: $errorMessage');
+        }
+
+        return data;
+      } else {
+        throw Exception("Error HTTP: ${response.statusCode} - ${response.body}");
+      }
+    } on http.ClientException catch (e) {
+      throw Exception("Error de red (ClientException): ${e.message}");
+    } on TimeoutException {
+      throw Exception("Error de red: conexión agotada (timeout)");
+    } catch (e) {
+      throw Exception("Error inesperado: $e");
+    }
   }
+
 }

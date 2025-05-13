@@ -1,36 +1,59 @@
-import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-class GraphQLService extends GetxService {
-  late ValueNotifier<GraphQLClient> client;
+import '../error/exceptions/exceptions.dart';
+import '../network/graphql_client_provider.dart';
 
-  Future<GraphQLService> init() async {
-    client = _initializeClient();
-    return this;
+class GraphQLService {
+  late final GraphQLClient _client;
+
+  GraphQLService({required GraphQLClientProvider clientProvider}) {
+    _client = clientProvider.getClient();
   }
 
-  ValueNotifier<GraphQLClient> _initializeClient() {
-    final HttpLink httpLink = HttpLink(
-      'https://chiguiro.proyen.co:7701/pond',
-      defaultHeaders: {
-        'Authorization': 'Bearer TU_TOKEN',
-        'Content-Type': 'application/json',
-      },
-    );
-
-    return ValueNotifier(
-      GraphQLClient(
-        link: Link.from([httpLink]),
-        cache: GraphQLCache(store: null),
-        defaultPolicies: DefaultPolicies(
-          query: Policies(fetch: FetchPolicy.noCache),
-          mutate: Policies(fetch: FetchPolicy.noCache),
-        ),
+  Future<Map<String, dynamic>> query({
+    required String document,
+    Map<String, dynamic>? variables,
+  }) async {
+    final result = await _client.query(
+      QueryOptions(
+        document: gql(document),
+        variables: variables!,
+        fetchPolicy: FetchPolicy.noCache,
       ),
     );
+    return _handleResult(result);
+  }
+
+  Future<Map<String, dynamic>> mutate({
+    required String document,
+    Map<String, dynamic>? variables,
+  }) async {
+    final result = await _client.mutate(
+      MutationOptions(
+        document: gql(document),
+        variables: variables!,
+        fetchPolicy: FetchPolicy.noCache,
+      ),
+    );
+    return _handleResult(result);
+  }
+
+  Map<String, dynamic> _handleResult(QueryResult result) {
+    if (result.hasException) {
+      final e = result.exception!;
+      if (e.graphqlErrors.isNotEmpty) {
+        final first = e.graphqlErrors.first;
+        final type = first.extensions?['classification'];
+        final message = first.message;
+
+        if (type == 'BAD_REQUEST') throw CheckException(message);
+        if (type == 'UNAUTHORIZED') throw GateException(message);
+
+        throw Exception(message);
+      } else if (e.linkException != null) {
+        throw AppNetworkException(e.linkException.toString());
+      }
+    }
+    return result.data ?? {};
   }
 }
-
-

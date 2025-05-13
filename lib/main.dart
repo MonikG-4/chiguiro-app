@@ -1,16 +1,9 @@
-// import 'dart:io';
-// import 'package:flutter/services.dart' show rootBundle;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-// import 'dart:convert';
-// import 'package:geocoding/geocoding.dart';
-// import 'package:csv/csv.dart';
-// import 'package:diacritic/diacritic.dart';
 
 import 'app/bindings/app_binding.dart';
 import 'app/data/models/jumper_model.dart';
@@ -21,13 +14,10 @@ import 'app/data/models/survey_responded_model.dart';
 import 'app/data/models/survey_statistics_model.dart';
 import 'app/data/models/surveyor_model.dart';
 import 'app/routes/app_routes.dart';
-import 'core/services/graphql_service.dart';
 import 'core/theme/app_theme.dart';
-import 'core/network/graphql_config.dart';
 import 'app/data/models/survey_entry_model.dart';
 import 'app/data/models/sync_task_model.dart';
 import 'app/presentation/controllers/session_controller.dart';
-// import 'core/values/location.dart';
 import 'core/values/routes.dart';
 
 void main() async {
@@ -38,7 +28,6 @@ void main() async {
 
   await AppBinding().initAsyncDependencies(flutterLocalNotificationsPlugin);
 
-  // await enrichLocationData();
   runApp(const MyApp());
 }
 
@@ -97,9 +86,7 @@ class MyApp extends StatelessWidget {
         ? Routes.DASHBOARD_SURVEYOR
         : Routes.LOGIN;
 
-    return GraphQLProvider(
-      client: Get.find<GraphQLService>().client,
-      child: GetMaterialApp(
+    return GetMaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Chiwi Censo',
         theme: AppTheme.theme,
@@ -115,7 +102,6 @@ class MyApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-      ),
     );
   }
 }
