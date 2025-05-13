@@ -14,7 +14,7 @@ class AuthRepository extends BaseRepository implements IAuthRepository {
 
   @override
   Future<Either<Failure, AuthResponse>> login(
-      String email, String password, String deviceToken) async {
+      String email, String password, String? deviceToken) async {
     return safeApiCall<AuthResponse>(
       request: () => _graphqlService.query(
         document: LoginQuery.pollsterLogin,

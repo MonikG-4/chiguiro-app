@@ -29,7 +29,7 @@ class AuthController extends GetxController {
   Future<void> login(String email, String password) async {
     isLoading.value = true;
 
-    final result = await repository.login(email, password, _notificationController.deviceToken.value!);
+    final result = await repository.login(email, password, _notificationController.deviceToken.value);
 
     result.fold(
             (failure) {
