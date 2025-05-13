@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/values/routes.dart';
@@ -29,28 +31,34 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
-              child: SizedBox(
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    _buildAppBarBackground(context),
-                    Positioned(
-                      top: 110.0,
-                      left: 16.0,
-                      right: 16.0,
-                      child: Obx(() {
-                        return SurveyorBalanceCard(
-                          isLoading: controller.isSurveyorDataLoading.value,
-                          responses:
-                              controller.dataSurveyor.value?.totalEntries ?? 0,
-                          lastSurveyDate:
-                              controller.dataSurveyor.value?.lastSurvey ??
-                                  '-- -- -- --',
-                        );
-                      }),
-                    ),
-                  ],
-                ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Column(
+                    children: [
+                      _buildAppBarBackground(context),
+                      Container(
+                        height: 80,
+                        color: AppColors.background,
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    top: 130.0,
+                    left: 16.0,
+                    right: 16.0,
+                    child: Obx(() {
+                      return SurveyorBalanceCard(
+                        isLoading: controller.isSurveyorDataLoading.value,
+                        responses:
+                        controller.dataSurveyor.value?.totalEntries ?? 0,
+                        lastSurveyDate:
+                        controller.dataSurveyor.value?.lastSurvey ??
+                            '-- -- -- --',
+                      );
+                    }),
+                  ),
+                ],
               ),
             ),
             SliverToBoxAdapter(
@@ -61,73 +69,47 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
       ),
       bottomNavigationBar: Obx(() => controller.showContent.value
           ? Container(
-              padding: const EdgeInsets.only(bottom: 30, right: 16, left: 16),
-              color: AppColors.background,
-              child: PrimaryButton(
-                onPressed: () => _showConfirmationDialog(context, homeCodeController),
-                isLoading: false,
-                child: 'Finalizar hogar',
-              ),
-            )
+        padding: const EdgeInsets.only(bottom: 30, right: 16, left: 16),
+        color: AppColors.background,
+        child: PrimaryButton(
+          onPressed: () => _showConfirmationDialog(context, homeCodeController),
+          isLoading: false,
+          child: 'Finalizar hogar',
+        ),
+      )
           : const SizedBox.shrink()),
     );
   }
 
-  void _showConfirmationDialog(BuildContext context, HomeCodeController homeCodeController) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Confirmación"),
-          content: const Text("¿Estás seguro de que deseas finalizar el hogar?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Cancelar"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                controller.showContent.value = false;
-                homeCodeController.resetHomeCode();
-              },
-              child: const Text("Aceptar"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Widget _buildAppBarBackground(BuildContext context) {
-    return SafeArea(
-      top: false,
-      bottom: false,
-      child: Container(
-        height: 160,
-        decoration: const BoxDecoration(
-          gradient: AppColors.backgroundSecondary,
-        ),
-        padding: const EdgeInsets.only(top: 16),
-        child: AppBar(
-          backgroundColor: Colors.transparent,
-          automaticallyImplyLeading: false,
-          title: ProfileHeader(
-            name:
-            'Hola ${controller.nameSurveyor.value} ${controller.surnameSurveyor.value}',
+    final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+
+    return Container(
+      height: 170,
+      padding: EdgeInsets.only(top: isIOS ? 10 : 20, right: 16, left: 16),
+      decoration: const BoxDecoration(
+        gradient: AppColors.backgroundSecondary,
+      ),
+      child: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: true,
+        toolbarHeight: isIOS ? 50 : kToolbarHeight,
+        centerTitle: false,
+        titleSpacing: 0,
+        title: ProfileHeader(
+            name: 'Hola ${controller.nameSurveyor.value} ${controller.surnameSurveyor.value}',
             role: 'Encuestador',
             avatarPath: 'assets/images/icons/Male.png',
             onSettingsTap: () => _showSettingsModal(context),
           ),
-        ),
-      )
+      ),
     );
   }
 
   Widget _buildContent() {
     return Container(
       padding: const EdgeInsets.only(
-        top: 70,
         left: 16,
         right: 16,
         bottom: 16,
@@ -145,25 +127,25 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
           ),
           Obx(() => controller.showContent.value
               ? controller.isSurveysLoading.value
-                  ? const Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionHeader('Rango de edad'),
-                        const SizedBox(height: 16),
-                        _buildSurveysList(controller.surveys),
-                        const SizedBox(height: 24),
-                        _buildSectionHeader('Rango de edad encuestados'),
-                        const SizedBox(height: 16),
-                        _buildSurveysList(
-                          controller.surveysResponded,
-                          isHistorical: true,
-                        )
-                      ],
-                    )
+              ? const Padding(
+            padding: EdgeInsets.only(top: 20),
+            child: Center(child: CircularProgressIndicator()),
+          )
+              : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionHeader('Rango de edad'),
+              const SizedBox(height: 16),
+              _buildSurveysList(controller.surveys),
+              const SizedBox(height: 24),
+              _buildSectionHeader('Rango de edad encuestados'),
+              const SizedBox(height: 16),
+              _buildSurveysList(
+                controller.surveysResponded,
+                isHistorical: true,
+              )
+            ],
+          )
               : const SizedBox()),
         ],
       ),
@@ -207,7 +189,6 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   }
 
   Widget _buildSurveysList(List<Survey> surveys, {bool isHistorical = false}) {
-
     if (surveys.isEmpty) {
       return const Card(
         color: Colors.white,
@@ -255,6 +236,32 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
     }
   }
 
+  void _showConfirmationDialog(BuildContext context, HomeCodeController homeCodeController) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirmación"),
+          content: const Text("¿Estás seguro de que deseas finalizar el hogar?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Cancelar"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                controller.showContent.value = false;
+                homeCodeController.resetHomeCode();
+              },
+              child: const Text("Aceptar"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _showSettingsModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -274,7 +281,6 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
                   await Get.toNamed(Routes.PENDING_SURVEYS, arguments: {
                     'surveyorId': controller.idSurveyor.value,
                   })?.then((_) => controller.refreshAllData());
-
                 },
               ),
               ListTile(

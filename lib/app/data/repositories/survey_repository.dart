@@ -67,7 +67,7 @@ class SurveyRepository extends BaseRepository implements ISurveyRepository {
     } on http.ClientException catch (e) {
       throw Exception("Error de red (ClientException): ${e.message}");
     } on TimeoutException {
-      throw Exception("Error de red: conexión agotada (timeout)");
+      throw Exception("Error de red: conexión agotada");
     } catch (e) {
       throw Exception("Error inesperado: $e");
     }

@@ -51,13 +51,16 @@ class _IntegerInputQuestionState extends State<IntegerInputQuestion> {
 
   void _onTextChanged() {
     final value = _textController.text;
-
-    widget.controller.responses[widget.question.id] = {
-      'question': widget.question.question,
-      'type': widget.question.type,
-      'value': value,
-    };
-      widget.controller.responses.refresh();
+    if (value.isEmpty) {
+      widget.controller.responses.remove(widget.question.id);
+    } else {
+      widget.controller.responses[widget.question.id] = {
+        'question': widget.question.question,
+        'type': widget.question.type,
+        'value': value,
+      };
+    }
+    widget.controller.responses.refresh();
   }
 
   @override
