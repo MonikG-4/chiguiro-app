@@ -3,5 +3,5 @@ import '../../../core/error/failures/failure.dart';
 
 abstract class ISurveyRepository {
   Future<Either<Failure, List<Map<String, dynamic>>>> fetchSurveys(int surveyorId);
-  Future<Either<Failure, bool>> saveSurveyResults(Map<String, dynamic> entryInput);
+  Future<Map<String, dynamic>> saveSurveyResults(Map<String, dynamic> entryInput);
 }

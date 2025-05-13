@@ -62,13 +62,14 @@ class SurveyCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        survey.active != null ?
         Text(
-          survey.active ? 'En proceso' : 'Finalizada',
+          survey.active! ? 'En proceso' : 'Finalizada',
           style: const TextStyle(
             fontSize: 14,
             color: AppColors.secondary,
           ),
-        ),
+        ) : const SizedBox(height: 4,),
         _buildResponsesInfo(),
       ],
     );

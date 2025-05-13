@@ -63,7 +63,6 @@ class MatrixTimeQuestion extends StatelessWidget {
               items: options,
               label: rowLabel,
               state: state,
-              maxHeight: 300.0,
               onSelected: (String? newValue) {
                 if (newValue != null) {
                   onChanged(newValue);

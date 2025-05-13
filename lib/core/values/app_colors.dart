@@ -34,6 +34,8 @@ class AppColors {
 
   static const Color withOutWifiBackground = Color(0xFFC9E4FA);
 
+  static const Color codeBackground = Color(0xFF57E9B4);
+
 
   //Borde
   static const Color inputs = Color(0xFF748299);

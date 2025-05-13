@@ -1,25 +1,40 @@
-abstract class RepositoryException implements Exception {
+class CheckException implements Exception {
   final String message;
-  final int? code;
-
-  RepositoryException(this.message, [this.code]);
+  CheckException(this.message);
 
   @override
   String toString() => message;
 }
 
-class NetworkException extends RepositoryException {
-  NetworkException(super.message, [super.code]);
+class GateException implements Exception {
+  final String message;
+  GateException(this.message);
+
+  @override
+  String toString() => message;
 }
 
-class ServerException extends RepositoryException {
-  ServerException(super.message, [super.code]);
+class GeneralException implements Exception {
+  final String message;
+  GeneralException(this.message);
+
+  @override
+  String toString() => message;
 }
 
-class CacheException extends RepositoryException {
-  CacheException(super.message, [super.code]);
+class AppNetworkException  implements Exception {
+  final String message;
+  AppNetworkException (this.message);
+
+  @override
+  String toString() => message;
 }
 
-class UnknownException extends RepositoryException {
-  UnknownException(super.message, [super.code]);
+class CacheException implements Exception {
+  final String message;
+  CacheException(this.message);
+
+  @override
+  String toString() => message;
 }
+

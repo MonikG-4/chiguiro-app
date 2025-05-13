@@ -1,3 +1,4 @@
+import 'package:chiguiro_front_app/app/presentation/controllers/notification_controller.dart';
 import 'package:get/get.dart';
 
 import '../../../core/error/failures/failure.dart';
@@ -12,6 +13,7 @@ class AuthController extends GetxController {
   final IAuthRepository repository;
   final CacheStorageService _cacheStorageService =
   Get.find<CacheStorageService>();
+  final NotificationController _notificationController = Get.find();
 
   final isLoading = false.obs;
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
@@ -27,7 +29,7 @@ class AuthController extends GetxController {
   Future<void> login(String email, String password) async {
     isLoading.value = true;
 
-    final result = await repository.login(email, password);
+    final result = await repository.login(email, password, _notificationController.deviceToken.value!);
 
     result.fold(
             (failure) {
@@ -52,7 +54,7 @@ class AuthController extends GetxController {
 
     result.fold(
             (failure) {
-          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+          _showMessage('Error', _mapFailureToMessage(failure).replaceAll("Exception:", ""), 'error');
         },
             (isSuccess) {
           if (isSuccess) {
