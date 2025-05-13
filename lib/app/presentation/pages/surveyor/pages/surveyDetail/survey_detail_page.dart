@@ -16,7 +16,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
 
   @override
   Widget build(BuildContext context) {
-    final availableHeight = MediaQuery.of(context).size.height - 520;
+    final availableHeight = MediaQuery.of(context).size.height - 540;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final estimatedPageSize = (availableHeight / 30).floor();
@@ -39,7 +39,6 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
                 slivers: [
                   SliverToBoxAdapter(
                     child: SizedBox(
-                      height: 230.0,
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
@@ -88,7 +87,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 10, left: 16, right: 16),
+            padding: const EdgeInsets.only(bottom: 30, left: 16, right: 16),
             child: PrimaryButton(
               onPressed: (() async {
                 await Get.toNamed(
@@ -109,29 +108,35 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
   }
 
   Widget _buildAppBarBackground(BuildContext context) {
-    var logoUrl =
-        'assets/images/min-deporte.png';
+    var logoUrl = 'assets/images/min-deporte.png';
 
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: AppColors.backgroundSecondary,
-      ),
-      padding: const EdgeInsets.only(top: 16, right: 16),
-      child: AppBar(
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
-          onPressed: () => Navigator.of(context).pop(),
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: Container(
+        height: 230,
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundSecondary,
         ),
-        titleSpacing: -15,
-        title: ProfileHeader(
-          name: controller.survey.value!.name,
-          role: controller.survey.value!.active! ? 'En proceso' : 'Finalizada',
-          avatarPath: logoUrl,
+        padding: const EdgeInsets.only(top: 16, right: 16),
+        child: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          titleSpacing: -15,
+          title: ProfileHeader(
+            name: controller.survey.value!.name,
+            role: controller.survey.value!.active! ? 'En proceso' : 'Finalizada',
+            avatarPath: logoUrl,
+          ),
         ),
       ),
     );
   }
+
 
   Widget _buildSectionHeader(String title) {
     return Row(

@@ -111,16 +111,34 @@ class SyncService extends GetxService {
     }
   }
 
+  // Future<bool> _handleRepositoryRequest(SyncTaskModel task) async {
+  //   try {
+  //     switch (task.repositoryKey) {
+  //       case 'surveyRepository':
+  //         final ISurveyRepository surveyRepository = Get.find();
+  //         final result = await surveyRepository.saveSurveyResults(task.payload.toJson());
+  //         return result.fold(
+  //                 (failure) => false,
+  //                 (success) => success
+  //         );
+  //       default:
+  //         throw Exception('Repositorio no reconocido: ${task.repositoryKey}');
+  //     }
+  //   } catch (e) {
+  //     return false;
+  //   }
+  // }
+
   Future<bool> _handleRepositoryRequest(SyncTaskModel task) async {
     try {
       switch (task.repositoryKey) {
         case 'surveyRepository':
           final ISurveyRepository surveyRepository = Get.find();
           final result = await surveyRepository.saveSurveyResults(task.payload.toJson());
-          return result.fold(
-                  (failure) => false,
-                  (success) => success
-          );
+          if (result['data'] == null || result['data']['entry'] == null) {
+            throw Exception('Error al enviar la encuesta, por favor intente más tarde.');
+          }
+          return true;
         default:
           throw Exception('Repositorio no reconocido: ${task.repositoryKey}');
       }

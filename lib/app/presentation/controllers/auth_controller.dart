@@ -36,7 +36,6 @@ class AuthController extends GetxController {
           _showMessage('Error', _mapFailureToMessage(failure), 'error');
         },
             (response) async {
-              print('Token enviado: ${_notificationController.deviceToken.value!}');
           await _cacheStorageService.saveAuthResponse(response);
           Get.find<SessionController>().updateAuthStatus();
 
@@ -55,7 +54,7 @@ class AuthController extends GetxController {
 
     result.fold(
             (failure) {
-          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+          _showMessage('Error', _mapFailureToMessage(failure).replaceAll("Exception:", ""), 'error');
         },
             (isSuccess) {
           if (isSuccess) {

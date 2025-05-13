@@ -39,7 +39,7 @@ class _IntegerInputQuestionState extends State<IntegerInputQuestion> {
 
   void _updateControllerText() {
     final currentValue = widget.controller.responses[widget.question.id]?['value'];
-    final currentText = currentValue != null && currentValue != 0
+    final currentText = currentValue != null
         ? currentValue.toString()
         : '';
 
@@ -50,18 +50,14 @@ class _IntegerInputQuestionState extends State<IntegerInputQuestion> {
   }
 
   void _onTextChanged() {
-    final value = int.tryParse(_textController.text);
+    final value = _textController.text;
 
-    if (value != null && value != 0) {
-      widget.controller.responses[widget.question.id] = {
-        'question': widget.question.question,
-        'type': widget.question.type,
-        'value': value,
-      };
-    } else {
-      widget.controller.responses.remove(widget.question.id);
-    }
-    widget.controller.responses.refresh();
+    widget.controller.responses[widget.question.id] = {
+      'question': widget.question.question,
+      'type': widget.question.type,
+      'value': value,
+    };
+      widget.controller.responses.refresh();
   }
 
   @override

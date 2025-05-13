@@ -30,13 +30,12 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
           slivers: [
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 178.0,
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
                     _buildAppBarBackground(context),
                     Positioned(
-                      top: 130.0,
+                      top: 110.0,
                       left: 16.0,
                       right: 16.0,
                       child: Obx(() {
@@ -62,7 +61,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
       ),
       bottomNavigationBar: Obx(() => controller.showContent.value
           ? Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.only(bottom: 30, right: 16, left: 16),
               color: AppColors.background,
               child: PrimaryButton(
                 onPressed: () => _showConfirmationDialog(context, homeCodeController),
@@ -101,22 +100,27 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   }
 
   Widget _buildAppBarBackground(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: AppColors.backgroundSecondary,
-      ),
-      padding: const EdgeInsets.only(top: 16),
-      child: AppBar(
-        backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: false,
-        title: ProfileHeader(
-          name:
-              'Hola ${controller.nameSurveyor.value} ${controller.surnameSurveyor.value}',
-          role: 'Encuestador',
-          avatarPath: 'assets/images/icons/Male.png',
-          onSettingsTap: () => _showSettingsModal(context),
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: Container(
+        height: 160,
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundSecondary,
         ),
-      ),
+        padding: const EdgeInsets.only(top: 16),
+        child: AppBar(
+          backgroundColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+          title: ProfileHeader(
+            name:
+            'Hola ${controller.nameSurveyor.value} ${controller.surnameSurveyor.value}',
+            role: 'Encuestador',
+            avatarPath: 'assets/images/icons/Male.png',
+            onSettingsTap: () => _showSettingsModal(context),
+          ),
+        ),
+      )
     );
   }
 

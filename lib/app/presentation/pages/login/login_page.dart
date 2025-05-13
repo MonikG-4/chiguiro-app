@@ -1,5 +1,3 @@
-import 'package:chiguiro_front_app/app/presentation/widgets/custom_view_form.dart';
-import 'package:chiguiro_front_app/app/presentation/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,6 +5,8 @@ import '../../../../core/values/routes.dart';
 import '../../controllers/auth_controller.dart';
 import '../../widgets/bottom_pages.dart';
 import '../../widgets/custom_text_button_redirect.dart';
+import '../../widgets/custom_view_form.dart';
+import '../../widgets/primary_button.dart';
 import 'widgets/login_form.dart';
 
 class LoginPage extends GetView<AuthController> {

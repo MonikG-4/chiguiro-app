@@ -61,8 +61,8 @@ class PendingSurveysPage extends GetView<SurveyController> {
                     subtitle: Text(formattedDate),
                     trailing: IconButton(
                       icon: const Icon(Icons.save),
-                      onPressed: () {
-                        controller.saveSurveyResults(_surveyorId, survey);
+                      onPressed: () async {
+                         controller.saveSurveyResults(survey);
                       },
                     ),
                   ),

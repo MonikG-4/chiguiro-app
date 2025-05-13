@@ -73,7 +73,8 @@ class DashboardSurveyorController extends GetxController {
         _storageService.authResponse!.id, password);
 
     result.fold((failure) {
-      _showMessage('Error', _mapFailureToMessage(failure), 'error');
+      _showMessage('Error',
+          _mapFailureToMessage(failure).replaceAll("Exception:", ""), 'error');
     }, (isSuccess) {
       if (isSuccess) {
         Get.back();
@@ -98,15 +99,22 @@ class DashboardSurveyorController extends GetxController {
 
     try {
       final userId = _storageService.authResponse!.id;
-      final surveysResult = await repository.fetchSurveyResponded(homeCode, userId);
+      final surveysResult =
+          await repository.fetchSurveyResponded(homeCode, userId);
 
       surveysResult.fold(
-            (failure) {
-          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+        (failure) {
+          _showMessage(
+              'Error',
+              _mapFailureToMessage(failure).replaceAll("Exception:", ""),
+              'error');
         },
-            (data) {
+        (data) {
           if (data.isNotEmpty) {
-            surveysResponded.value = data.where((survey) => survey.entriesCount > 0).toList()..sort((a, b) => a.id.compareTo(b.id));
+            surveysResponded.value = data
+                .where((survey) => survey.entriesCount > 0)
+                .toList()
+              ..sort((a, b) => a.id.compareTo(b.id));
           } else {
             surveysResponded.clear();
           }
@@ -129,10 +137,13 @@ class DashboardSurveyorController extends GetxController {
       final surveysResult = await repository.fetchSurveys(userId);
 
       surveysResult.fold(
-            (failure) {
-          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+        (failure) {
+          _showMessage(
+              'Error',
+              _mapFailureToMessage(failure).replaceAll("Exception:", ""),
+              'error');
         },
-            (data) {
+        (data) {
           if (data.isNotEmpty) {
             surveys.value = data..sort((a, b) => a.id.compareTo(b.id));
             _handlePermissions(data);
@@ -158,10 +169,13 @@ class DashboardSurveyorController extends GetxController {
       final result = await repository.fetchDataSurveyor(userId);
 
       result.fold(
-            (failure) {
-          _showMessage('Error', _mapFailureToMessage(failure), 'error');
+        (failure) {
+          _showMessage(
+              'Error',
+              _mapFailureToMessage(failure).replaceAll("Exception:", ""),
+              'error');
         },
-            (data) {
+        (data) {
           dataSurveyor.value = data;
         },
       );
