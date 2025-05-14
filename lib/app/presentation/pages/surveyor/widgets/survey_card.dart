@@ -70,27 +70,6 @@ class SurveyCard extends StatelessWidget {
             color: AppColors.secondary,
           ),
         ) : const SizedBox(height: 4,),
-        _buildResponsesInfo(),
-      ],
-    );
-  }
-
-  Widget _buildResponsesInfo() {
-    return Row(
-      children: [
-        Icon(
-          Icons.description_outlined,
-          size: 16,
-          color: isHistorical ? AppColors.secondary : AppColors.successText,
-        ),
-        const SizedBox(width: 4),
-        Text(
-          '${survey.entriesCount} respuestas',
-          style: TextStyle(
-            fontSize: 12,
-            color: isHistorical ? AppColors.secondary : AppColors.successText,
-          ),
-        ),
       ],
     );
   }

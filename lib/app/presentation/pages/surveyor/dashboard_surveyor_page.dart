@@ -138,7 +138,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
               const SizedBox(height: 16),
               _buildSurveysList(controller.surveys),
               const SizedBox(height: 24),
-              _buildSectionHeader('Rango de edad encuestados'),
+              _buildSectionHeader('Encuestas realizadas'),
               const SizedBox(height: 16),
               _buildSurveysList(
                 controller.surveysResponded,
@@ -219,7 +219,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   Future<void> _redirectToSurvey(Survey survey) async {
     if (survey.entriesCount > 0) {
       await Get.toNamed(
-        Routes.SURVEY_DETAIL,
+        Routes.SURVEY,
         arguments: {
           'survey': survey,
           'homeCode': controller.homeCode.value,

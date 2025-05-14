@@ -4,8 +4,9 @@ import '../../app/data/models/sync_task_model.dart';
 class SyncTaskStorageService {
   final Box<SyncTaskModel> _taskBox = Hive.box<SyncTaskModel>('sync_tasks');
 
-  Future<void> addTask(SyncTaskModel task) async {
+  Future<String> addTask(SyncTaskModel task) async {
     await _taskBox.put(task.id, task);
+    return task.id;
   }
 
   List<SyncTaskModel> getPendingTasks(int userId) {

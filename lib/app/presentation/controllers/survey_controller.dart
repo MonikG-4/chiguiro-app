@@ -116,12 +116,10 @@ class SurveyController extends GetxController {
     await _fetchLocation();
 
     var position = _locationService.cachedPosition;
-    print(position);
 
     final location =
         getDepartmentAndCityFromCoords(position!.latitude, position.longitude);
 
-    print(location);
     responses[question.id] = {
       'question': question.question,
       'type': question.type,
@@ -275,79 +273,64 @@ class SurveyController extends GetxController {
     );
 
     try {
-      await _saveSurveyLocally(entryInput);
-
-      if (survey.value?.entriesCount == 0) {
-        Get.offNamedUntil(
-          Routes.SURVEY_DETAIL,
-              (route) => route.settings.name != Routes.SURVEY,
-          arguments: {'survey': survey.value},
-        );
-      } else {
-        Get.until(
-              (route) => route.settings.name == Routes.SURVEY_DETAIL,
-        );
-      }
-
-    } catch (e){
-      _showMessage('Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
+      String taskId = await _saveSurveyLocally(entryInput);
+      await saveSurveyResults(entryInput, taskId: taskId);
+    } catch (e) {
+      _showMessage(
+          'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
     } finally {
       isLoadingSendSurvey.value = false;
     }
   }
 
-  Future<void> saveSurveyResults(Map<String, dynamic> entryInputPending) async {
+  Future<void> saveSurveyResults(dynamic entryInput, {String? taskId}) async {
     isLoadingSendSurvey.value = true;
-    try {
-      final result = await repository.saveSurveyResults(entryInputPending['payload'].toJson());
 
-      // Aquí puedes validar si result contiene "data" válida
-      if (result['data'] == null || result['data']['entry'] == null) {
-        throw Exception('La respuesta del servidor no contiene datos válidos');
+    try {
+      late Map<String, dynamic> payload;
+
+      if (entryInput is Map<String, dynamic>) {
+        if (entryInput.containsKey('payload') && entryInput.containsKey('id')) {
+          payload = entryInput['payload'].toJson();
+          taskId = entryInput['id'];
+        } else {
+          throw Exception("Map de entrada inválido: falta 'payload' o 'id'");
+        }
+      } else if (entryInput is SurveyEntryModel) {
+        payload = entryInput.toJson();
+      } else {
+        throw Exception("Tipo de entrada no válido para guardar resultados");
       }
 
-      _taskStorageService.removeTask(entryInputPending['id']);
-      _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
-      Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
-    } catch (e) {
-      _showMessage('Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
-    }
+      final result = await repository.saveSurveyResults(payload);
 
-    // try {
-    //   final result = await repository.saveSurveyResults(entryInputPending['payload'].toJson());
-    //
-    //   result.fold((failure) {
-    //     throw Exception(_mapFailureToMessage(failure));
-    //   }, (data) {
-    //     if (!data) {
-    //       throw Exception('Fallo al enviar la encuesta al servidor');
-    //     }
-    //
-    //     _taskStorageService.removeTask(entryInputPending['id']);
-    //     _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
-    //   });
-    //
-    //   Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
-    // } catch (e) {
-    //   _showMessage('Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
-    // }
-    finally {
+      if (result['data'] == null || result['data']['entry'] == null) {
+        _showMessage('Encuesta', 'Encuesta guardada localmente.', 'success');
+      }
+
+      if (taskId != null) {
+        await _taskStorageService.removeTask(taskId);
+      }
+
+      _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
+
+    } catch (e) {
+      _showMessage('Encuesta', 'Encuesta guardada localmente.', 'success');
+    } finally {
       isLoadingSendSurvey.value = false;
+      Get.until(
+            (route) => route.settings.name == Routes.DASHBOARD_SURVEYOR,
+      );
     }
   }
 
-  Future<void> _saveSurveyLocally(
-      SurveyEntryModel entryInput) async {
-    await _taskStorageService.addTask(SyncTaskModel(
+  Future<String> _saveSurveyLocally(SurveyEntryModel entryInput) async {
+    return await _taskStorageService.addTask(SyncTaskModel(
       id: generateUniqueId(),
       surveyName: survey.value?.name ?? 'Desconocido',
       payload: entryInput,
       repositoryKey: 'surveyRepository',
     ));
-    _showMessage(
-        'Encuesta',
-        'Encuesta guardada correctamente.',
-        'success');
   }
 
   Future<SurveyEntryModel> _createSurveyEntry(
@@ -560,7 +543,8 @@ class SurveyController extends GetxController {
     final locationData = LocationData.getLocationData();
 
     // Función para calcular la distancia entre dos puntos usando la fórmula de Haversine
-    double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    double calculateDistance(
+        double lat1, double lon1, double lat2, double lon2) {
       const earthRadius = 6371; // Radio de la Tierra en km
       final dLat = (lat2 - lat1) * (3.141592653589793 / 180);
       final dLon = (lon2 - lon1) * (3.141592653589793 / 180);
@@ -601,7 +585,8 @@ class SurveyController extends GetxController {
     // Si la distancia es mayor a cierto umbral (por ejemplo, 50 km)
     // podríamos considerar que está fuera de las áreas registradas
     if (minCityDistance > 50) {
-      print('Advertencia: La ubicación más cercana está a $minCityDistance km de distancia');
+      print(
+          'Advertencia: La ubicación más cercana está a $minCityDistance km de distancia');
     }
 
     return {
@@ -610,5 +595,4 @@ class SurveyController extends GetxController {
       'distance': minCityDistance, // Opcional: para información de depuración
     };
   }
-
 }
