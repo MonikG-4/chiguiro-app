@@ -80,7 +80,7 @@
 		</array>
 		<!--  Permisos para ubicación -->
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>Esta aplicación necesita acceder a tu ubicación para registrar desde dónde envías la encuesta.</string>
+		<string>La app registra tu ubicación para asociar cada encuesta con el lugar donde la envías.</string>
 		<key>NSLocationAlwaysUsageDescription</key>
 		<string>Esta aplicación necesita acceso a tu ubicación en segundo plano.</string>
 		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
