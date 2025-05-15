@@ -41,4 +41,9 @@ class AuthResponse {
     if (value is String) return int.tryParse(value) ?? 0;
     return 0;
   }
+
+  @override
+  String toString() {
+    return 'AuthResponse(id: $id, name: $name, surname: $surname, accessToken: $accessToken)';
+  }
 }

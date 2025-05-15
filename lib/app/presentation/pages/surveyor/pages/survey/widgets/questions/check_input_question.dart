@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../../../../../../core/values/app_colors.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
-import '../custom_input.dart';
+import '../custom_input_select.dart';
 
 class CheckInputQuestion extends StatelessWidget {
   final SurveyQuestion question;
@@ -62,7 +62,7 @@ class CheckInputQuestion extends StatelessWidget {
                   state.validate();
                 }
 
-                return  CustomInput(
+                return  CustomInputSelect(
                   hasError: state.hasError,
                   hasValue: controller.responses[question.id] != null,
                   onTap: toggleSelection,

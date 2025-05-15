@@ -7,6 +7,7 @@ class SurveyRespondedQuery {
         project{
           id
           name
+          active
         }
       }
     }

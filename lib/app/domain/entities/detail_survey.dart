@@ -28,4 +28,9 @@ class DetailSurvey {
       'completed': completed,
     };
   }
+
+  @override
+  String toString() {
+    return 'DetailSurvey(id: $id, createdOn: $createdOn, answerPercentage: $answerPercentage, completed: $completed)';
+  }
 }

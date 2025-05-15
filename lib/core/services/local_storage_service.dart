@@ -5,6 +5,7 @@ import '../../app/data/models/survey_responded_model.dart';
 import '../../app/data/models/survey_statistics_model.dart';
 import '../../app/data/models/surveyor_model.dart';
 import '../../app/domain/entities/survey.dart';
+import '../../app/domain/entities/survey_responded.dart';
 import '../../app/domain/entities/survey_statistics.dart';
 import '../../app/domain/entities/surveyor.dart';
 
@@ -33,18 +34,18 @@ class LocalStorageService {
     _surveysBox.clear();
   }
 
-  void saveSurveysResponded(List<Survey> surveys) {
+  void saveSurveysResponded(List<SurveyResponded> surveys) {
     final projectsModels =
     surveys.map((s) => SurveyRespondedModel.fromEntity(s)).toList();
     for (final project in projectsModels) {
-      final existingProject = _surveysRespondedBox.get(project.surveyId);
+      final existingProject = _surveysRespondedBox.get(project.survey.id);
       if (existingProject == null || existingProject != project) {
-        _surveysRespondedBox.put(project.surveyId, project);
+        _surveysRespondedBox.put(project.survey.id, project);
       }
     }
   }
 
-  List<Survey> getSurveysResponded() {
+  List<SurveyResponded> getSurveysResponded() {
     return _surveysRespondedBox.values.map((s) => s.toEntity()).toList();
   }
 

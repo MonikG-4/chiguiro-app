@@ -12,4 +12,9 @@ class SurveyStatistics {
     required this.completedPercentage,
     required this.lastSurvey,
   });
+
+  @override
+  String toString() {
+    return 'SurveyStatistics(totalEntries: $totalEntries, totalCompleted: $totalCompleted, totalUncompleted: $totalUncompleted, completedPercentage: $completedPercentage, lastSurvey: $lastSurvey)';
+  }
 }

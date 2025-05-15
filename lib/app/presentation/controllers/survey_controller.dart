@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
@@ -16,6 +17,7 @@ import '../../../core/values/location.dart';
 import '../../../core/values/routes.dart';
 import '../../data/models/survey_entry_model.dart';
 import '../../data/models/sync_task_model.dart';
+import '../../domain/entities/block_code.dart';
 import '../../domain/entities/sections.dart';
 import '../../domain/entities/survey.dart';
 import '../../domain/entities/survey_question.dart';
@@ -125,6 +127,53 @@ class SurveyController extends GetxController {
       'type': question.type,
       'value': ['Colombia', '${location['department']}', '${location['city']}'],
     };
+  }
+
+  Future<BlockCode?> fetchBlockCode() async {
+    await _fetchLocation();
+    final position = _locationService.cachedPosition;
+
+    if (position == null) {
+      _showMessage('Error', 'No se pudo obtener la ubicación', 'error');
+      return null;
+    }
+
+    final result = await repository.fecthBlockCode(
+      position.latitude,
+      position.longitude,
+    );
+
+    BlockCode? blockCode;
+
+    result.fold(
+      (failure) {
+        _showMessage('Error', failure.message, 'error');
+      },
+      (data) {
+        blockCode = data;
+      },
+    );
+
+    return blockCode;
+  }
+
+  Future<void> redirectToMap() async {
+    const String url = 'https://chiguiro.proyen.co/geodata';
+
+    final Uri uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      final bool launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched) {
+        _showMessage('Ver mapa', 'No se pudo abrir el navegador', 'error');
+      }
+    } else {
+      _showMessage('Ver mapa', 'URL inválida', 'error');
+    }
   }
 
   Future<void> pickImage(SurveyQuestion question) async {
@@ -313,13 +362,12 @@ class SurveyController extends GetxController {
       }
 
       _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
-
     } catch (e) {
       _showMessage('Encuesta', 'Encuesta guardada localmente.', 'success');
     } finally {
       isLoadingSendSurvey.value = false;
       Get.until(
-            (route) => route.settings.name == Routes.DASHBOARD_SURVEYOR,
+        (route) => route.settings.name == Routes.DASHBOARD_SURVEYOR,
       );
     }
   }
@@ -367,6 +415,7 @@ class SurveyController extends GetxController {
         case 'Double':
         case 'Star':
         case 'Scale':
+        case 'Address':
           answer['answer'] = responseValue.toString();
           break;
 
@@ -382,6 +431,7 @@ class SurveyController extends GetxController {
 
         case 'Check':
         case 'Location':
+        case 'Block_Code':
           answer['checkResults'] = List<String>.from(responseValue);
           break;
 

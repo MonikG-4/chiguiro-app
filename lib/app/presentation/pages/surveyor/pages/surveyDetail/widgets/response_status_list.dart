@@ -6,7 +6,6 @@ import '../../../../../../domain/entities/detail_survey.dart';
 import '../../../../../controllers/detail_survey_controller.dart';
 
 class ResponseStatusList extends StatelessWidget {
-  final bool shrinkWrap;
   final ScrollPhysics? physics;
   final double? maxHeight;
 
@@ -14,7 +13,6 @@ class ResponseStatusList extends StatelessWidget {
 
   ResponseStatusList({
     super.key,
-    this.shrinkWrap = false,
     this.physics,
     this.maxHeight,
   });

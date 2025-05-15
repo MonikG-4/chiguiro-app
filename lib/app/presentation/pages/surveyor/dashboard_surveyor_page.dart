@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/values/routes.dart';
@@ -11,6 +9,7 @@ import '../../../../core/values/app_colors.dart';
 import '../../../domain/entities/survey.dart';
 import '../../controllers/dashboard_surveyor_controller.dart';
 import 'widgets/home_code_widget.dart';
+import 'widgets/response_survey_list.dart';
 import 'widgets/surveyor_balance_card.dart';
 import 'widgets/profile_header.dart';
 
@@ -134,16 +133,13 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
               : Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionHeader('Rango de edad'),
+              _buildSectionHeader('Formularios'),
               const SizedBox(height: 16),
-              _buildSurveysList(controller.surveys),
+              _buildSurveysList(),
               const SizedBox(height: 24),
               _buildSectionHeader('Encuestas realizadas'),
               const SizedBox(height: 16),
-              _buildSurveysList(
-                controller.surveysResponded,
-                isHistorical: true,
-              )
+              _buildSurveysRespondedList()
             ],
           )
               : const SizedBox()),
@@ -188,8 +184,8 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
     );
   }
 
-  Widget _buildSurveysList(List<Survey> surveys, {bool isHistorical = false}) {
-    if (surveys.isEmpty) {
+  Widget _buildSurveysList() {
+    if (controller.surveys.isEmpty) {
       return const Card(
         color: Colors.white,
         child: Padding(
@@ -206,13 +202,39 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
     }
 
     return Column(
-      children: surveys.map((survey) {
+      children: controller.surveys.map((survey) {
         return SurveyCard(
           survey: survey,
-          isHistorical: isHistorical,
-          onTap: () => isHistorical ? null : _redirectToSurvey(survey),
+          onTap: () => _redirectToSurvey(survey),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildSurveysRespondedList() {
+    if (controller.surveysResponded.isEmpty) {
+      return const Card(
+        color: Colors.white,
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Center(
+            child: Text(
+              "No hay encuestas disponibles",
+              style: TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        ResponseSurveyList(
+          surveyResponded: controller.surveysResponded,
+          isLoadingAnswerSurvey: controller.isSurveysRespondedLoading,
+        ),
+      ]
     );
   }
 
@@ -226,13 +248,13 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
         },
       )?.then((_) => controller.refreshAllData());
     } else {
-      Get.toNamed(
+      await Get.toNamed(
         Routes.SURVEY_WITHOUT_RESPONSE,
         arguments: {
           'survey': survey,
           'homeCode': controller.homeCode.value,
         },
-      );
+      )?.then((_) => controller.refreshAllData());
     }
   }
 

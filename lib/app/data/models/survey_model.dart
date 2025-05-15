@@ -22,15 +22,12 @@ class SurveyModel extends HiveObject {
   final int entriesCount;
 
   @HiveField(5)
-  final String? logoUrl;
-
-  @HiveField(6)
   final bool geoLocation;
 
-  @HiveField(7)
+  @HiveField(6)
   final bool voiceRecorder;
 
-  @HiveField(8)
+  @HiveField(7)
   final List<SectionsModel> sections;
 
   SurveyModel({
@@ -39,7 +36,6 @@ class SurveyModel extends HiveObject {
     required this.active,
     this.lastSurvey,
     required this.entriesCount,
-    this.logoUrl,
     required this.geoLocation,
     required this.voiceRecorder,
     required this.sections
@@ -52,7 +48,6 @@ class SurveyModel extends HiveObject {
       active: json['active'] ?? false,
       lastSurvey: json['lastSurvey'] != null ? DateTime.parse(json['lastSurvey']) : null,
       entriesCount: json['entriesCount'] ?? 0,
-      logoUrl: json['logoUrl'],
       geoLocation: json['geoLocation'] ?? false,
       voiceRecorder: json['voiceRecorder'] ?? false,
       sections: json['sections'] != null ? List<SectionsModel>.from(json['sections'].map((x) => SectionsModel.fromJson(x))) : [],
@@ -65,10 +60,9 @@ class SurveyModel extends HiveObject {
     return SurveyModel(
       id: survey.id,
       name: survey.name,
-      active: survey.active!,
+      active: survey.active,
       lastSurvey: survey.lastSurvey,
       entriesCount: survey.entriesCount,
-      logoUrl: survey.logoUrl,
       geoLocation: survey.geoLocation,
       voiceRecorder: survey.voiceRecorder,
       sections: survey.sections.map((s) => SectionsModel.fromEntity(s)).toList(),
@@ -82,7 +76,6 @@ class SurveyModel extends HiveObject {
       active: active,
       lastSurvey: lastSurvey,
       entriesCount: entriesCount,
-      logoUrl: logoUrl,
       geoLocation: geoLocation,
       voiceRecorder: voiceRecorder,
       sections: sections.map((s) => s.toEntity()).toList(),

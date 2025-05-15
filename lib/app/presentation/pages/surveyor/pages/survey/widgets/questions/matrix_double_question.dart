@@ -106,20 +106,23 @@ class _MatrixDoubleQuestionState extends State<MatrixDoubleQuestion> {
       validator: (_) => null,
       builder: (FormFieldState<String> state) {
         return Flexible(
-            child: CustomSelect(
-          keyDropdown: dropdownKeys[cellKey] ?? GlobalKey(), // Changed here
-          value: initialValue.isEmpty ? null : initialValue,
-          items: List.generate(9, (index) => index.toString()),
-          label: label,
-          state: state,
-          onSelected: (String? newValue) {
-            if (newValue != null) {
-              onChanged(newValue);
-            } else {
-              onChanged('0');
-            }
-          },
-        ));
+            child: Padding(
+                padding: const EdgeInsets.only(left: 0, right: 5),
+                child: CustomSelect(
+                  keyDropdown: dropdownKeys[cellKey] ?? GlobalKey(),
+                  // Changed here
+                  value: initialValue.isEmpty ? "0" : initialValue,
+                  items: List.generate(10, (index) => index.toString()),
+                  label: label,
+                  state: state,
+                  onSelected: (String? newValue) {
+                    if (newValue != null) {
+                      onChanged(newValue);
+                    } else {
+                      onChanged('0');
+                    }
+                  },
+                )));
       },
     );
   }

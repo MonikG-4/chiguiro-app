@@ -31,7 +31,7 @@ class SelectInputQuestion extends StatelessWidget {
               return CustomSelect(
                 value: selectedValue,
                 items: question.meta,
-                label: 'una opción',
+                label: 'Selecciona una opción',
                 keyDropdown: selectKey,
                 state: state,
                 onSelected: (value) {
