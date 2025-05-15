@@ -5,7 +5,6 @@ import FirebaseMessaging
 import UserNotifications
 
 @main
-<<<<<<< HEAD
 @objc class AppDelegate: FlutterAppDelegate  {
     
     override func application(
@@ -59,7 +58,6 @@ import UserNotifications
         print(" Notificación tocada: \(userInfo)")
         completionHandler()
     }
-=======
 @objc class AppDelegate: FlutterAppDelegate {
 
   override func application(
