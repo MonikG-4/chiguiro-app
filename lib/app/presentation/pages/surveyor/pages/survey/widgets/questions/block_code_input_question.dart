@@ -101,7 +101,7 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       final blockCode =
-                      await widget.controller.fetchBlockCode();
+                          await widget.controller.fetchBlockCode();
 
                       if (blockCode != null) {
                         _blockCodeController.text = blockCode.blockCode;
@@ -128,12 +128,15 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () async {
-                      final url = Uri.tryParse('https://chiguiro.proyen.co/geodata ');
+                      final url =
+                          Uri.tryParse('https://chiguiro.proyen.co/geodata');
                       if (url != null) {
-                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                        await launchUrl(url,
+                            mode: LaunchMode.externalApplication);
                       } else {
                         Get.snackbar('Error', 'No se pudo abrir el enlace');
-                      }                    },
+                      }
+                    },
                     icon: const Icon(Icons.map_outlined),
                     label: const Text('Ver mapa'),
                     style: ElevatedButton.styleFrom(
@@ -168,7 +171,8 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
                   : _regionController.text,
               items: _regionOptions,
               label: 'Región',
-              keyDropdown: GlobalKey(debugLabel: '${widget.question.id}_region'),
+              keyDropdown:
+                  GlobalKey(debugLabel: '${widget.question.id}_region'),
               state: state,
               onSelected: (value) {
                 _regionController.text = value!;
@@ -179,8 +183,7 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
             const Text('Zona',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
             CustomSelect(
-              value:
-              _zoneController.text.isEmpty ? null : _zoneController.text,
+              value: _zoneController.text.isEmpty ? null : _zoneController.text,
               items: _zoneOptions,
               label: 'Zona',
               keyDropdown: GlobalKey(debugLabel: '${widget.question.id}_zone'),
