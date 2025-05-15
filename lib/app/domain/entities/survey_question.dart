@@ -30,4 +30,9 @@ class SurveyQuestion {
     this.scaleMax,
     this.jumpers,
   });
+
+  @override
+  String toString() {
+    return 'SurveyQuestion(id: $id, question: $question, description: $description, sort: $sort, type: $type, mandatory: $mandatory, meta: $meta, meta2: $meta2, anchorMin: $anchorMin, anchorMax: $anchorMax, scaleMin: $scaleMin, scaleMax: $scaleMax, jumpers: $jumpers)';
+  }
 }

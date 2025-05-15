@@ -28,6 +28,10 @@ abstract class BaseRepository {
     try {
       final result = await request();
 
+      if (!result.containsKey(dataKey) || result[dataKey] == null) {
+        return Left(UnknownFailure(unknownErrorMessage));
+      }
+
       return Right(onSuccess(result));
     } on Exception catch (e) {
       return Left(UnknownFailure(e.toString()));
@@ -46,6 +50,10 @@ abstract class BaseRepository {
     if (_connectivityService.isConnected.value) {
       try {
         final result = await request();
+
+        if (!result.containsKey(dataKey) || result[dataKey] == null) {
+          return Left(UnknownFailure(unknownErrorMessage));
+        }
 
         final data = onSuccess(result);
         saveToCache(data);

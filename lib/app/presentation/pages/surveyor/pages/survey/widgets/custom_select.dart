@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'custom_input.dart';
+import 'custom_input_select.dart';
 
 class CustomSelect extends StatelessWidget {
   final String? value;
@@ -66,7 +66,7 @@ class CustomSelect extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 80),
-      child: CustomInput(
+      child: CustomInputSelect(
         key: keyDropdown,
         hasError: state?.hasError ?? false,
         hasValue: value != null,

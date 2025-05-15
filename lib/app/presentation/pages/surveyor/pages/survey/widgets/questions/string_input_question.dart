@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../../../../core/values/app_colors.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
+import '../custom_input.dart';
 
 class StringInputQuestion extends StatefulWidget {
   final SurveyQuestion question;
@@ -67,24 +67,11 @@ class StringInputQuestionState extends State<StringInputQuestion> {
         return Obx(() {
           _updateControllerText();
 
-          final hasValue = widget.controller.responses[widget.question.id]?['value'] != null;
-
-          return TextFormField(
+          return CustomInput(
             controller: _textController,
-            decoration: InputDecoration(
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: hasValue ? AppColors.successBorder : Colors.grey[300]!,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: AppColors.successBorder),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-              errorText: state.errorText,
-            ),
+            inputType: InputValueType.text,
+            hintText: 'Ejemplo: texto aqui!',
+            errorText: state.errorText,
             onChanged: (value) {
               state.validate();
             },
