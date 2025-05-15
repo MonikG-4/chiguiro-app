@@ -62,6 +62,12 @@
 			<key>NSAllowsArbitraryLoads</key>
 			<true/>
 		</dict>
+		<!--  Permiso para redirección -->
+		<key>LSApplicationQueriesSchemes</key>
+        <array>
+          <string>http</string>
+          <string>https</string>
+        </array>
 		<!--  Permiso para notificaciones -->
 		<key>NSUserNotificationAlertStyle</key>
 		<string>alert</string>

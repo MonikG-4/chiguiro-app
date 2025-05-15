@@ -19,23 +19,20 @@ class SurveyRespondedModelAdapter extends TypeAdapter<SurveyRespondedModel> {
     return SurveyRespondedModel(
       totalEntries: fields[0] as int,
       lastSurvey: fields[1] as DateTime,
-      surveyId: fields[2] as int,
-      surveyName: fields[3] as String,
+      survey: fields[2] as SurveyModel,
     );
   }
 
   @override
   void write(BinaryWriter writer, SurveyRespondedModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.totalEntries)
       ..writeByte(1)
       ..write(obj.lastSurvey)
       ..writeByte(2)
-      ..write(obj.surveyId)
-      ..writeByte(3)
-      ..write(obj.surveyName);
+      ..write(obj.survey);
   }
 
   @override

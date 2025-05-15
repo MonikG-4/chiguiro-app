@@ -6,6 +6,7 @@ import '../../../core/error/failures/failure.dart';
 import '../../../core/services/graphql_service.dart';
 import '../../../core/services/local_storage_service.dart';
 import '../../domain/entities/survey.dart';
+import '../../domain/entities/survey_responded.dart';
 import '../../domain/entities/surveyor.dart';
 import '../../domain/repositories/i_dashboard_surveyor_repository.dart';
 import '../graphql/mutations/password_mutations.dart';
@@ -84,8 +85,8 @@ class DashboardSurveyorRepository extends BaseRepository
   }
 
   @override
-  Future<Either<Failure, List<Survey>>> fetchSurveyResponded(String homeCode, int surveyorId) async{
-    return safeApiCallWithCache<List<Survey>>(
+  Future<Either<Failure, List<SurveyResponded>>> fetchSurveyResponded(String homeCode, int surveyorId) async{
+    return safeApiCallWithCache<List<SurveyResponded>>(
       request: () => _graphqlService.query(
         document: SurveyRespondedQuery.pollsterStatisticHome,
         variables: {

@@ -5,13 +5,11 @@ import '../../../../domain/entities/survey.dart';
 
 class SurveyCard extends StatelessWidget {
   final Survey survey;
-  final bool isHistorical;
   final VoidCallback onTap;
 
   const SurveyCard({
     required this.survey,
     required this.onTap,
-    this.isHistorical = false,
     super.key,
   });
 
@@ -22,14 +20,11 @@ class SurveyCard extends StatelessWidget {
       color: Colors.white,
       child: InkWell(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: ListTile(
-            leading: _buildLeadingIcon(),
-            title: _buildTitle(),
-            subtitle: _buildSubtitle(),
-            trailing: const Icon(Icons.chevron_right),
-          ),
+        child: ListTile(
+          leading: _buildLeadingIcon(),
+          title: _buildTitle(),
+          subtitle: _buildSubtitle(),
+          trailing: const Icon(Icons.chevron_right),
         ),
       ),
     );
@@ -50,9 +45,8 @@ class SurveyCard extends StatelessWidget {
   Widget _buildTitle() {
     return Text(
       survey.name,
-      style: TextStyle(
+      style: const TextStyle(
         fontWeight: FontWeight.w600,
-        color: isHistorical ? AppColors.secondary : null,
       ),
       overflow: TextOverflow.ellipsis,
     );
@@ -62,14 +56,17 @@ class SurveyCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        survey.active != null ?
-        Text(
-          survey.active! ? 'En proceso' : 'Finalizada',
-          style: const TextStyle(
-            fontSize: 14,
-            color: AppColors.secondary,
-          ),
-        ) : const SizedBox(height: 4,),
+        survey.active
+            ? Text(
+                survey.active ? 'En proceso' : 'Finalizada',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.secondary,
+                ),
+              )
+            : const SizedBox(
+                height: 4,
+              ),
       ],
     );
   }

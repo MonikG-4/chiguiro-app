@@ -6,6 +6,7 @@ import '../../../core/services/connectivity_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../domain/entities/survey.dart';
+import '../../domain/entities/survey_responded.dart';
 import '../../domain/entities/surveyor.dart';
 import '../../domain/repositories/i_dashboard_surveyor_repository.dart';
 import '../../../core/services/location_service.dart';
@@ -19,7 +20,7 @@ class DashboardSurveyorController extends GetxController {
 
   // Variables reactivas para la UI
   final surveys = <Survey>[].obs;
-  final surveysResponded = <Survey>[].obs;
+  final surveysResponded = <SurveyResponded>[].obs;
   final dataSurveyor = Rx<Surveyor?>(null);
 
   // Estados de carga separados para cada operación
@@ -101,7 +102,7 @@ class DashboardSurveyorController extends GetxController {
       final userId = _storageService.authResponse!.id;
       final surveysResult =
           await repository.fetchSurveyResponded(homeCode, userId);
-
+      
       surveysResult.fold(
         (failure) {
           _showMessage(
@@ -112,9 +113,9 @@ class DashboardSurveyorController extends GetxController {
         (data) {
           if (data.isNotEmpty) {
             surveysResponded.value = data
-                .where((survey) => survey.entriesCount > 0)
+                .where((survey) => survey.totalEntries > 0)
                 .toList()
-              ..sort((a, b) => a.id.compareTo(b.id));
+              ..sort((a, b) => a.survey.id.compareTo(b.survey.id));
           } else {
             surveysResponded.clear();
           }
