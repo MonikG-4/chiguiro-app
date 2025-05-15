@@ -41,6 +41,7 @@ class AppColors {
   static const Color inputs = Color(0xFF748299);
   static const Color errorInputs = Color(0xFFB91C1C);
 
+  static const Color infoBorder = Color(0xFF2563EB);
   static const Color successBorder = Color(0xFF26D87B);
   static const Color warningBorder = Color(0xFFFACC15);
   static const Color errorBorder = Color(0xFFEF4444);

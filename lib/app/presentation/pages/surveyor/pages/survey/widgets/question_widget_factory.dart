@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import '../../../../../../../core/values/app_colors.dart';
 import '../../../../../../domain/entities/survey_question.dart';
 import '../../../../../controllers/survey_controller.dart';
+import 'questions/address_input_question.dart';
+import 'questions/block_code_input_question.dart';
 import 'questions/date_input_question.dart';
 import 'questions/location_input_question.dart';
 import 'questions/check_input_question.dart';
@@ -29,6 +31,7 @@ class QuestionWidgetFactory {
         _QuestionHeader(question: question, controller: controller),
         const SizedBox(height: 8),
         _QuestionBody(question: question, controller: controller),
+        const SizedBox(height: 8),
       ],
     );
   }
@@ -45,27 +48,10 @@ class _QuestionHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    if (question.mandatory)
-                      const TextSpan(
-                        text: '* ',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    TextSpan(
-                      text: 'Pregunta ${question.sort}',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (question.type == 'Location')
+        if (question.type == 'Location')
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
               InkWell(
                 onTap: () => controller.getLocation(question),
                 borderRadius: BorderRadius.circular(8),
@@ -80,7 +66,8 @@ class _QuestionHeader extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.location_on, size: 16, color: AppColors.successText),
+                      Icon(Icons.location_on,
+                          size: 16, color: AppColors.successText),
                       SizedBox(width: 2),
                       Text(
                         'Ubicar',
@@ -93,18 +80,42 @@ class _QuestionHeader extends StatelessWidget {
                     ],
                   ),
                 ),
-              )
+              ),
+            ],
+          ),
 
-          ],
+        const SizedBox(height: 4),
+
+        Text.rich(
+          TextSpan(
+            children: [
+              if (question.mandatory)
+                const TextSpan(
+                  text: '* ',
+                  style: TextStyle(color: Colors.red),
+                ),
+              TextSpan(
+                text: 'P${question.sort} ',
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, color: AppColors.tertiary),
+              ),
+              TextSpan(
+                text: question.question,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          softWrap: true,
+          overflow: TextOverflow.visible,
         ),
-        Text(question.question,
-            style: const TextStyle(fontWeight: FontWeight.w600)),
+
         if (question.description != null && question.description!.isNotEmpty) ...[
           const SizedBox(height: 12),
           Text(question.description!),
         ],
       ],
     );
+
   }
 }
 
@@ -147,6 +158,11 @@ class _QuestionBody extends StatelessWidget {
         return MatrixTimeQuestion(question: question, controller: controller);
       case 'MatrixDouble':
         return MatrixDoubleQuestion(question: question, controller: controller);
+      case 'Address':
+        return AddressInputQuestion(question: question, controller: controller);
+      case 'Block_Code':
+        return BlockCodeInputQuestion(
+            question: question, controller: controller);
       default:
         return const SizedBox.shrink();
     }
