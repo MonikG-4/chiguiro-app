@@ -13,23 +13,27 @@ class SurveyRespondedModel extends HiveObject {
   final DateTime lastSurvey;
 
   @HiveField(2)
-  final SurveyModel survey;
+  final SurveyModel? survey;
 
 
   SurveyRespondedModel({
     required this.totalEntries,
     required this.lastSurvey,
-    required this.survey,
+    this.survey,
   });
 
   factory SurveyRespondedModel.fromJson(Map<String, dynamic> json) {
-    print(json);
     return SurveyRespondedModel(
       totalEntries: json['totalEntries'] ?? 0,
-      lastSurvey: json['lastSurvey'] != null ? DateTime.parse(json['lastSurvey']) : DateTime.now(),
-      survey: SurveyModel.fromJson(json['project']),
+      lastSurvey: json['lastSurvey'] != null
+          ? DateTime.tryParse(json['lastSurvey']) ?? DateTime.now()
+          : DateTime.now(),
+      survey: json['project'] != null
+          ? SurveyModel.fromJson(json['project'])
+          : null,
     );
   }
+
 
   factory SurveyRespondedModel.fromEntity(SurveyResponded survey) {
     return SurveyRespondedModel(
@@ -43,7 +47,7 @@ class SurveyRespondedModel extends HiveObject {
     return SurveyResponded(
       lastSurvey: lastSurvey,
       totalEntries: totalEntries,
-      survey: survey.toEntity(),
+      survey: survey!.toEntity(),
     );
   }
 }

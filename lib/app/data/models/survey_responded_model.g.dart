@@ -19,7 +19,7 @@ class SurveyRespondedModelAdapter extends TypeAdapter<SurveyRespondedModel> {
     return SurveyRespondedModel(
       totalEntries: fields[0] as int,
       lastSurvey: fields[1] as DateTime,
-      survey: fields[2] as SurveyModel,
+      survey: fields[2] as SurveyModel?,
     );
   }
 

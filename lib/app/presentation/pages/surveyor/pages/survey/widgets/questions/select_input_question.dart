@@ -44,7 +44,10 @@ class SelectInputQuestion extends StatelessWidget {
                       'value': value,
                     };
                   }
-                  state.didChange(value);
+                  controller.handleJumper(question, value);
+
+                  state.didChange(controller.responses[question.id]?['value']
+                      ?.toString());
                   state.validate();
                 },
               );

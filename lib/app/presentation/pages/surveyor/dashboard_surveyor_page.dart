@@ -21,50 +21,48 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
     final homeCodeController = Get.find<HomeCodeController>();
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       backgroundColor: AppColors.background,
-      body: RefreshIndicator(
-        onRefresh: () async {
-          controller.refreshAllData();
-        },
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Column(
-                    children: [
-                      _buildAppBarBackground(context),
-                      Container(
-                        height: 80,
-                        color: AppColors.background,
-                      ),
-                    ],
-                  ),
-                  Positioned(
-                    top: 130.0,
-                    left: 16.0,
-                    right: 16.0,
-                    child: Obx(() {
-                      return SurveyorBalanceCard(
-                        isLoading: controller.isSurveyorDataLoading.value,
-                        responses:
-                        controller.dataSurveyor.value?.totalEntries ?? 0,
-                        lastSurveyDate:
-                        controller.dataSurveyor.value?.lastSurvey ??
-                            '-- -- -- --',
-                      );
-                    }),
-                  ),
-                ],
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              SizedBox(
+                height: 190,
+                child: _buildAppBarBackground(context),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: _buildContent(),
-            ),
-          ],
-        ),
+
+              const SizedBox(height: 70),
+
+              // Scroll solo para el contenido
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    controller.refreshAllData();
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: _buildContent(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          Positioned(
+            top: 140,
+            left: 16,
+            right: 16,
+            child: Obx(() {
+              return SurveyorBalanceCard(
+                isLoading: controller.isSurveyorDataLoading.value,
+                responses: controller.dataSurveyor.value?.totalEntries ?? 0,
+                lastSurveyDate:
+                controller.dataSurveyor.value?.lastSurvey ?? '-- -- -- --',
+              );
+            }),
+          ),
+        ],
       ),
       bottomNavigationBar: Obx(() => controller.showContent.value
           ? Container(
@@ -79,6 +77,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
           : const SizedBox.shrink()),
     );
   }
+
 
   Widget _buildAppBarBackground(BuildContext context) {
     final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
@@ -185,7 +184,9 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   }
 
   Widget _buildSurveysList() {
-    if (controller.surveys.isEmpty) {
+    final activeSurveys = controller.surveys.where((survey) => survey.active).toList();
+
+    if (activeSurveys.isEmpty) {
       return const Card(
         color: Colors.white,
         child: Padding(
@@ -202,7 +203,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
     }
 
     return Column(
-      children: controller.surveys.map((survey) {
+      children: activeSurveys.map((survey) {
         return SurveyCard(
           survey: survey,
           onTap: () => _redirectToSurvey(survey),
@@ -210,6 +211,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
       }).toList(),
     );
   }
+
 
   Widget _buildSurveysRespondedList() {
     if (controller.surveysResponded.isEmpty) {

@@ -53,11 +53,21 @@ class SurveyPage extends GetView<SurveyController> {
               _buildQuestionsForm(context),
               _buildProgressBar(),
 
-              _buildSubmitButton(context),
+              // _buildSubmitButton(context),
             ],
           ),
         );
       }),
+      bottomNavigationBar:  Container(
+        padding: const EdgeInsets.only(top: 10, bottom: 30, right: 16, left: 16),
+        child: PrimaryButton(
+          onPressed: controller.isLoadingSendSurvey.value
+              ? null
+              : () => _submitSurvey(),
+          isLoading: controller.isLoadingSendSurvey.value,
+          child: 'Enviar Encuesta',
+        ),
+      ),
     );
   }
 
@@ -70,7 +80,6 @@ class SurveyPage extends GetView<SurveyController> {
                 : 40.0,
         left: 16.0,
         right: 16.0,
-        bottom: 100.0,
       ),
       child: Form(
         key: _formKey,
@@ -317,36 +326,36 @@ class SurveyPage extends GetView<SurveyController> {
     }
   }
 
-  Widget _buildSubmitButton(BuildContext context) {
-    return Positioned(
-      bottom: 20,
-      left: 0,
-      right: 0,
-      child: Container(
-        color: AppColors.background,
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            PrimaryButton(
-              onPressed: controller.isLoadingSendSurvey.value
-                  ? null
-                  : () => _submitSurvey(),
-              isLoading: controller.isLoadingSendSurvey.value,
-              child: 'Enviar Encuesta',
-            ),
-            // const SizedBox(height: 8),
-            // PrimaryButton(
-            //   isLoading: false,
-            //   onPressed: () async {
-            //     await _fillSurveyWithRandomResponses();
-            //   },
-            //   child: 'Responder Aleatoriamente',
-            // ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildSubmitButton(BuildContext context) {
+  //   return Positioned(
+  //     bottom: 20,
+  //     left: 0,
+  //     right: 0,
+  //     child: Container(
+  //       color: AppColors.background,
+  //       padding: const EdgeInsets.all(16.0),
+  //       child: Column(
+  //         children: [
+  //           PrimaryButton(
+  //             onPressed: controller.isLoadingSendSurvey.value
+  //                 ? null
+  //                 : () => _submitSurvey(),
+  //             isLoading: controller.isLoadingSendSurvey.value,
+  //             child: 'Enviar Encuesta',
+  //           ),
+  //           // const SizedBox(height: 8),
+  //           // PrimaryButton(
+  //           //   isLoading: false,
+  //           //   onPressed: () async {
+  //           //     await _fillSurveyWithRandomResponses();
+  //           //   },
+  //           //   child: 'Responder Aleatoriamente',
+  //           // ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Future<void> _submitSurvey() async {
     if (_formKey.currentState!.validate() & controller.validateAllQuestions()) {

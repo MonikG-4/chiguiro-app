@@ -38,9 +38,9 @@ class LocalStorageService {
     final projectsModels =
     surveys.map((s) => SurveyRespondedModel.fromEntity(s)).toList();
     for (final project in projectsModels) {
-      final existingProject = _surveysRespondedBox.get(project.survey.id);
+      final existingProject = _surveysRespondedBox.get(project.survey?.id);
       if (existingProject == null || existingProject != project) {
-        _surveysRespondedBox.put(project.survey.id, project);
+        _surveysRespondedBox.put(project.survey?.id, project);
       }
     }
   }

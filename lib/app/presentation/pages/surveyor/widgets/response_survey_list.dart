@@ -24,36 +24,33 @@ class ResponseSurveyList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(surveyResponded);
     return Obx(() {
       if (isLoadingAnswerSurvey.value) {
         return const Center(
-            child: CircularProgressIndicator(color: Colors.black));
+          child: CircularProgressIndicator(color: Colors.black),
+        );
       }
 
-      return SizedBox(
-        height: maxHeight,
-        child: Column(
-          children: [
-            _buildHeader(),
-            const Divider(height: 2, color: Color(0xFFE3EAF3)),
-            Expanded(
-              child: ListView.separated(
-                physics: physics ?? const AlwaysScrollableScrollPhysics(),
-                shrinkWrap: shrinkWrap,
-                padding: EdgeInsets.zero,
-                itemCount: surveyResponded.length,
-                separatorBuilder: (context, index) =>
-                    const Divider(height: 1, color: Color(0xFFE3EAF3)),
-                itemBuilder: (context, index) =>
-                    _buildItem(surveyResponded[index]),
-              ),
-            ),
-          ],
-        ),
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildHeader(),
+          const Divider(height: 2, color: Color(0xFFE3EAF3)),
+          ListView.separated(
+            physics: physics ?? const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            padding: EdgeInsets.zero,
+            itemCount: surveyResponded.length,
+            separatorBuilder: (context, index) =>
+            const Divider(height: 1, color: Color(0xFFE3EAF3)),
+            itemBuilder: (context, index) =>
+                _buildItem(surveyResponded[index]),
+          ),
+        ],
       );
     });
   }
+
 
   Widget _buildHeader() {
     return Padding(
