@@ -16,10 +16,10 @@ class GraphQLService {
   }) async {
     final result = await _client.query(
       QueryOptions(
-        document: gql(document),
-        variables: variables!,
-        fetchPolicy: FetchPolicy.noCache,
-      ),
+          document: gql(document),
+          variables: variables!,
+          fetchPolicy: FetchPolicy.noCache,
+          queryRequestTimeout: const Duration(seconds: 1000)),
     );
     return _handleResult(result);
   }
@@ -30,10 +30,10 @@ class GraphQLService {
   }) async {
     final result = await _client.mutate(
       MutationOptions(
-        document: gql(document),
-        variables: variables!,
-        fetchPolicy: FetchPolicy.noCache,
-      ),
+          document: gql(document),
+          variables: variables!,
+          fetchPolicy: FetchPolicy.noCache,
+          queryRequestTimeout: const Duration(seconds: 1000)),
     );
     return _handleResult(result);
   }
