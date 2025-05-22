@@ -42,7 +42,6 @@ class SurveyPage extends GetView<SurveyController> {
           padding: const EdgeInsets.only(top: 5.0),
           child: Stack(
             children: [
-
               if (controller.isVoiceRecorder.value ||
                   controller.isGeoLocation.value)
                 AudioLocationPanel(
@@ -58,15 +57,20 @@ class SurveyPage extends GetView<SurveyController> {
           ),
         );
       }),
-      bottomNavigationBar:  Container(
-        padding: const EdgeInsets.only(top: 10, bottom: 30, right: 16, left: 16),
-        child: PrimaryButton(
-          onPressed: controller.isLoadingSendSurvey.value
-              ? null
-              : () => _submitSurvey(),
-          isLoading: controller.isLoadingSendSurvey.value,
-          child: 'Enviar Encuesta',
-        ),
+      bottomNavigationBar: Obx(
+        () {
+          return Container(
+            padding:
+                const EdgeInsets.only(top: 10, bottom: 30, right: 16, left: 16),
+            child: PrimaryButton(
+              onPressed: controller.isLoadingSendSurvey.value
+                  ? null
+                  : () => _submitSurvey(),
+              isLoading: controller.isLoadingSendSurvey.value,
+              child: 'Enviar Encuesta',
+            ),
+          );
+        },
       ),
     );
   }
@@ -174,7 +178,6 @@ class SurveyPage extends GetView<SurveyController> {
                 CustomProgressBar(progress: progress),
                 const SizedBox(height: 8.0),
                 ConnectivityBanner(),
-
               ],
             ),
           );
