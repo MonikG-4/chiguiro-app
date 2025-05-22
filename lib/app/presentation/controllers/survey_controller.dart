@@ -354,17 +354,18 @@ class SurveyController extends GetxController {
 
       final result = await repository.saveSurveyResults(payload);
 
-      if (result['data'] == null || result['data']['entry'] == null) {
+      result.fold((failure) {
         _showMessage('Encuesta', 'Encuesta guardada localmente.', 'success');
-      }
-
-      if (taskId != null) {
-        await _taskStorageService.removeTask(taskId);
-      }
-
-      _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
+        throw Exception(_mapFailureToMessage(failure));
+      }, (data) {
+        if (taskId != null) {
+          _taskStorageService.removeTask(taskId);
+        }
+        _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
+      });
     } catch (e) {
-      _showMessage('Encuesta', 'Encuesta guardada localmente.', 'success');
+      _showMessage(
+          'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
     } finally {
       isLoadingSendSurvey.value = false;
       Get.until(
@@ -631,13 +632,6 @@ class SurveyController extends GetxController {
           }
         }
       }
-    }
-
-    // Si la distancia es mayor a cierto umbral (por ejemplo, 50 km)
-    // podríamos considerar que está fuera de las áreas registradas
-    if (minCityDistance > 50) {
-      print(
-          'Advertencia: La ubicación más cercana está a $minCityDistance km de distancia');
     }
 
     return {

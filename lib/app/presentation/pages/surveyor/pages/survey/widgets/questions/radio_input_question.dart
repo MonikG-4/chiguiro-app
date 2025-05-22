@@ -29,6 +29,8 @@ class RadioInputQuestion extends StatelessWidget {
                       controller.responses[question.id]?['value'] == option;
 
                   void toggleSelection(String option) {
+                    FocusScope.of(context).requestFocus(FocusNode());
+
                     bool isSelected = controller.responses[question.id]?['value'] == option;
                     if (isSelected) {
                       controller.responses.remove(question.id);

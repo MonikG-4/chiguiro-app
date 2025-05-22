@@ -45,7 +45,13 @@ class DetailSurveyController extends GetxController {
     MessageHandler.setupSnackbarListener(message);
 
     scrollController = ScrollController()..addListener(_scrollListener);
-    _connectivityService.addCallback(true, 2, () => fetchData(clearData: true));
+
+    _connectivityService.addCallback(
+        true,
+        priority: 2,
+        () async { fetchData(clearData: true); },
+        id: 'detail_survey'
+    );
   }
 
   void fetchData({bool clearData = false}) {

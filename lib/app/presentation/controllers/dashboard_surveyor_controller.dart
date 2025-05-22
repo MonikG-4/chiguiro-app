@@ -48,7 +48,14 @@ class DashboardSurveyorController extends GetxController {
     fetchSurveys();
     fetchDataSurveyor();
 
-    _connectivityService.addCallback(true, 2, refreshAllData);
+    _connectivityService.addCallback(
+        true,
+        priority: 2,
+        () async {
+          refreshAllData();
+        },
+        id: 'dashboard_surveyor');
+
     MessageHandler.setupSnackbarListener(message);
   }
 
@@ -102,7 +109,7 @@ class DashboardSurveyorController extends GetxController {
       final userId = _storageService.authResponse!.id;
       final surveysResult =
           await repository.fetchSurveyResponded(homeCode, userId);
-      
+
       surveysResult.fold(
         (failure) {
           _showMessage(
@@ -111,14 +118,10 @@ class DashboardSurveyorController extends GetxController {
               'error');
         },
         (data) {
-          if (data.isNotEmpty) {
-            surveysResponded.value = data
-                .where((survey) => survey.totalEntries > 0)
-                .toList()
-              ..sort((a, b) => a.survey.id.compareTo(b.survey.id));
-          } else {
-            surveysResponded.clear();
-          }
+          surveysResponded.value = data
+              .where((survey) => survey.totalEntries > 0)
+              .toList()
+            ..sort((a, b) => a.survey.id.compareTo(b.survey.id));
         },
       );
     } catch (e) {
@@ -145,12 +148,8 @@ class DashboardSurveyorController extends GetxController {
               'error');
         },
         (data) {
-          if (data.isNotEmpty) {
-            surveys.value = data..sort((a, b) => a.id.compareTo(b.id));
-            _handlePermissions(data);
-          } else {
-            surveys.clear();
-          }
+          surveys.value = data..sort((a, b) => a.id.compareTo(b.id));
+          _handlePermissions(data);
         },
       );
     } catch (e) {
