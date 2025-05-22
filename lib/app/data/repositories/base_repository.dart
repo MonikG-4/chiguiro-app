@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:dartz/dartz.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../../../core/error/exceptions/exceptions.dart';
 import '../../../core/error/failures/failure.dart';
@@ -21,7 +22,9 @@ abstract class BaseRepository {
     String unknownErrorMessage = 'Error desconocido',
   }) async {
 
-    if (!_connectivityService.isStableConnection.value) {
+    await _connectivityService.waitForConnection();
+
+    if (!_connectivityService.isOnline) {
       return Left(NetworkFailure(offlineErrorMessage));
     }
 
@@ -47,7 +50,10 @@ abstract class BaseRepository {
     required Function(T data) saveToCache,
     String unknownErrorMessage = 'Error desconocido',
   }) async {
-    if (_connectivityService.isConnected.value) {
+
+    await _connectivityService.waitForConnection();
+
+    if (_connectivityService.isOnline) {
       try {
         final result = await request();
 
@@ -58,6 +64,8 @@ abstract class BaseRepository {
         final data = onSuccess(result);
         saveToCache(data);
         return Right(data);
+      } on NetworkException catch (e) {
+        return Left(NetworkFailure(e.message!));
       } on Exception catch (e) {
         return Left(UnknownFailure(e.toString()));
       }

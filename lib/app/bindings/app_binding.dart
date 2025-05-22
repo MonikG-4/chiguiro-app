@@ -26,16 +26,16 @@ class AppBinding {
     await Get.putAsync<AudioService>(() async => AudioService(),
         permanent: true);
 
-    final connectivityService = Get.put(ConnectivityService(), permanent: true);
-    await connectivityService.waitForInitialization();
+    Get.put(ConnectivityService(), permanent: true);
     Get.put(LocalStorageService(), permanent: true);
-    Get.put(SyncTaskStorageService(), permanent: true);
+
+    await Get.putAsync<SyncTaskStorageService>(() async => SyncTaskStorageService(),
+        permanent: true);
 
     final cacheStorageService = Get.find<CacheStorageService>();
     Get.put(SessionController(cacheStorageService), permanent: true);
     SurveyBinding().dependencies();
-    final syncService = Get.put(SyncService(), permanent: true);
-    syncService.onInit();
+    Get.put(SyncService(), permanent: true);
 
     Get.put<GraphQLService>(
       GraphQLService(clientProvider: GraphQLClientProvider()),

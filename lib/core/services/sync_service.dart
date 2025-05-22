@@ -9,7 +9,7 @@ import 'connectivity_service.dart';
 import 'sync_task_storage_service.dart';
 
 class SyncService extends GetxService {
-  final SyncTaskStorageService _taskStorageService = Get.find();
+  final SyncTaskStorageService _taskStorageService = Get.find<SyncTaskStorageService>();
   final CacheStorageService _authResponse = Get.find();
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
   final ConnectivityService _connectivityService = Get.find();
@@ -22,7 +22,13 @@ class SyncService extends GetxService {
     super.onInit();
     MessageHandler.setupSnackbarListener(message);
     syncPendingTasks();
-    _connectivityService.addCallback(true, 1, () => syncPendingTasks());
+
+    _connectivityService.addCallback(
+        true,
+        priority: 1,
+        () async { await syncPendingTasks(); },
+        id: 'sync_service'
+    );
   }
 
   Future<void> syncPendingTasks() async {
@@ -111,34 +117,16 @@ class SyncService extends GetxService {
     }
   }
 
-  // Future<bool> _handleRepositoryRequest(SyncTaskModel task) async {
-  //   try {
-  //     switch (task.repositoryKey) {
-  //       case 'surveyRepository':
-  //         final ISurveyRepository surveyRepository = Get.find();
-  //         final result = await surveyRepository.saveSurveyResults(task.payload.toJson());
-  //         return result.fold(
-  //                 (failure) => false,
-  //                 (success) => success
-  //         );
-  //       default:
-  //         throw Exception('Repositorio no reconocido: ${task.repositoryKey}');
-  //     }
-  //   } catch (e) {
-  //     return false;
-  //   }
-  // }
-
   Future<bool> _handleRepositoryRequest(SyncTaskModel task) async {
     try {
       switch (task.repositoryKey) {
         case 'surveyRepository':
           final ISurveyRepository surveyRepository = Get.find();
           final result = await surveyRepository.saveSurveyResults(task.payload.toJson());
-          if (result['data'] == null || result['data']['entry'] == null) {
-            throw Exception('Error al enviar la encuesta, por favor intente más tarde.');
-          }
-          return true;
+          return result.fold(
+                  (failure) => false,
+                  (success) => success
+          );
         default:
           throw Exception('Repositorio no reconocido: ${task.repositoryKey}');
       }

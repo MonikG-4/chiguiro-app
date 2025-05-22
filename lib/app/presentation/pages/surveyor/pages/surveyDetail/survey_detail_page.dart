@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../../../core/values/app_colors.dart';
@@ -122,7 +120,7 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
         titleSpacing: -15,
         title: ProfileHeader(
           name: controller.survey.value!.name,
-          role: controller.survey.value!.active! ? 'En proceso' : 'Finalizada',
+          role: controller.survey.value!.active ? 'En proceso' : 'Finalizada',
           avatarPath: 'assets/images/min-deporte.png',
         ),
       ),
