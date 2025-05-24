@@ -15,6 +15,8 @@ class AppColors {
 
   //Boton
   static const Color primaryButton = Color(0xFF0D9488);
+  static const Color confirmButton = Color(0xFF0D9488);
+  static const Color cancelButton = Color(0xFF9F9B9B);
 
   //Fondo
   static const Color background = Color(0xFFEEF4F8);

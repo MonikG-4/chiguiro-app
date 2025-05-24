@@ -18,10 +18,8 @@ abstract class BaseRepository {
     required T Function(Map<String, dynamic> data) onSuccess,
     required String dataKey,
     String offlineErrorMessage = 'Sin conexión a internet',
-    String errorSendingDataMessage = 'Error al enviar los datos',
     String unknownErrorMessage = 'Error desconocido',
   }) async {
-
     await _connectivityService.waitForConnection();
 
     if (!_connectivityService.isOnline) {
@@ -36,10 +34,17 @@ abstract class BaseRepository {
       }
 
       return Right(onSuccess(result));
+    } on CheckException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } on GateException catch (e) {
+      return Left(AuthFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message ?? 'Error de red'));
     } on Exception catch (e) {
       return Left(UnknownFailure(e.toString()));
     }
   }
+
 
   /// Maneja operaciones con almacenamiento local cuando está sin conexión
   Future<Either<Failure, T>> safeApiCallWithCache<T>({
@@ -50,7 +55,6 @@ abstract class BaseRepository {
     required Function(T data) saveToCache,
     String unknownErrorMessage = 'Error desconocido',
   }) async {
-
     await _connectivityService.waitForConnection();
 
     if (_connectivityService.isOnline) {
@@ -64,8 +68,12 @@ abstract class BaseRepository {
         final data = onSuccess(result);
         saveToCache(data);
         return Right(data);
+      } on CheckException catch (e) {
+        return Left(ValidationFailure(e.message));
+      } on GateException catch (e) {
+        return Left(AuthFailure(e.message));
       } on NetworkException catch (e) {
-        return Left(NetworkFailure(e.message!));
+        return Left(NetworkFailure(e.message ?? 'Error de red'));
       } on Exception catch (e) {
         return Left(UnknownFailure(e.toString()));
       }
@@ -80,4 +88,5 @@ abstract class BaseRepository {
       }
     }
   }
+
 }

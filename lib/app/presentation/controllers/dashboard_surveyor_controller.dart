@@ -13,7 +13,7 @@ import '../../../core/services/location_service.dart';
 
 class DashboardSurveyorController extends GetxController {
   final IDashboardSurveyorRepository repository;
-  final ConnectivityService _connectivityService = Get.find();
+  final ConnectivityService connectivityService = Get.find();
   late final LocationService _locationService;
   late final AudioService _audioService;
   late final CacheStorageService _storageService;
@@ -28,6 +28,7 @@ class DashboardSurveyorController extends GetxController {
   final isSurveysLoading = false.obs;
   final isSurveysRespondedLoading = false.obs;
   final isSurveyorDataLoading = false.obs;
+  final isDownloadingSurveys = false.obs;
 
   // Datos del encuestador
   final idSurveyor = 0.obs;
@@ -44,19 +45,12 @@ class DashboardSurveyorController extends GetxController {
     super.onInit();
     _initializeServices();
     _initializeUserData();
+  }
 
-    fetchSurveys();
-    fetchDataSurveyor();
-
-    _connectivityService.addCallback(
-        true,
-        priority: 2,
-        () async {
-          refreshAllData();
-        },
-        id: 'dashboard_surveyor');
-
-    MessageHandler.setupSnackbarListener(message);
+  @override
+  void onReady() {
+    super.onReady();
+    _initializeDashboard();
   }
 
   void _initializeServices() {
@@ -71,6 +65,23 @@ class DashboardSurveyorController extends GetxController {
       nameSurveyor.value = auth.name;
       surnameSurveyor.value = auth.surname;
       idSurveyor.value = auth.id;
+    }
+  }
+
+  Future<void> _initializeDashboard() async {
+    try {
+      // Configurar listeners
+      connectivityService.addCallback(true, priority: 2, () async {
+        refreshAllData();
+      }, id: 'dashboard_surveyor');
+
+      MessageHandler.setupSnackbarListener(message);
+
+      // Carga inicial con splash
+      refreshAllData();
+
+    } catch (e) {
+      print('Error initializing dashboard: $e');
     }
   }
 
@@ -94,10 +105,16 @@ class DashboardSurveyorController extends GetxController {
     isChangePasswordLoading.value = false;
   }
 
-  void refreshAllData() {
-    fetchSurveys();
-    fetchDataSurveyor();
-    fetchSurveysResponded(homeCode.value);
+  void refreshAllData({bool all = true}) async {
+
+    if (all) {
+      isDownloadingSurveys.value = true;
+      await fetchSurveys();
+      isDownloadingSurveys.value = false;
+    }
+    await fetchDataSurveyor();
+    await fetchSurveysResponded(homeCode.value);
+
   }
 
   Future<void> fetchSurveysResponded(String homeCode) async {

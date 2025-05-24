@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/values/routes.dart';
 import '../../controllers/session_controller.dart';
+import '../../widgets/confirmation_dialog.dart';
 import '../../widgets/connectivity_banner.dart';
 import '../../widgets/primary_button.dart';
 import './widgets/survey_card.dart';
 import '../../../../core/values/app_colors.dart';
 import '../../../domain/entities/survey.dart';
 import '../../controllers/dashboard_surveyor_controller.dart';
+import 'widgets/download_splash.dart';
 import 'widgets/home_code_widget.dart';
 import 'widgets/response_survey_list.dart';
 import 'widgets/surveyor_balance_card.dart';
@@ -20,64 +22,82 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
   Widget build(BuildContext context) {
     final homeCodeController = Get.find<HomeCodeController>();
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              SizedBox(
-                height: 190,
-                child: _buildAppBarBackground(context),
-              ),
+    return Obx(() {
+      // Mostrar splash durante inicialización o descarga
+      if (controller.isDownloadingSurveys.value && controller.connectivityService.isOnline) {
+        return const Scaffold(
+          body: DownloadSplash(),
+        );
+      }
 
-              const SizedBox(height: 70),
-
-              // Scroll solo para el contenido
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () async {
-                    controller.refreshAllData();
-                  },
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: _buildContent(),
+      // Mostrar dashboard normal una vez cargado
+      return Scaffold(
+        extendBodyBehindAppBar: true,
+        backgroundColor: AppColors.background,
+        body: Stack(
+          children: [
+            Column(
+              children: [
+                SizedBox(
+                  height: 190,
+                  child: _buildAppBarBackground(context),
+                ),
+                const SizedBox(height: 70),
+                // Scroll solo para el contenido
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      // Refresh normal sin splash (ya que no es carga inicial)
+                      controller.refreshAllData();
+                    },
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: _buildContent(),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-
-          Positioned(
-            top: 140,
-            left: 16,
-            right: 16,
-            child: Obx(() {
-              return SurveyorBalanceCard(
-                isLoading: controller.isSurveyorDataLoading.value,
-                responses: controller.dataSurveyor.value?.totalEntries ?? 0,
-                lastSurveyDate:
-                controller.dataSurveyor.value?.lastSurvey ?? '-- -- -- --',
-              );
-            }),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Obx(() => controller.showContent.value
-          ? Container(
-        padding: const EdgeInsets.only(bottom: 30, right: 16, left: 16),
-        color: AppColors.background,
-        child: PrimaryButton(
-          onPressed: () => _showConfirmationDialog(context, homeCodeController),
-          isLoading: false,
-          child: 'Finalizar hogar',
+              ],
+            ),
+            Positioned(
+              top: 140,
+              left: 16,
+              right: 16,
+              child: Obx(() {
+                return SurveyorBalanceCard(
+                  isLoading: controller.isSurveyorDataLoading.value,
+                  responses: controller.dataSurveyor.value?.totalEntries ?? 0,
+                  lastSurveyDate:
+                  controller.dataSurveyor.value?.lastSurvey ?? '-- -- -- --',
+                );
+              }),
+            ),
+          ],
         ),
-      )
-          : const SizedBox.shrink()),
-    );
+        bottomNavigationBar: Obx(() => controller.showContent.value
+            ? Container(
+          padding: const EdgeInsets.only(bottom: 30, right: 16, left: 16),
+          color: AppColors.background,
+          child: PrimaryButton(
+            onPressed: () async {
+              final confirmed = await Get.dialog<bool>(
+                const ConfirmationDialog(
+                  message: "¿Estás seguro de que deseas finalizar el hogar?",
+                  confirmText: 'Finalizar',
+                ),
+              );
+              if (confirmed == true) {
+                controller.showContent.value = false;
+                homeCodeController.resetHomeCode();
+              }
+            },
+            isLoading: false,
+            child: 'Finalizar hogar',
+          ),
+        )
+            : const SizedBox.shrink()),
+      );
+    });
   }
-
 
   Widget _buildAppBarBackground(BuildContext context) {
     final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
@@ -248,7 +268,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
           'survey': survey,
           'homeCode': controller.homeCode.value,
         },
-      )?.then((_) => controller.refreshAllData());
+      )?.then((_) => controller.refreshAllData(all: false));
     } else {
       await Get.toNamed(
         Routes.SURVEY_WITHOUT_RESPONSE,
@@ -256,34 +276,8 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
           'survey': survey,
           'homeCode': controller.homeCode.value,
         },
-      )?.then((_) => controller.refreshAllData());
+      )?.then((_) => controller.refreshAllData(all: false));
     }
-  }
-
-  void _showConfirmationDialog(BuildContext context, HomeCodeController homeCodeController) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Confirmación"),
-          content: const Text("¿Estás seguro de que deseas finalizar el hogar?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Cancelar"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                controller.showContent.value = false;
-                homeCodeController.resetHomeCode();
-              },
-              child: const Text("Aceptar"),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _showSettingsModal(BuildContext context) {
@@ -304,7 +298,7 @@ class DashboardSurveyorPage extends GetView<DashboardSurveyorController> {
                 onTap: () async {
                   await Get.toNamed(Routes.PENDING_SURVEYS, arguments: {
                     'surveyorId': controller.idSurveyor.value,
-                  })?.then((_) => controller.refreshAllData());
+                  })?.then((_) => controller.refreshAllData(all: false));
                 },
               ),
               ListTile(

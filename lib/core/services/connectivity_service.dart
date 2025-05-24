@@ -81,10 +81,7 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
       }
 
       if (_isOnline.value != hasInternet) {
-        print("asdadd");
-        print(_isOnline);
         _isOnline.value = hasInternet;
-        print(_isOnline);
 
         await _runCallbacks(hasInternet);
       }
@@ -137,7 +134,6 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
 
     // Forzar verificación cuando la app vuelve al foreground
     if (state == AppLifecycleState.resumed) {
-      Get.log('📱 App resumed - Verificando conectividad');
       // Pequeño delay para que la red se estabilice
       Future.delayed(const Duration(milliseconds: 500), () {
         forceCheck();

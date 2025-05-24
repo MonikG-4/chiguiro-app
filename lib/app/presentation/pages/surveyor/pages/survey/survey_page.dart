@@ -7,6 +7,7 @@ import '../../../../../../core/services/cache_storage_service.dart';
 import '../../../../../../core/values/app_colors.dart';
 import '../../../../../domain/entities/auth_response.dart';
 import '../../../../../presentation/controllers/survey_controller.dart';
+import '../../../../widgets/confirmation_dialog.dart';
 import '../../../../widgets/connectivity_banner.dart';
 import '../../../../widgets/primary_button.dart';
 import 'widgets/audio_location_panel.dart';
@@ -21,47 +22,66 @@ class SurveyPage extends GetView<SurveyController> {
   SurveyPage({super.key})
       : authResponse = Get.find<CacheStorageService>().authResponse!;
 
+  Future<bool> _showExitConfirmationDialog(BuildContext context) async {
+    final confirmed = await Get.dialog<bool>(
+      const ConfirmationDialog(
+        message: 'Si regresa perderá todo el progreso. ¿Desea continuar?',
+        confirmText: 'Aceptar',
+      ),
+    );
+    return confirmed == true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(controller.survey.value!.name),
-        backgroundColor: AppColors.background,
-      ),
-      backgroundColor: AppColors.background,
-      body: Obx(() {
-        if (controller.isLoadingQuestion.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (controller.sections.isEmpty) {
-          return const Center(child: Text('No hay secciones disponibles'));
-        }
-
-        return Padding(
-          padding: const EdgeInsets.only(top: 5.0),
-          child: Stack(
-            children: [
-              if (controller.isVoiceRecorder.value ||
-                  controller.isGeoLocation.value)
-                AudioLocationPanel(
-                  showLocation: controller.survey.value!.geoLocation,
-                  showAudioRecorder: controller.survey.value!.voiceRecorder,
-                ),
-
-              _buildQuestionsForm(context),
-              _buildProgressBar(),
-
-              // _buildSubmitButton(context),
-            ],
+    return WillPopScope(
+      onWillPop: () async {
+        return await _showExitConfirmationDialog(context);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              final canPop = await _showExitConfirmationDialog(context);
+              if (canPop) {
+                Get.back();
+              }
+            },
           ),
-        );
-      }),
-      bottomNavigationBar: Obx(
-        () {
+          title: Text(controller.survey.value!.name),
+          backgroundColor: AppColors.background,
+        ),
+        backgroundColor: AppColors.background,
+        body: Obx(() {
+          if (controller.isLoadingQuestion.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (controller.sections.isEmpty) {
+            return const Center(child: Text('No hay secciones disponibles'));
+          }
+
+          return Padding(
+            padding: const EdgeInsets.only(top: 5.0),
+            child: Stack(
+              children: [
+                if (controller.isVoiceRecorder.value || controller.isGeoLocation.value)
+                  AudioLocationPanel(
+                    showLocation: controller.survey.value!.geoLocation,
+                    showAudioRecorder: controller.survey.value!.voiceRecorder,
+                  ),
+                _buildQuestionsForm(context),
+                _buildProgressBar(),
+                // _buildSubmitButton(context),
+              ],
+            ),
+          );
+        }),
+        bottomNavigationBar: Obx(() {
           return Container(
             padding:
-                const EdgeInsets.only(top: 10, bottom: 30, right: 16, left: 16),
+            const EdgeInsets.only(top: 10, bottom: 30, right: 16, left: 16),
             child: PrimaryButton(
               onPressed: controller.isLoadingSendSurvey.value
                   ? null
@@ -70,10 +90,11 @@ class SurveyPage extends GetView<SurveyController> {
               child: 'Enviar Encuesta',
             ),
           );
-        },
+        }),
       ),
     );
   }
+
 
   Widget _buildQuestionsForm(BuildContext context) {
     return Padding(
