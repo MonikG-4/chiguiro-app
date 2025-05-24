@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
+import '../../../core/services/location_service.dart';
 import '../../../core/services/sync_task_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
@@ -22,7 +24,6 @@ import '../../domain/entities/sections.dart';
 import '../../domain/entities/survey.dart';
 import '../../domain/entities/survey_question.dart';
 import '../../domain/repositories/i_survey_repository.dart';
-import '../../../core/services/location_service.dart';
 
 class SurveyController extends GetxController {
   final ISurveyRepository repository;
