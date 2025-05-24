@@ -54,6 +54,8 @@ post_install do |installer|
         # dart: Permiso de ubicacion
         'PERMISSION_LOCATION=1',
         'PERMISSION_LOCATION_WHENINUSE=0',
+        # dart: Permiso de camara
+        'PERMISSION_CAMERA=1',
       ]
     end
   end
