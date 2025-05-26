@@ -20,6 +20,12 @@ abstract class BaseRepository {
     String offlineErrorMessage = 'Sin conexión a internet',
     String unknownErrorMessage = 'Error desconocido',
   }) async {
+
+    const Set<String> keysAllowingNull = {
+      'pollsterForgotPassword',
+      'pollsterChangePassword',
+    };
+
     await _connectivityService.waitForConnection();
 
     if (!_connectivityService.isOnline) {
@@ -29,7 +35,8 @@ abstract class BaseRepository {
     try {
       final result = await request();
 
-      if (!result.containsKey(dataKey) || result[dataKey] == null) {
+      if (!result.containsKey(dataKey) ||
+          (result[dataKey] == null && !keysAllowingNull.contains(dataKey))) {
         return Left(UnknownFailure(unknownErrorMessage));
       }
 
