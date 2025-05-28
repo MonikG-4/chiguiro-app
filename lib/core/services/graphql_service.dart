@@ -22,7 +22,7 @@ class GraphQLService {
           document: gql(document),
           variables: variables!,
           fetchPolicy: FetchPolicy.noCache,
-          queryRequestTimeout: const Duration(seconds: 1000)),
+          queryRequestTimeout: const Duration(seconds: 10000)),
     );
     return _handleResult(result);
   }
@@ -36,7 +36,7 @@ class GraphQLService {
           document: gql(document),
           variables: variables!,
           fetchPolicy: FetchPolicy.noCache,
-          queryRequestTimeout: const Duration(seconds: 1000)),
+          queryRequestTimeout: const Duration(seconds: 10000)),
     );
     return _handleResult(result);
   }
@@ -64,7 +64,8 @@ class GraphQLService {
         } else if (linkEx is NetworkException) {
           errorMessage = 'Conexión fallida: revisa tu conexion';
         }
-        throw NetworkException(message: errorMessage, originalException: linkEx, uri: null);
+        throw NetworkException(
+            message: errorMessage, originalException: linkEx, uri: null);
       } else {
         throw Exception('Problema desconocido: ${e.toString()}');
       }
