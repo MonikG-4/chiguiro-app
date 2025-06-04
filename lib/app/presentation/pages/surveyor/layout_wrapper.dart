@@ -10,6 +10,7 @@ import '../../../bindings/survey_pending_binding.dart';
 import '../../controllers/home_controller.dart';
 import '../../controllers/pending_survey_controller.dart';
 import '../../controllers/revisits_controller.dart';
+import '../../controllers/settings_controller.dart';
 import 'pages/home/home_page.dart';
 import 'pages/home/widgets/download_splash.dart';
 import 'pages/pendingSurveys/pending_surveys_page.dart';
@@ -32,7 +33,7 @@ class _DashboardPageState extends State<DashboardPage> {
   final pages = <int, Widget>{
     0: const HomePage(),
     1: const RevisitsPage(),
-    2: const PendingSurveysPage(),
+    2: const SettingsPage(),
     3: const PendingSurveysPage(),
     4: const SettingsPage(),
   };
@@ -49,7 +50,7 @@ class _DashboardPageState extends State<DashboardPage> {
   final bindings = <int, Bindings>{
     0: HomeBinding(),
     1: RevisitsBinding(),
-    2: HomeBinding(),
+    2: SettingsBinding(),
     3: SurveyPendingBinding(),
     4: SettingsBinding(),
   };
@@ -110,8 +111,13 @@ class _DashboardPageState extends State<DashboardPage> {
                   if (Get.isRegistered<RevisitsController>()) Get.delete<RevisitsController>();
                   break;
                 case 2:
+                  if (Get.isRegistered<SettingsController>()) Get.delete<SettingsController>();
+                  break;
                 case 3:
                   if (Get.isRegistered<PendingSurveyController>()) Get.delete<PendingSurveyController>();
+                  break;
+                case 4:
+                  if (Get.isRegistered<SettingsController>()) Get.delete<SettingsController>();
                   break;
               }
               lastIndex = index;
@@ -125,8 +131,13 @@ class _DashboardPageState extends State<DashboardPage> {
                 _ensureBinding<RevisitsController>(index);
                 break;
               case 2:
+                _ensureBinding<SettingsController>(index);
+                break;
               case 3:
                 _ensureBinding<PendingSurveyController>(index);
+                break;
+              case 4:
+                _ensureBinding<SettingsController>(index);
                 break;
             }
 

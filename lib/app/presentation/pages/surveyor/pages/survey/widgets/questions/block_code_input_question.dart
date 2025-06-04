@@ -129,7 +129,7 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
                   child: OutlinedButton.icon(
                     onPressed: () async {
                       final url =
-                          Uri.tryParse('https://chiguiro.proyen.co/geodata');
+                          Uri.tryParse('https://chiguiro.capibara.lat/geodata');
                       if (url != null) {
                         await launchUrl(url,
                             mode: LaunchMode.externalApplication);
