@@ -31,6 +31,12 @@ class SurveyEntryModel {
   @HiveField(8)
   final String finishedOn;
 
+  @HiveField(9)
+  final String? comments;
+
+  @HiveField(10)
+  final bool? revisit;
+
   SurveyEntryModel({
     required this.homeCode,
     required this.projectId,
@@ -41,6 +47,8 @@ class SurveyEntryModel {
     this.longitude,
     required this.startedOn,
     required this.finishedOn,
+    this.comments,
+    this.revisit,
   });
 
   factory SurveyEntryModel.fromJson(Map<String, dynamic> json) {
@@ -54,6 +62,8 @@ class SurveyEntryModel {
       longitude: json['longitude'],
       startedOn: json['startedOn'],
       finishedOn: json['finishedOn'],
+      comments: json['comments'],
+      revisit: json['revisit'],
     );
   }
 
@@ -68,6 +78,8 @@ class SurveyEntryModel {
       longitude: map['longitude'],
       startedOn: map['startedOn'],
       finishedOn: map['finishedOn'],
+      comments: map['comments'],
+      revisit: map['revisit'],
     );
   }
 
@@ -82,6 +94,8 @@ class SurveyEntryModel {
       if (audio != null && audio!.isNotEmpty) 'audio': audio,
       if (latitude != null && latitude!.isNotEmpty) 'latitude': latitude,
       if (longitude != null && longitude!.isNotEmpty) 'longitude': longitude,
+      if (comments != null && comments!.isNotEmpty) 'comments': comments,
+      if (revisit != null) 'revisit': revisit,
     };
 
     return data;

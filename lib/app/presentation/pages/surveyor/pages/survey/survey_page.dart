@@ -60,17 +60,26 @@ class SurveyPage extends GetView<SurveyController> {
         );
       }),
       bottomNavigationBar: Obx(() {
-        return Container(
-          padding: const EdgeInsets.only(top: 10, bottom: 30, right: 16, left: 16),
-          child: PrimaryButton(
-            onPressed: controller.isLoadingSendSurvey.value
-                ? null
-                : () => _submitSurvey(),
-            isLoading: controller.isLoadingSendSurvey.value,
-            child: 'Enviar Encuesta',
+        return SafeArea(
+          bottom: true,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewPadding.bottom + 8,
+              left: 8,
+              right: 8,
+              top: 4,
+            ),
+            child: PrimaryButton(
+              onPressed: controller.isLoadingSendSurvey.value
+                  ? null
+                  : () => _submitSurvey(),
+              isLoading: controller.isLoadingSendSurvey.value,
+              child: 'Enviar Encuesta',
+            ),
           ),
         );
       }),
+
     );
   }
 

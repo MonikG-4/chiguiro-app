@@ -32,51 +32,55 @@ class RevisitDetailPage extends GetView<RevisitDetailController> {
           onRefresh: () async {
             await controller.refreshAllData();
           },
-          bottomButton: Row(
-            children: [
-              // Botón guardar hogar
-              Expanded(
-                child: PrimaryButton(
-                  onPressed: () async {
-                    final confirmed = await Get.dialog<bool>(
-                      const ConfirmationDialog(
-                        message:
-                        "¿Estás seguro de que deseas finalizar el hogar?",
-                        confirmText: 'Finalizar',
-                      ),
-                    );
-                    if (confirmed == true) {
-                      controller.saveRevisit();
-                      Get.back();
-                    }
-                  },
-                  backgroundColor: AppColors.secondaryButton,
-                  isLoading: false,
-                  child: 'Guardar hogar',
+          bottomButton: SafeArea(
+            minimum: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewPadding.bottom + 8,
+              left: 8,
+              right: 8,
+              top: 4,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: PrimaryButton(
+                    onPressed: () async {
+                      final confirmed = await Get.dialog<bool>(
+                        const ConfirmationDialog(
+                          message: "¿Estás seguro de que deseas finalizar el hogar?",
+                          confirmText: 'Finalizar',
+                        ),
+                      );
+                      if (confirmed == true) {
+                        controller.saveRevisit();
+                        Get.back();
+                      }
+                    },
+                    backgroundColor: AppColors.secondaryButton,
+                    isLoading: false,
+                    child: 'Guardar hogar',
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              // Botón Finalizar hogar
-              Expanded(
-                child: PrimaryButton(
-                  onPressed: () async {
-                    final confirmed = await Get.dialog<bool>(
-                      const ConfirmationDialog(
-                        message:
-                        "¿Estás seguro de que deseas finalizar el hogar?",
-                        confirmText: 'Finalizar',
-                      ),
-                    );
-                    if (confirmed == true) {
-                      controller.deleteRevisit();
-                      Get.back();
-                    }
-                  },
-                  isLoading: false,
-                  child: 'Finalizar hogar',
+                const SizedBox(width: 12),
+                Expanded(
+                  child: PrimaryButton(
+                    onPressed: () async {
+                      final confirmed = await Get.dialog<bool>(
+                        const ConfirmationDialog(
+                          message: "¿Estás seguro de que deseas finalizar el hogar?",
+                          confirmText: 'Finalizar',
+                        ),
+                      );
+                      if (confirmed == true) {
+                        controller.deleteRevisit();
+                        Get.back();
+                      }
+                    },
+                    isLoading: false,
+                    child: 'Finalizar hogar',
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,

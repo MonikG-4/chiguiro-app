@@ -11,6 +11,7 @@ import '../../controllers/home_controller.dart';
 import '../../controllers/pending_survey_controller.dart';
 import '../../controllers/revisits_controller.dart';
 import '../../controllers/settings_controller.dart';
+import '../../widgets/confirmation_dialog.dart';
 import 'pages/home/home_page.dart';
 import 'pages/home/widgets/download_splash.dart';
 import 'pages/pendingSurveys/pending_surveys_page.dart';
@@ -33,26 +34,26 @@ class _DashboardPageState extends State<DashboardPage> {
   final pages = <int, Widget>{
     0: const HomePage(),
     1: const RevisitsPage(),
-    2: const SettingsPage(),
-    3: const PendingSurveysPage(),
-    4: const SettingsPage(),
+    // 2: const SettingsPage(),
+    2: const PendingSurveysPage(),
+    3: const SettingsPage(),
   };
 
 
   final navItems = [
     {'icon': Icons.home_outlined, 'label': 'Inicio'},
     {'icon': Icons.watch_later_outlined, 'label': 'Revisitas'},
-    {'icon': Icons.stacked_bar_chart_outlined, 'label': 'Estadísticas'},
+    // {'icon': Icons.stacked_bar_chart_outlined, 'label': 'Estadísticas'},
     {'icon': Icons.cloud_upload_outlined, 'label': 'En cola'},
-    {'icon': Icons.settings_outlined, 'label': 'Configuración'},
+    {'icon': Icons.settings_outlined, 'label': 'Ajustes'},
   ];
 
   final bindings = <int, Bindings>{
     0: HomeBinding(),
     1: RevisitsBinding(),
-    2: SettingsBinding(),
-    3: SurveyPendingBinding(),
-    4: SettingsBinding(),
+    // 2: SettingsBinding(),
+    2: SurveyPendingBinding(),
+    3: SettingsBinding(),
   };
 
   @override
@@ -64,21 +65,13 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Future<bool> _onWillPop() async {
     final confirmed = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Confirmación'),
-        content: const Text('¿Estás seguro de que deseas salir de la aplicación?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Get.back(result: true),
-            child: const Text('Salir'),
-          ),
-        ],
+      const ConfirmationDialog(
+        message:
+        '¿Estás seguro de que deseas salir de la aplicación?',
+        confirmText: 'Salir',
       ),
     );
+
     return confirmed ?? false; // Solo sale si es true
   }
 
@@ -89,7 +82,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final controller = Get.find<HomeController>();
 
     return WillPopScope(
-        onWillPop: _onWillPop, // Aquí interceptas el gesto o botón de retroceso
+        onWillPop: _onWillPop,
         child: Stack(
       children: [
         Scaffold(
@@ -110,13 +103,13 @@ class _DashboardPageState extends State<DashboardPage> {
                 case 1:
                   if (Get.isRegistered<RevisitsController>()) Get.delete<RevisitsController>();
                   break;
+                // case 2:
+                //   if (Get.isRegistered<SettingsController>()) Get.delete<SettingsController>();
+                //   break;
                 case 2:
-                  if (Get.isRegistered<SettingsController>()) Get.delete<SettingsController>();
-                  break;
-                case 3:
                   if (Get.isRegistered<PendingSurveyController>()) Get.delete<PendingSurveyController>();
                   break;
-                case 4:
+                case 3:
                   if (Get.isRegistered<SettingsController>()) Get.delete<SettingsController>();
                   break;
               }
@@ -130,13 +123,13 @@ class _DashboardPageState extends State<DashboardPage> {
               case 1:
                 _ensureBinding<RevisitsController>(index);
                 break;
+              // case 2:
+              //   _ensureBinding<SettingsController>(index);
+              //   break;
               case 2:
-                _ensureBinding<SettingsController>(index);
-                break;
-              case 3:
                 _ensureBinding<PendingSurveyController>(index);
                 break;
-              case 4:
+              case 3:
                 _ensureBinding<SettingsController>(index);
                 break;
             }

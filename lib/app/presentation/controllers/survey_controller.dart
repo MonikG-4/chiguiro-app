@@ -359,25 +359,24 @@ class SurveyController extends GetxController {
       }, (data) {
         _taskStorageService?.removeTask(taskId!);
         _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
-
-        Get.until((route) => route.settings.name != Routes.SURVEY);
-
-        if (revisit.value != null) {
-          Get.toNamed(
-            Routes.REVISIT_DETAIL,
-            arguments: revisit.value,
-          );
-        } else {
-          Get.toNamed(
-            Routes.DASHBOARD,
-          );
-        }
       });
     } catch (e) {
       _showMessage(
           'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
     } finally {
       isLoadingSendSurvey.value = false;
+      Get.until((route) => route.settings.name != Routes.SURVEY);
+
+      if (revisit.value != null) {
+        Get.toNamed(
+          Routes.REVISIT_DETAIL,
+          arguments: revisit.value,
+        );
+      } else {
+        Get.toNamed(
+          Routes.DASHBOARD,
+        );
+      }
     }
   }
 
@@ -392,6 +391,7 @@ class SurveyController extends GetxController {
 
   Future<SurveyEntryModel> _createSurveyEntry(
       int projectId, int pollsterId, String? audioBase64) async {
+
     return SurveyEntryModel(
       homeCode: homeCode.value ?? '',
       projectId: projectId,
@@ -402,6 +402,9 @@ class SurveyController extends GetxController {
       longitude: _locationService?.cachedPosition?.longitude.toString(),
       startedOn: timeAnswerStart.value.toIso8601String(),
       finishedOn: DateTime.now().toIso8601String(),
+      comments: revisit.value?.reason,
+      revisit: revisit.value != null,
+
     );
   }
 

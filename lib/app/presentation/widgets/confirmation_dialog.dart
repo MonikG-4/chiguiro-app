@@ -40,7 +40,7 @@ class ConfirmationDialog extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(true),
           isLoading: false,
           child: confirmText,
-          width: 100,
+          width: 110,
           height: 40,
           textSize: 12,
           backgroundColor: AppColors.confirmButton,

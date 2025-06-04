@@ -58,6 +58,7 @@ class HomePage extends GetView<HomeController> {
                             const ConfirmationDialog(
                               message:
                                   "¿Estás seguro de que deseas finalizar el hogar?",
+                              confirmText: 'Finalizar',
                             ),
                           );
                           if (confirmed == true) {
@@ -98,6 +99,12 @@ class HomePage extends GetView<HomeController> {
                 )
               else
               // Si ya hay código generado, mostrar loading o contenido
+                controller.isSurveysLoading.value
+                    ? const Padding(
+                  padding: EdgeInsets.only(top: 20),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+                    :
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -109,12 +116,7 @@ class HomePage extends GetView<HomeController> {
                     ),
                     const SizedBox(height: 8),
 
-                    controller.isSurveysLoading.value
-                        ? const Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                        : CustomCard(
+                     CustomCard(
                       children: [
                         SurveyDisplaySection(
                           title: 'Encuestas realizadas',

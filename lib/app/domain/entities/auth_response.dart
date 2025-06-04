@@ -2,12 +2,16 @@ class AuthResponse {
   final int id;
   final String name;
   final String surname;
+  final String email;
+  final String phone;
   final String accessToken;
 
   AuthResponse({
     required this.id,
     required this.name,
     required this.surname,
+    required this.email,
+    required this.phone,
     required this.accessToken,
   });
 
@@ -16,6 +20,8 @@ class AuthResponse {
       id: _parseIntSafely(json['id']),
       name: json['name'] ?? '',
       surname: json['surname'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'] ?? '',
       accessToken: json['accessToken'] ?? '',
     );
   }
@@ -24,6 +30,8 @@ class AuthResponse {
         'id': id,
         'name': name,
         'surname': surname,
+        'email': email,
+        'phone': phone,
         'accessToken': accessToken,
       };
 
@@ -32,6 +40,8 @@ class AuthResponse {
       id: 0,
       name: '',
       surname: '',
+      email: '',
+      phone: '',
       accessToken: '',
     );
   }

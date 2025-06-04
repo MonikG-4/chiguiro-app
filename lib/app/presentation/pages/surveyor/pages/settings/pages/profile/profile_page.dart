@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../../../../../../../core/services/cache_storage_service.dart';
+import '../../../../../../../../core/values/app_colors.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = Get.find<CacheStorageService>().authResponse!;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("Información Personal"),
         backgroundColor: Colors.transparent,
@@ -22,14 +28,14 @@ class ProfilePage extends StatelessWidget {
               child: Icon(Icons.person, color: Colors.white, size: 48),
             ),
             const SizedBox(height: 24),
-            _buildTextField(label: 'Nombre', initialValue: 'Juanito'),
+            _buildTextField(label: 'Nombre', initialValue: user.name),
             const SizedBox(height: 12),
-            _buildTextField(label: 'Apellido', initialValue: 'Perez'),
+            _buildTextField(label: 'Apellido', initialValue: user.surname),
             const SizedBox(height: 12),
             _buildTextField(
-                label: 'Correo', initialValue: 'correo@ejemplo.com'),
+                label: 'Correo', initialValue: user.email),
             const SizedBox(height: 12),
-            _buildPhoneField(),
+            _buildPhoneField(user.phone),
           ],
         ),
       ),
@@ -52,9 +58,9 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildPhoneField() {
+  Widget _buildPhoneField(String initialValue) {
     return TextFormField(
-      initialValue: '311 345 55 66',
+      initialValue: initialValue,
       readOnly: true,
       decoration: InputDecoration(
         labelText: 'Número Telefónico',
@@ -66,7 +72,7 @@ class ProfilePage extends StatelessWidget {
           decoration: const BoxDecoration(
             border: Border(
               right: BorderSide(
-                color: Color(0xFFE3EAF3), // Color de división
+                color: Color(0xFFE3EAF3),
                 width: 1.5,
               ),
             ),

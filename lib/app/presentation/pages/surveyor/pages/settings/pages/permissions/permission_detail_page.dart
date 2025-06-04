@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../../../../core/values/app_colors.dart';
 import 'widgets/permission_modal.dart';
 
 class PermissionDetailPage extends StatelessWidget {
@@ -26,7 +27,7 @@ class PermissionDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(title),
         backgroundColor: Colors.transparent,
@@ -43,7 +44,6 @@ class PermissionDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Opción activa (primera)
             _buildOption(
               title: isGranted ? allowedTitle : deniedTitle,
               description: isGranted ? allowedDescription : deniedDescription,
@@ -54,7 +54,6 @@ class PermissionDetailPage extends StatelessWidget {
             const Text('Otra opción', style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 12),
 
-            // Opción inactiva (segunda)
             _buildOption(
               title: isGranted ? deniedTitle : allowedTitle,
               description: isGranted ? deniedDescription : allowedDescription,
@@ -66,31 +65,37 @@ class PermissionDetailPage extends StatelessWidget {
                   've a la configuración del dispositivo.',
               style: TextStyle(color: Colors.grey),
             ),
-            const Spacer(),
-
-            ElevatedButton(
-              onPressed: () async {
-                final confirmed = await Get.dialog<bool>(
-                  const PermissionModal(),
-                );
-                if (confirmed == true) onOpenSettings();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF189F8E),
-                minimumSize: const Size.fromHeight(48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28),
-                ),
-              ),
-              child: const Text(
-                'Actualizar configuración del dispositivo',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                ),
-              ),
-            ),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        minimum: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewPadding.bottom + 8,
+          left: 8,
+          right: 8,
+          top: 4,
+        ),
+        child: ElevatedButton(
+          onPressed: () async {
+            final confirmed = await Get.dialog<bool>(
+              const PermissionModal(),
+            );
+            if (confirmed == true) onOpenSettings();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF189F8E),
+            minimumSize: const Size.fromHeight(48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+          ),
+          child: const Text(
+            'Actualizar configuración del dispositivo',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+            ),
+          ),
         ),
       ),
     );

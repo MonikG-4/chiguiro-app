@@ -28,13 +28,15 @@ class SurveyEntryModelAdapter extends TypeAdapter<SurveyEntryModel> {
       longitude: fields[6] as String?,
       startedOn: fields[7] as String,
       finishedOn: fields[8] as String,
+      comments: fields[9] as String?,
+      revisit: fields[10] as bool?,
     );
   }
 
   @override
   void write(BinaryWriter writer, SurveyEntryModel obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.homeCode)
       ..writeByte(1)
@@ -52,7 +54,11 @@ class SurveyEntryModelAdapter extends TypeAdapter<SurveyEntryModel> {
       ..writeByte(7)
       ..write(obj.startedOn)
       ..writeByte(8)
-      ..write(obj.finishedOn);
+      ..write(obj.finishedOn)
+      ..writeByte(9)
+      ..write(obj.comments)
+      ..writeByte(10)
+      ..write(obj.revisit);
   }
 
   @override

@@ -103,7 +103,7 @@ class LocationService extends GetxService {
 
         return "$street, $neighborhood, $city";
       } else {
-        return "Dirección desconocida";
+        return "";
       }
     } catch (e) {
       message.update((val) {
@@ -111,7 +111,7 @@ class LocationService extends GetxService {
         val?.message = 'No se pudo obtener la dirección';
         val?.state = 'error';
       });
-      return "Error al obtener dirección";
+      return "";
     }
   }
 

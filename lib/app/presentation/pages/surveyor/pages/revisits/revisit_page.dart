@@ -77,7 +77,7 @@ class RevisitsPage extends GetView<RevisitsController> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    revisit.address,
+                                    revisit.address.split(',').first,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,

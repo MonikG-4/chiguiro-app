@@ -240,7 +240,7 @@ class HomeController extends GetxController {
         latitude: location.latitude,
         longitude: location.longitude,
         totalSurveys: surveysResponded.length,
-        address: address,
+        address: address != '' ? address : homeCode.value,
         revisitNumber: 1,
         date: DateTime.now(),
         reason: reason,
