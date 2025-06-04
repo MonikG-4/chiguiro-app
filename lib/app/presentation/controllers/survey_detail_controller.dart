@@ -11,7 +11,7 @@ import '../../domain/entities/survey.dart';
 import '../../domain/entities/survey_statistics.dart';
 import '../../domain/repositories/i_detail_survey_repository.dart';
 
-class DetailSurveyController extends GetxController {
+class SurveyDetailController extends GetxController {
   final IDetailSurveyRepository repository;
   final ConnectivityService _connectivityService = Get.find();
   late final CacheStorageService _storageService;
@@ -30,7 +30,7 @@ class DetailSurveyController extends GetxController {
   final Rx<Survey?> survey = Rx<Survey?>(null);
   final Rx<SurveyStatistics?> surveyStatistics = Rx<SurveyStatistics?>(null);
 
-  DetailSurveyController(this.repository);
+  SurveyDetailController(this.repository);
 
   @override
   void onInit() {

@@ -1,4 +1,3 @@
-import 'package:chiguiro_front_app/app/presentation/controllers/notification_controller.dart';
 import 'package:get/get.dart';
 
 import '../../../core/error/failures/failure.dart';
@@ -7,6 +6,7 @@ import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../../core/values/routes.dart';
 import '../../domain/repositories/i_auth_repository.dart';
+import 'notification_controller.dart';
 import 'session_controller.dart';
 
 class AuthController extends GetxController {
@@ -29,6 +29,8 @@ class AuthController extends GetxController {
   Future<void> login(String email, String password) async {
     isLoading.value = true;
 
+    print('Device Token: ${_notificationController.deviceToken.value}');
+
     final result = await repository.login(email, password, _notificationController.deviceToken.value);
 
     result.fold(
@@ -40,7 +42,7 @@ class AuthController extends GetxController {
           Get.find<SessionController>().updateAuthStatus();
 
           Get.closeAllSnackbars();
-          Get.offAllNamed(Routes.DASHBOARD_SURVEYOR);
+          Get.offAllNamed(Routes.DASHBOARD);
         }
     );
 

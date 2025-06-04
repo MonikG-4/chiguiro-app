@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'app/bindings/app_binding.dart';
 import 'app/data/models/jumper_model.dart';
+import 'app/data/models/revisit_model.dart';
 import 'app/data/models/sections_model.dart';
 import 'app/data/models/survey_model.dart';
 import 'app/data/models/survey_question_model.dart';
@@ -65,6 +66,8 @@ Future<void> _initHive() async {
   Hive.registerAdapter(SurveyQuestionModelAdapter());
   Hive.registerAdapter(JumperModelAdapter());
   Hive.registerAdapter(SectionsModelAdapter());
+  Hive.registerAdapter(RevisitModelAdapter());
+
 
   await Future.wait([
     Hive.openBox('authBox'),
@@ -73,6 +76,7 @@ Future<void> _initHive() async {
     Hive.openBox<SurveyRespondedModel>('surveysRespondedBox'),
     Hive.openBox<SurveyStatisticsModel>('statisticsBox'),
     Hive.openBox<SurveyorModel>('surveyorBox'),
+    Hive.openBox<RevisitModel>('revisitsBox'),
   ]);
 }
 
@@ -83,7 +87,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final initialRoute = Get.find<SessionController>().isAuthenticated.value
-        ? Routes.DASHBOARD_SURVEYOR
+        ? Routes.DASHBOARD
         : Routes.LOGIN;
 
     return GetMaterialApp(

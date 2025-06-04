@@ -11,12 +11,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
+import '../../../core/services/cache_storage_service.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/sync_task_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../../core/values/location.dart';
 import '../../../core/values/routes.dart';
+import '../../data/models/revisit_model.dart';
 import '../../data/models/survey_entry_model.dart';
 import '../../data/models/sync_task_model.dart';
 import '../../domain/entities/block_code.dart';
@@ -27,16 +29,21 @@ import '../../domain/repositories/i_survey_repository.dart';
 
 class SurveyController extends GetxController {
   final ISurveyRepository repository;
-  late final LocationService _locationService;
-  late final AudioService _audioService;
-  late final SyncTaskStorageService _taskStorageService;
+  LocationService? _locationService;
+  AudioService? _audioService;
+  SyncTaskStorageService? _taskStorageService;
+  CacheStorageService? _storageService;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
-  final surveyPending = <Map<String, dynamic>>[].obs;
+  final idSurveyor = 0.obs;
+
   final survey = Rx<Survey?>(null);
   final sections = <Sections>[].obs;
   final homeCode = RxnString();
+
+  final revisit = Rxn<RevisitModel>();
+
   final responses = <String, dynamic>{}.obs;
   final hiddenQuestions = <String>{}.obs;
   final RxMap<int, Set<String>> jumperHiddenQuestions =
@@ -46,6 +53,7 @@ class SurveyController extends GetxController {
   final isLoadingSendSurvey = false.obs;
   final isGeoLocation = false.obs;
   final isVoiceRecorder = false.obs;
+  final RxBool allowPop = false.obs;
 
   final Rx<File?> imageFile = Rx<File?>(null);
   final timeAnswerStart = DateTime.now().obs;
@@ -59,9 +67,18 @@ class SurveyController extends GetxController {
     _locationService = Get.find<LocationService>();
     _audioService = Get.find<AudioService>();
     _taskStorageService = Get.find<SyncTaskStorageService>();
+    _storageService ??= Get.find<CacheStorageService>();
 
     survey.value = Get.arguments?['survey'];
     homeCode.value = Get.arguments?['homeCode'];
+    revisit.value = Get.arguments?['revisit'];
+
+    if (idSurveyor.value == 0) {
+      final auth = _storageService?.authResponse;
+      if (auth != null) {
+        idSurveyor.value = auth.id;
+      }
+    }
 
     if (survey.value != null) {
       sections.assignAll(survey.value!.sections);
@@ -80,8 +97,8 @@ class SurveyController extends GetxController {
 
   @override
   void onClose() {
-    if (_audioService.isRecording.value) {
-      _audioService.stopRecording();
+    if (_audioService!.isRecording.value) {
+      _audioService?.stopRecording();
     }
     super.onClose();
   }
@@ -91,8 +108,8 @@ class SurveyController extends GetxController {
 
     if (survey.value?.geoLocation == true) {
       final hasLocationPermission =
-          await _locationService.requestLocationPermission();
-      if (!hasLocationPermission) {
+          await _locationService?.requestLocationPermission();
+      if (!hasLocationPermission!) {
         _showMessage(
             'Permisos necesarios',
             'Esta encuesta requiere acceso a tu ubicación. Por favor, otorga los permisos necesarios.',
@@ -102,8 +119,8 @@ class SurveyController extends GetxController {
     }
 
     if (survey.value?.voiceRecorder == true) {
-      final hasAudioPermission = await _audioService.requestAudioPermission();
-      if (!hasAudioPermission) {
+      final hasAudioPermission = await _audioService?.requestAudioPermission();
+      if (!hasAudioPermission!) {
         _showMessage(
             'Permisos necesarios',
             'Esta encuesta requiere acceso a tu micrófono. Por favor, otorga los permisos necesarios.',
@@ -118,7 +135,7 @@ class SurveyController extends GetxController {
   Future<void> getLocation(SurveyQuestion question) async {
     await _fetchLocation();
 
-    var position = _locationService.cachedPosition;
+    var position = _locationService?.cachedPosition;
 
     final location =
         getDepartmentAndCityFromCoords(position!.latitude, position.longitude);
@@ -132,7 +149,7 @@ class SurveyController extends GetxController {
 
   Future<BlockCode?> fetchBlockCode() async {
     await _fetchLocation();
-    final position = _locationService.cachedPosition;
+    final position = _locationService?.cachedPosition;
 
     if (position == null) {
       _showMessage('Error', 'No se pudo obtener la ubicación', 'error');
@@ -159,7 +176,7 @@ class SurveyController extends GetxController {
   }
 
   Future<void> redirectToMap() async {
-    const String url = 'https://chiguiro.proyen.co/geodata';
+    const String url = 'https://chiguiro.capibara.lat/geodata';
 
     final Uri uri = Uri.parse(url);
 
@@ -211,31 +228,13 @@ class SurveyController extends GetxController {
     }
   }
 
-  Future<void> fetchSurveys(int surveyorId) async {
-    isLoadingQuestion.value = true;
-
-    try {
-      final result = await repository.fetchSurveys(surveyorId);
-
-      result.fold((failure) {
-        _showMessage('Error', _mapFailureToMessage(failure), 'error');
-      }, (data) {
-        surveyPending.value = data;
-      });
-    } catch (e) {
-      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
-    } finally {
-      isLoadingQuestion.value = false;
-    }
-  }
-
   Future<void> _loadSurveyData() async {
     if (survey.value != null) {
       isGeoLocation.value = survey.value!.geoLocation;
       isVoiceRecorder.value = survey.value!.voiceRecorder;
 
       if (isVoiceRecorder.value) {
-        await _audioService.startRecording();
+        await _audioService?.startRecording();
       }
 
       if (isGeoLocation.value) {
@@ -245,7 +244,7 @@ class SurveyController extends GetxController {
   }
 
   Future<void> _fetchLocation() async {
-    await _locationService.initializeCachedPosition();
+    await _locationService?.initializeCachedPosition();
   }
 
   String? Function(dynamic value) validatorMandatory(SurveyQuestion question) {
@@ -312,8 +311,8 @@ class SurveyController extends GetxController {
       return;
     }
 
-    if (isVoiceRecorder.value && _audioService.isRecording.value) {
-      audioBase64 = await _audioService.stopRecording();
+    if (isVoiceRecorder.value && _audioService!.isRecording.value) {
+      audioBase64 = await _audioService?.stopRecording();
     }
 
     final entryInput = await _createSurveyEntry(
@@ -358,24 +357,32 @@ class SurveyController extends GetxController {
         _showMessage('Encuesta', 'Encuesta guardada localmente.', 'success');
         throw Exception(_mapFailureToMessage(failure));
       }, (data) {
-        if (taskId != null) {
-          _taskStorageService.removeTask(taskId);
-        }
+        _taskStorageService?.removeTask(taskId!);
         _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
+
+        Get.until((route) => route.settings.name != Routes.SURVEY);
+
+        if (revisit.value != null) {
+          Get.toNamed(
+            Routes.REVISIT_DETAIL,
+            arguments: revisit.value,
+          );
+        } else {
+          Get.toNamed(
+            Routes.DASHBOARD,
+          );
+        }
       });
     } catch (e) {
       _showMessage(
           'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
     } finally {
       isLoadingSendSurvey.value = false;
-      Get.until(
-        (route) => route.settings.name == Routes.DASHBOARD_SURVEYOR,
-      );
     }
   }
 
   Future<String> _saveSurveyLocally(SurveyEntryModel entryInput) async {
-    return await _taskStorageService.addTask(SyncTaskModel(
+    return await _taskStorageService!.addTask(SyncTaskModel(
       id: generateUniqueId(),
       surveyName: survey.value?.name ?? 'Desconocido',
       payload: entryInput,
@@ -391,8 +398,8 @@ class SurveyController extends GetxController {
       pollsterId: pollsterId,
       audio: audioBase64,
       answers: await _buildAnswers(),
-      latitude: _locationService.cachedPosition?.latitude.toString(),
-      longitude: _locationService.cachedPosition?.longitude.toString(),
+      latitude: _locationService?.cachedPosition?.latitude.toString(),
+      longitude: _locationService?.cachedPosition?.longitude.toString(),
       startedOn: timeAnswerStart.value.toIso8601String(),
       finishedOn: DateTime.now().toIso8601String(),
     );

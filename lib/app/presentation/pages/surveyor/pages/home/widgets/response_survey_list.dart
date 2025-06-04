@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../../../core/values/app_colors.dart';
-import '../../../../domain/entities/survey_responded.dart';
+import '../../../../../../domain/entities/survey_responded.dart';
 
 class ResponseSurveyList extends StatelessWidget {
   final List<SurveyResponded> surveyResponded;
@@ -20,7 +19,7 @@ class ResponseSurveyList extends StatelessWidget {
     this.maxHeight = 300,
   });
 
-  final List<String> headers = ['Fecha', 'Formulario', 'Cantidad', 'Estado'];
+  final List<String> headers = ['Fecha', 'Formulario', 'Cantidad'];
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +88,7 @@ class ResponseSurveyList extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 4,
             child: Text(
               item.survey.name,
               style: const TextStyle(color: Color(0xFF6C7A9C), fontSize: 12),
@@ -102,19 +101,6 @@ class ResponseSurveyList extends StatelessWidget {
               item.totalEntries.toString(),
               style: const TextStyle(color: Color(0xFF6C7A9C), fontSize: 12),
               textAlign: TextAlign.center,
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Container(
-              width: 22,
-              height: 22,
-              decoration: const BoxDecoration(
-                color:
-                    // item.completed ? AppColors.complete : AppColors.incomplete,
-                    AppColors.complete,
-                shape: BoxShape.circle,
-              ),
             ),
           ),
         ],

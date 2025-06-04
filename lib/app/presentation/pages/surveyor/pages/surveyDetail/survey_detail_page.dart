@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../../../core/values/app_colors.dart';
 import '../../../../../../core/values/routes.dart';
-import '../../../../controllers/detail_survey_controller.dart';
+import '../../../../controllers/survey_detail_controller.dart';
 import '../../../../widgets/connectivity_banner.dart';
 import '../../../../widgets/primary_button.dart';
 import 'widgets/response_status_list.dart';
 import '../../widgets/profile_header.dart';
 import 'widgets/survey_detail_card.dart';
 
-class SurveyDetailPage extends GetView<DetailSurveyController> {
+class SurveyDetailPage extends GetView<SurveyDetailController> {
   final String? homeCode;
 
   SurveyDetailPage({super.key}) : homeCode = Get.arguments['homeCode'];
@@ -121,7 +121,6 @@ class SurveyDetailPage extends GetView<DetailSurveyController> {
         title: ProfileHeader(
           name: controller.survey.value!.name,
           role: controller.survey.value!.active ? 'En proceso' : 'Finalizada',
-          avatarPath: 'assets/images/min-deporte.png',
         ),
       ),
     );

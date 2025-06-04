@@ -8,7 +8,7 @@ import '../../../core/services/local_storage_service.dart';
 import '../../domain/entities/survey.dart';
 import '../../domain/entities/survey_responded.dart';
 import '../../domain/entities/surveyor.dart';
-import '../../domain/repositories/i_dashboard_surveyor_repository.dart';
+import '../../domain/repositories/i_home_repository.dart';
 import '../graphql/mutations/password_mutations.dart';
 import '../graphql/queries/survey_query.dart';
 import '../graphql/queries/survey_responded_query.dart';
@@ -18,12 +18,12 @@ import '../models/survey_responded_model.dart';
 import '../models/surveyor_model.dart';
 import 'base_repository.dart';
 
-class DashboardSurveyorRepository extends BaseRepository
-    implements IDashboardSurveyorRepository {
+class HomeRepository extends BaseRepository
+    implements IHomeRepository {
   final GraphQLService _graphqlService = Get.find<GraphQLService>();
   final LocalStorageService _localStorageService = Get.find();
 
-  DashboardSurveyorRepository();
+  HomeRepository();
 
   @override
   Future<Either<Failure, bool>> changePassword(

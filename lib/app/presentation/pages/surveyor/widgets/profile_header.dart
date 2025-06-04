@@ -3,14 +3,12 @@ import 'package:flutter/material.dart';
 class ProfileHeader extends StatelessWidget {
   final String name;
   final String role;
-  final String avatarPath;
   final VoidCallback? onSettingsTap;
 
   const ProfileHeader({
     super.key,
     required this.name,
     required this.role,
-    required this.avatarPath,
     this.onSettingsTap,
   });
 
@@ -19,31 +17,28 @@ class ProfileHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _buildAvatar(),
           const SizedBox(width: 12),
           _buildUserInfo(),
-          if (onSettingsTap != null) _buildSettingsButton(),
+          if (onSettingsTap != null) ...[
+            const SizedBox(width: 12),
+            _buildSettingsButton(),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildAvatar() {
-    return CircleAvatar(
-      backgroundColor: Colors.transparent,
-      child: ClipOval(
-        child: Image.asset(
-          avatarPath,
-        width: 60,
-        height: 60,
-        errorBuilder: (_, __, ___) => const Icon(
-          Icons.business,
-          size: 40,
-        ),
-      ),
+    return const CircleAvatar(
+      radius: 25,
+      backgroundColor: Colors.white,
+      child: Icon(
+        Icons.person,
+        size: 40,
+        color: Colors.black54,
       ),
     );
   }
@@ -52,12 +47,14 @@ class ProfileHeader extends StatelessWidget {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            name,
+            'Hola, $name',
             style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
               color: Colors.white,
-              fontWeight: FontWeight.w600,
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -65,7 +62,7 @@ class ProfileHeader extends StatelessWidget {
             role,
             style: const TextStyle(
               fontSize: 14,
-              color: Colors.white,
+              color: Colors.white70,
             ),
           ),
         ],

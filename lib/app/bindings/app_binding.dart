@@ -8,13 +8,15 @@ import '../../core/services/connectivity_service.dart';
 import '../../core/services/graphql_service.dart';
 import '../../core/services/local_storage_service.dart';
 import '../../core/services/location_service.dart';
+import '../../core/services/revisit_storage_service.dart';
 import '../../core/services/sync_service.dart';
 import '../../core/services/sync_task_storage_service.dart';
 import '../data/repositories/push_notification_repository.dart';
+import '../data/repositories/survey_repository.dart';
 import '../domain/repositories/i_notification_repository.dart';
+import '../domain/repositories/i_survey_repository.dart';
 import '../presentation/controllers/notification_controller.dart';
 import '../presentation/controllers/session_controller.dart';
-import 'survey_binding.dart';
 
 class AppBinding {
   Future<void> initAsyncDependencies(
@@ -34,8 +36,9 @@ class AppBinding {
 
     final cacheStorageService = Get.find<CacheStorageService>();
     Get.put(SessionController(cacheStorageService), permanent: true);
-    SurveyBinding().dependencies();
+    Get.lazyPut<ISurveyRepository>(() => SurveyRepository(), fenix: true);
     Get.put(SyncService(), permanent: true);
+    Get.put(RevisitStorageService(), permanent: true);
 
     Get.put<GraphQLService>(
       GraphQLService(clientProvider: GraphQLClientProvider()),

@@ -3,13 +3,13 @@ import 'package:get/get.dart';
 
 import '../../../../../../../core/values/app_colors.dart';
 import '../../../../../../domain/entities/detail_survey.dart';
-import '../../../../../controllers/detail_survey_controller.dart';
+import '../../../../../controllers/survey_detail_controller.dart';
 
 class ResponseStatusList extends StatelessWidget {
   final ScrollPhysics? physics;
   final double? maxHeight;
 
-  final DetailSurveyController controller = Get.find();
+  final SurveyDetailController controller = Get.find();
 
   ResponseStatusList({
     super.key,

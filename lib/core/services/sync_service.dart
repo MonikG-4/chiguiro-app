@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'package:chiguiro_front_app/core/services/cache_storage_service.dart';
 import 'package:get/get.dart';
 import '../../app/data/models/sync_task_model.dart';
 import '../../app/domain/repositories/i_survey_repository.dart';
 import '../utils/message_handler.dart';
 import '../utils/snackbar_message_model.dart';
+import 'cache_storage_service.dart';
 import 'connectivity_service.dart';
 import 'sync_task_storage_service.dart';
 
@@ -46,8 +46,12 @@ class SyncService extends GetxService {
       List<String> failedTaskIds = [];
 
       if (pendingTasks.isEmpty) {
+        if (Get.overlayContext != null) {
+          _showMessage('Encuestas', 'No hay encuestas pendientes para enviar', 'success');
+        }
         return;
       }
+
 
       final results = await Future.wait(
           pendingTasks.map((task) async {

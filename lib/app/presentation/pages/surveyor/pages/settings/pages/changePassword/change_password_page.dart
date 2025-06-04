@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../controllers/dashboard_surveyor_controller.dart';
-import '../../widgets/bottom_pages.dart';
-import '../../widgets/custom_text_button_redirect.dart';
-import '../../widgets/custom_view_form.dart';
-import '../../widgets/primary_button.dart';
+import '../../../../../../controllers/home_controller.dart';
+import '../../../../../../widgets/bottom_pages.dart';
+import '../../../../../../widgets/custom_text_button_redirect.dart';
+import '../../../../../../widgets/custom_view_form.dart';
+import '../../../../../../widgets/primary_button.dart';
 import 'widgets/change_password_form.dart';
 
-class ChangePasswordPage extends GetView<DashboardSurveyorController> {
+class ChangePasswordPage extends GetView<HomeController> {
   const ChangePasswordPage({super.key});
 
   @override
@@ -52,7 +52,7 @@ class ChangePasswordPage extends GetView<DashboardSurveyorController> {
             const SizedBox(height: 16),
             CustomTextButtonRedirect(
               onPressed: _handleBackNavigation,
-              label: 'Volver al inicio',
+              label: 'Cancelar ',
             ),
           ],
         ),
@@ -68,7 +68,7 @@ class ChangePasswordPage extends GetView<DashboardSurveyorController> {
                 }
               },
               isLoading: controller.isChangePasswordLoading.value,
-              child: 'Actualizar contraseña',
+              child: 'Guardar cambios',
             ),
           ],
         )),

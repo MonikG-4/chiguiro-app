@@ -5,7 +5,7 @@ import '../entities/survey.dart';
 import '../entities/survey_responded.dart';
 import '../entities/surveyor.dart';
 
-abstract class IDashboardSurveyorRepository {
+abstract class IHomeRepository {
   Future<Either<Failure, bool>> changePassword(int pollsterId, String password);
   Future<Either<Failure, List<Survey>>> fetchSurveys(int surveyorId);
   Future<Either<Failure, Surveyor>> fetchDataSurveyor(int surveyorId);

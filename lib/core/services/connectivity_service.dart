@@ -22,7 +22,7 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
   late final Connectivity _connectivity;
   late final http.Client _httpClient;
 
-  final RxBool _isOnline = false.obs;
+  final RxBool _isOnline = true.obs;
   final Completer<void> _initCompleter = Completer<void>();
   final List<CallbackEntry> _onConnectedCallbacks = [];
   final List<CallbackEntry> _onDisconnectedCallbacks = [];
@@ -142,7 +142,7 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
   }
 
   /// Espera conexión estable
-  Future<bool> waitForConnection([Duration timeout = const Duration(seconds: 5)]) async {
+  Future<bool> waitForConnection([Duration timeout = const Duration(seconds: 3)]) async {
     await waitForInit();
     if (isOnline) return true;
 

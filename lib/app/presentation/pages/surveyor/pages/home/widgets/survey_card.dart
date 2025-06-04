@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/values/app_colors.dart';
-import '../../../../domain/entities/survey.dart';
+import '../../../../../../../core/values/app_colors.dart';
+import '../../../../../../domain/entities/survey.dart';
 
 class SurveyCard extends StatelessWidget {
   final Survey survey;

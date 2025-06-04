@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:get/get.dart';
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
@@ -7,38 +9,40 @@ import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../domain/entities/survey.dart';
 import '../../domain/entities/survey_responded.dart';
-import '../../domain/entities/surveyor.dart';
-import '../../domain/repositories/i_dashboard_surveyor_repository.dart';
+import '../../data/models/revisit_model.dart';
+import '../../domain/repositories/i_home_repository.dart';
 import '../../../core/services/location_service.dart';
+import '../../../core/services/revisit_storage_service.dart';
 
-class DashboardSurveyorController extends GetxController {
-  final IDashboardSurveyorRepository repository;
+class HomeController extends GetxController {
+  final IHomeRepository repository;
   final ConnectivityService connectivityService = Get.find();
-  late final LocationService _locationService;
+  late LocationService _locationService;
   late final AudioService _audioService;
   late final CacheStorageService _storageService;
+  late final RevisitStorageService _revisitStorageService;
 
   // Variables reactivas para la UI
   final surveys = <Survey>[].obs;
   final surveysResponded = <SurveyResponded>[].obs;
-  final dataSurveyor = Rx<Surveyor?>(null);
 
   // Estados de carga separados para cada operación
   final isChangePasswordLoading = false.obs;
   final isSurveysLoading = false.obs;
-  final isSurveysRespondedLoading = false.obs;
   final isSurveyorDataLoading = false.obs;
   final isDownloadingSurveys = false.obs;
+  final showContent = false.obs;
+  final isCodeGenerated = false.obs;
 
   // Datos del encuestador
   final idSurveyor = 0.obs;
   final nameSurveyor = ''.obs;
   final surnameSurveyor = ''.obs;
-  final showContent = false.obs;
   final homeCode = ''.obs;
+
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
-  DashboardSurveyorController(this.repository);
+  HomeController(this.repository);
 
   @override
   void onInit() {
@@ -57,6 +61,7 @@ class DashboardSurveyorController extends GetxController {
     _locationService = Get.find<LocationService>();
     _audioService = Get.find<AudioService>();
     _storageService = Get.find<CacheStorageService>();
+    _revisitStorageService = Get.find<RevisitStorageService>();
   }
 
   void _initializeUserData() {
@@ -85,6 +90,29 @@ class DashboardSurveyorController extends GetxController {
     }
   }
 
+  void generateHomeCode() {
+    final now = DateTime.now();
+
+    final letters = String.fromCharCodes([
+      65 + (now.millisecond % 26), // Letra 1
+      65 + (now.second % 26),      // Letra 2
+      65 + (now.minute % 26),      // Letra 3
+      65 + (now.hour % 26),        // Letra 4
+    ]);
+
+    final random = Random(now.microsecond + now.millisecond + now.second + now.minute + now.hour);
+    final numbers = List.generate(4, (_) => random.nextInt(10)).join();
+
+    homeCode.value = "$letters-$numbers";
+    isCodeGenerated.value = true;
+  }
+
+
+  void resetHomeCode() {
+    homeCode.value = "";
+    isCodeGenerated.value = false;
+  }
+
   Future<void> changePassword(String password) async {
     isChangePasswordLoading.value = true;
 
@@ -105,22 +133,18 @@ class DashboardSurveyorController extends GetxController {
     isChangePasswordLoading.value = false;
   }
 
-  void refreshAllData({bool all = true}) async {
-
+  Future<void> refreshAllData({bool all = true}) async {
     if (all) {
-      isDownloadingSurveys.value = true;
       await fetchSurveys();
-      isDownloadingSurveys.value = false;
     }
-    await fetchDataSurveyor();
     await fetchSurveysResponded(homeCode.value);
-
   }
 
-  Future<void> fetchSurveysResponded(String homeCode) async {
-    if (isSurveysRespondedLoading.value) return;
 
-    isSurveysRespondedLoading.value = true;
+  Future<void> fetchSurveysResponded(String homeCode) async {
+    if (isSurveysLoading.value) return;
+
+    isSurveysLoading.value = true;
 
     try {
       final userId = _storageService.authResponse!.id;
@@ -144,7 +168,7 @@ class DashboardSurveyorController extends GetxController {
     } catch (e) {
       _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
-      isSurveysRespondedLoading.value = false;
+      isSurveysLoading.value = false;
     }
   }
 
@@ -176,33 +200,6 @@ class DashboardSurveyorController extends GetxController {
     }
   }
 
-  Future<void> fetchDataSurveyor() async {
-    if (isSurveyorDataLoading.value) return;
-
-    isSurveyorDataLoading.value = true;
-
-    try {
-      final userId = _storageService.authResponse!.id;
-      final result = await repository.fetchDataSurveyor(userId);
-
-      result.fold(
-        (failure) {
-          _showMessage(
-              'Error',
-              _mapFailureToMessage(failure).replaceAll("Exception:", ""),
-              'error');
-        },
-        (data) {
-          dataSurveyor.value = data;
-        },
-      );
-    } catch (e) {
-      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
-    } finally {
-      isSurveyorDataLoading.value = false;
-    }
-  }
-
   Future<void> _handlePermissions(List<Survey> surveys) async {
     bool locationPermissionRequested = false;
     bool audioPermissionRequested = false;
@@ -218,6 +215,45 @@ class DashboardSurveyorController extends GetxController {
         await Future.delayed(const Duration(seconds: 1));
       }
       if (locationPermissionRequested && audioPermissionRequested) break;
+    }
+  }
+
+  Future<void> saveRevisit(String reason) async {
+    try {
+      showContent.value = false;
+      isSurveysLoading.value = true;
+      await _locationService.initializeCachedPosition();
+      final location = _locationService.cachedPosition;
+
+      if (location == null) {
+        _showMessage('Error', 'No se pudo obtener la ubicación', 'error');
+        return;
+      }
+
+      final address = await _locationService.getAddressFromLatLng(
+        location.latitude,
+        location.longitude,
+      );
+
+      final revisit = RevisitModel(
+        homeCode: homeCode.value,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        totalSurveys: surveysResponded.length,
+        address: address,
+        revisitNumber: 1,
+        date: DateTime.now(),
+        reason: reason,
+      );
+
+      await _revisitStorageService.addRevisit(revisit);
+
+      _showMessage('Revisita guardada', 'Motivo: $reason', 'success');
+
+      resetHomeCode();
+      isSurveysLoading.value = false;
+    } catch (e) {
+      _showMessage('Error', 'No se pudo guardar la revisita: $e', 'error');
     }
   }
 

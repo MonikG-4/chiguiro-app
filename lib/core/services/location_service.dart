@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:geocoding/geocoding.dart';
 
 import '../utils/message_handler.dart';
 import '../utils/snackbar_message_model.dart';
@@ -86,4 +87,33 @@ class LocationService extends GetxService {
       barrierDismissible: false,
     );
   }
+
+  Future<String> getAddressFromLatLng(double lat, double lng) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+
+        String safeText(String? value) => (value == null || value.trim().isEmpty) ? 'No localizado' : value;
+
+        final street = safeText(place.street);
+        final neighborhood = safeText(place.subLocality);
+        final city = safeText(place.locality);
+
+        return "$street, $neighborhood, $city";
+      } else {
+        return "Dirección desconocida";
+      }
+    } catch (e) {
+      message.update((val) {
+        val?.title = 'Geolocalización';
+        val?.message = 'No se pudo obtener la dirección';
+        val?.state = 'error';
+      });
+      return "Error al obtener dirección";
+    }
+  }
+
+
 }

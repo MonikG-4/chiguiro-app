@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/utils/validator_login_fields.dart';
-import '../../../widgets/custom_text_field.dart';
+
+import '../../../../../../../../../core/utils/validator_login_fields.dart';
+import '../../../../../../../widgets/custom_text_field.dart';
+
 
 class ChangePasswordForm extends StatefulWidget {
   final TextEditingController passwordController;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../../../core/values/app_colors.dart';
 import 'primary_button.dart';
@@ -28,7 +27,7 @@ class ConfirmationDialog extends StatelessWidget {
       content: Text(message),
       actions: [
         PrimaryButton(
-          onPressed: () => Get.back(result: false),
+          onPressed: () => Navigator.of(context).pop(false),
           isLoading: false,
           child: cancelText,
           width: 110,
@@ -38,7 +37,7 @@ class ConfirmationDialog extends StatelessWidget {
           borderRadius: 6,
         ),
         PrimaryButton(
-          onPressed: () => Get.back(result: true),
+          onPressed: () => Navigator.of(context).pop(true),
           isLoading: false,
           child: confirmText,
           width: 100,
