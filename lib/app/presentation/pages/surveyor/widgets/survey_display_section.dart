@@ -37,9 +37,7 @@ class SurveyDisplaySection extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         if (filteredSurveys.isEmpty)
-          const Card(
-            color: Colors.white,
-            child: Padding(
+          const  Padding(
               padding: EdgeInsets.all(16.0),
               child: Center(
                 child: Text(
@@ -48,8 +46,7 @@ class SurveyDisplaySection extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
-            ),
-          )
+            )
         else if (isResponded)
           ResponseSurveyList(
             surveyResponded: filteredSurveys as List<SurveyResponded>,

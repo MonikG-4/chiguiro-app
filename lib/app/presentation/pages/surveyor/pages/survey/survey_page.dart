@@ -61,14 +61,7 @@ class SurveyPage extends GetView<SurveyController> {
       }),
       bottomNavigationBar: Obx(() {
         return SafeArea(
-          bottom: true,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewPadding.bottom + 8,
-              left: 8,
-              right: 8,
-              top: 4,
-            ),
+          minimum: const EdgeInsets.fromLTRB(8, 8, 8, 16),
             child: PrimaryButton(
               onPressed: controller.isLoadingSendSurvey.value
                   ? null
@@ -76,7 +69,6 @@ class SurveyPage extends GetView<SurveyController> {
               isLoading: controller.isLoadingSendSurvey.value,
               child: 'Enviar Encuesta',
             ),
-          ),
         );
       }),
 

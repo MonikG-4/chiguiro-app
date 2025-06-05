@@ -28,7 +28,6 @@ class RevisitDetailController extends GetxController {
   // Estados de carga separados para cada operación
   final isSurveysLoading = false.obs;
 
-
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
   RevisitDetailController(this.repository);
@@ -73,24 +72,23 @@ class RevisitDetailController extends GetxController {
     return [current, revisitPoint];
   }
 
-
   Future<void> fetchSurveysResponded(String homeCode) async {
     if (isSurveysLoading.value) return;
 
     isSurveysLoading.value = true;
 
     try {
-      final surveysResult =
-      await repository.fetchSurveyResponded(homeCode, _storageService.authResponse!.id);
+      final surveysResult = await repository.fetchSurveyResponded(
+          homeCode, _storageService.authResponse!.id);
 
       surveysResult.fold(
-            (failure) {
+        (failure) {
           _showMessage(
               'Error',
               _mapFailureToMessage(failure).replaceAll("Exception:", ""),
               'error');
         },
-            (data) {
+        (data) {
           surveysResponded.value = data
               .where((survey) => survey.totalEntries > 0)
               .toList()
@@ -110,17 +108,17 @@ class RevisitDetailController extends GetxController {
     isSurveysLoading.value = true;
 
     try {
-
-      final surveysResult = await repository.fetchSurveys(_storageService.authResponse!.id);
+      final surveysResult =
+          await repository.fetchSurveys(_storageService.authResponse!.id);
 
       surveysResult.fold(
-            (failure) {
+        (failure) {
           _showMessage(
               'Error',
               _mapFailureToMessage(failure).replaceAll("Exception:", ""),
               'error');
         },
-            (data) {
+        (data) {
           surveys.value = data..sort((a, b) => a.id.compareTo(b.id));
           _handlePermissions(data);
         },
@@ -132,16 +130,20 @@ class RevisitDetailController extends GetxController {
     }
   }
 
-  Future<void> saveRevisit() async {
+  Future<void> saveRevisit(String newReason) async {
     try {
       isSurveysLoading.value = true;
 
-      final revisitNumber = await _revisitStorageService.incrementRevisitCount(revisit.value!.homeCode);
+      final updated = await _revisitStorageService
+          .incrementRevisitCount(revisit.value!.homeCode, newReason: newReason);
 
-      if(revisitNumber! < 3) {
-        _showMessage('Revisita guardada', 'Hogar revisitado $revisitNumber veces', 'info');
+      if (updated!.revisitNumber < 3) {
+        revisit.value = updated;
+        _showMessage('Revisita guardada',
+            'Hogar revisitado ${updated.revisitNumber} veces', 'info');
       } else {
-        _showMessage('Hogar finalizado', 'Hogar revisitado $revisitNumber veces', 'error');
+        _showMessage('Hogar finalizado',
+            'Hogar revisitado ${updated.revisitNumber} veces', 'error');
       }
 
       isSurveysLoading.value = false;
@@ -153,10 +155,15 @@ class RevisitDetailController extends GetxController {
   Future<void> deleteRevisit() async {
     try {
       await _revisitStorageService.removeRevisit(revisit.value!.homeCode);
-      _showMessage('Hogar finalizado', 'Hogar finalizado correctamente', 'success');
-     } catch (e) {
+      _showMessage(
+          'Hogar finalizado', 'Hogar finalizado correctamente', 'success');
+    } catch (e) {
       _showMessage('Error', 'No se pudo finalizado el hogar: $e', 'error');
     }
+  }
+
+  Future<RevisitModel?> getRevisit() async {
+    return await _revisitStorageService.getRevisitByHomeCode(revisit.value!.homeCode);
   }
 
   Future<void> _handlePermissions(List<Survey> surveys) async {
@@ -197,5 +204,4 @@ class RevisitDetailController extends GetxController {
       val?.state = state;
     });
   }
-
 }

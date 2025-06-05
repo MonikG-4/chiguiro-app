@@ -80,7 +80,7 @@ class SettingsPage extends GetView<SettingsController> {
           ),
           child: Row(
             children: [
-              Icon(icon, size: 20, color: Colors.grey.shade700),
+              Icon(icon, size: 32, color: Colors.grey.shade700),
               const SizedBox(width: 12),
               Text(
                 text,

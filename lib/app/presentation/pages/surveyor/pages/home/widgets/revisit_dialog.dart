@@ -41,12 +41,13 @@ class _RevisitDialogState extends State<RevisitDialog> {
           const SizedBox(height: 16),
           TextField(
             controller: _reasonController,
-            maxLines: 2,
+            minLines: 3,
+            maxLines: 3,
             style: const TextStyle(fontSize: 14),
             decoration: const InputDecoration(
               hintText: 'Ejemplo: No estaban todos los integrantes',
               filled: true,
-              fillColor: Color(0xFFF2F2F2),
+              fillColor: Color(0xFFECE6F0),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10)),
                 borderSide: BorderSide.none,

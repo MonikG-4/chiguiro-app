@@ -13,6 +13,7 @@ import '../../widgets/custom_card.dart';
 import '../../widgets/revisit_map_view.dart';
 import '../../widgets/survey_display_section.dart';
 import '../../widgets/home_code_widget.dart';
+import '../home/widgets/revisit_dialog.dart';
 
 class RevisitDetailPage extends GetView<RevisitDetailController> {
   const RevisitDetailPage({super.key});
@@ -33,33 +34,50 @@ class RevisitDetailPage extends GetView<RevisitDetailController> {
             await controller.refreshAllData();
           },
           bottomButton: SafeArea(
-            minimum: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewPadding.bottom + 8,
-              left: 8,
-              right: 8,
-              top: 4,
-            ),
+            minimum: const EdgeInsets.fromLTRB(8, 0, 8, 16),
             child: Row(
               children: [
                 Expanded(
                   child: PrimaryButton(
                     onPressed: () async {
-                      final confirmed = await Get.dialog<bool>(
-                        const ConfirmationDialog(
-                          message: "¿Estás seguro de que deseas finalizar el hogar?",
-                          confirmText: 'Finalizar',
+                      final existing = await controller.getRevisit();
+
+                      if (existing?.revisitNumber == 2) {
+                        final confirmed = await Get.dialog<bool>(
+                          const ConfirmationDialog(
+                            message: "Este hogar ya ha sido revisitado 2 veces.\n"
+                                "Al guardar una vez más, se finalizará automáticamente.\n"
+                                "¿Deseas continuar?",
+                            confirmText: 'Finalizar',
+                          ),
+                        );
+                        if (confirmed == true) {
+                          await controller.saveRevisit("Finalización automática");
+                          Get.back(); // salir de la pantalla
+                        }
+                        return;
+                      }
+
+                      // Si no ha llegado al límite, pide motivo
+                      final reason = await Get.dialog<String>(
+                        const RevisitDialog(
+                          message: "¿Quieres guardar este hogar para una revisita?\n"
+                              "Cuéntanos el motivo de la revisita:",
                         ),
                       );
-                      if (confirmed == true) {
-                        controller.saveRevisit();
+
+                      if (reason != null && reason.isNotEmpty) {
+                        await controller.saveRevisit(reason);
                         Get.back();
                       }
                     },
                     backgroundColor: AppColors.secondaryButton,
                     isLoading: false,
                     child: 'Guardar hogar',
+                    textSize: 15,
                   ),
                 ),
+
                 const SizedBox(width: 12),
                 Expanded(
                   child: PrimaryButton(
@@ -77,6 +95,7 @@ class RevisitDetailPage extends GetView<RevisitDetailController> {
                     },
                     isLoading: false,
                     child: 'Finalizar hogar',
+                    textSize: 15,
                   ),
                 ),
               ],
@@ -173,7 +192,7 @@ class RevisitDetailPage extends GetView<RevisitDetailController> {
                       ],
                     ),
 
-                    const SizedBox(height: 42),
+                    const SizedBox(height: 90),
                   ],
                 );
               })

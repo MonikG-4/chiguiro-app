@@ -136,51 +136,65 @@ class _DashboardPageState extends State<DashboardPage> {
 
             return pages[index] ?? const Center(child: Text('No page found'));
           }),
-          bottomNavigationBar: Obx(() => BottomNavigationBar(
-            backgroundColor: AppColors.background,
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: AppColors.primaryButton,
-            unselectedItemColor: Colors.grey,
-            selectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 10,
-            ),
-            unselectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.normal,
-              fontSize: 9,
-            ),
-            currentIndex: selectedIndex.value,
-            onTap: (index) {
-              if (index == selectedIndex.value) return;
-
-              if (!loadedIndices.contains(index)) {
-                bindings[index]?.dependencies();
-                loadedIndices.add(index);
-              }
-
-               selectedIndex.value = index;
-            },
-            items: List.generate(navItems.length, (index) {
-              final item = navItems[index];
-              final isSelected = selectedIndex.value == index;
-
-              return BottomNavigationBarItem(
-                icon: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      height: 2,
-                      width: 64,
-                      margin: const EdgeInsets.only(bottom: 4),
-                      color: isSelected ? AppColors.primaryButton : Colors.transparent,
+          bottomNavigationBar: SizedBox(
+            height: 80,
+            child: Obx(() => MediaQuery.removePadding(
+              context: context,
+              removeBottom: true,
+              child: Stack(
+                children: [
+                  BottomNavigationBar(
+                    elevation: 0,
+                    backgroundColor: AppColors.background,
+                    type: BottomNavigationBarType.fixed,
+                    selectedItemColor: AppColors.primaryButton,
+                    unselectedItemColor: Colors.grey,
+                    selectedLabelStyle: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
                     ),
-                    Icon(item['icon'] as IconData),
-                  ],
-                ),
-                label: item['label'] as String,
-              );
-            }),
-          )),
+                    unselectedLabelStyle: const TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontSize: 11,
+                    ),
+                    currentIndex: selectedIndex.value,
+                    onTap: (index) {
+                      if (index == selectedIndex.value) return;
+
+                      if (!loadedIndices.contains(index)) {
+                        bindings[index]?.dependencies();
+                        loadedIndices.add(index);
+                      }
+
+                      selectedIndex.value = index;
+                    },
+                    items: List.generate(navItems.length, (index) {
+                      final item = navItems[index];
+                      final isSelected = selectedIndex.value == index;
+
+                      return BottomNavigationBarItem(
+                        icon: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            if (isSelected)
+                              Container(
+                                height: 2,
+                                width: 64,
+                                color: AppColors.primaryButton,
+                              ),
+                            const SizedBox(height: 6),
+                            Icon(item['icon'] as IconData, size: 30),
+                          ],
+                        ),
+                        label: item['label'] as String,
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            )),
+          ),
+
         ),
 
         Obx(() {

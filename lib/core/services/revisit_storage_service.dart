@@ -17,26 +17,33 @@ class RevisitStorageService extends GetxService {
     return _revisitBox.values.toList();
   }
 
-  Future<int?> incrementRevisitCount(String homeCode) async {
+  Future<RevisitModel?> incrementRevisitCount(String homeCode, {required String newReason}) async {
     final entry = _revisitBox.toMap().entries.firstWhereOrNull(
           (e) => e.value.homeCode == homeCode,
     );
 
     if (entry == null) return null;
 
-    final int newCount = entry.value.revisitNumber + 1;
+    final current = entry.value;
+    final int newCount = current.revisitNumber + 1;
+
+    RevisitModel? updated;
 
     if (newCount >= 3) {
+      // Elimina la revisita si se excede el límite
       await removeRevisit(homeCode);
+      updated = null;
     } else {
-      await _revisitBox.put(entry.key, entry.value.copyWith(
+      updated = current.copyWith(
         revisitNumber: newCount,
-      ));
+        reason: '${current.reason}; $newReason',
+        date: DateTime.now(),
+      );
+      await _revisitBox.put(entry.key, updated);
     }
 
-    return newCount;
+    return updated;
   }
-
 
   /// Elimina una revisita por su índice
   Future<void> removeRevisit(String homeCode) async {
@@ -48,4 +55,10 @@ class RevisitStorageService extends GetxService {
       await _revisitBox.delete(entry.key);
     }
   }
+
+  Future<RevisitModel?> getRevisitByHomeCode(String homeCode) async {
+    return _revisitBox.values.firstWhereOrNull((revisit) => revisit.homeCode == homeCode);
+  }
+
+
 }

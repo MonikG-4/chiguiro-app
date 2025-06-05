@@ -36,7 +36,6 @@ class PendingSurveyController extends GetxController {
       }
     }
 
-    print("idSurveyor: ${idSurveyor.value}");
     fetchSurveys(idSurveyor.value);
 
     MessageHandler.setupSnackbarListener(message);
