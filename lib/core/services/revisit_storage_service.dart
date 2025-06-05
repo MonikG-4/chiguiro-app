@@ -22,6 +22,8 @@ class RevisitStorageService extends GetxService {
           (e) => e.value.homeCode == homeCode,
     );
 
+    print(entry);
+
     if (entry == null) return null;
 
     final current = entry.value;

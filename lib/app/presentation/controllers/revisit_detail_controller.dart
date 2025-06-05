@@ -137,13 +137,13 @@ class RevisitDetailController extends GetxController {
       final updated = await _revisitStorageService
           .incrementRevisitCount(revisit.value!.homeCode, newReason: newReason);
 
-      if (updated!.revisitNumber < 3) {
+      if (updated == null) {
+        _showMessage('Hogar finalizado',
+            'Hogar revisitado 3 veces, se ha finalizado automáticamente.', 'error');
+      } else {
         revisit.value = updated;
         _showMessage('Revisita guardada',
             'Hogar revisitado ${updated.revisitNumber} veces', 'info');
-      } else {
-        _showMessage('Hogar finalizado',
-            'Hogar revisitado ${updated.revisitNumber} veces', 'error');
       }
 
       isSurveysLoading.value = false;

@@ -52,7 +52,7 @@ class RevisitDetailPage extends GetView<RevisitDetailController> {
                           ),
                         );
                         if (confirmed == true) {
-                          await controller.saveRevisit("Finalización automática");
+                          controller.saveRevisit("Finalización automática");
                           Get.back(); // salir de la pantalla
                         }
                         return;
@@ -67,7 +67,7 @@ class RevisitDetailPage extends GetView<RevisitDetailController> {
                       );
 
                       if (reason != null && reason.isNotEmpty) {
-                        await controller.saveRevisit(reason);
+                        controller.saveRevisit(reason);
                         Get.back();
                       }
                     },
