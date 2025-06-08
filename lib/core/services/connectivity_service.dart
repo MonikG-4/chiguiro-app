@@ -17,7 +17,7 @@ class CallbackEntry {
 /// Servicio de conectividad simplificado
 class ConnectivityService extends GetxService with WidgetsBindingObserver {
   static const _retryDelay = Duration(milliseconds: 800);
-  static const _checkUrl = 'pond.capibara.lat';
+  static const _checkUrl = 'https://www.google.com';
 
   late final Connectivity _connectivity;
   late final http.Client _httpClient;
@@ -66,12 +66,10 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
     _isChecking = true;
 
     try {
-      final hasNetwork = results.any((result) =>
-      result == ConnectivityResult.wifi || result == ConnectivityResult.mobile);
-
+      final hasBasicConnectivity = !results.contains(ConnectivityResult.none);
       bool hasInternet = false;
 
-      if (hasNetwork) {
+      if (hasBasicConnectivity) {
         hasInternet = await _checkInternet();
 
         if (!hasInternet) {
@@ -91,23 +89,18 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
   }
 
   Future<bool> _checkInternet() async {
-    final ping = Ping(_checkUrl, count: 5, timeout: 3);
-    int received = 0;
-
     try {
-      await for (final event in ping.stream) {
-        if (event.response != null) {
-          received++;
-        }
-      }
+      final response = await http.head(
+        Uri.parse(_checkUrl),
+      ).timeout(const Duration(seconds: 3));
 
-      return received > 0;
+      print('HEAD status: ${response.statusCode}');
+      return response.statusCode >= 200 && response.statusCode < 400;
     } catch (e) {
-      print('Ping error: $e');
+      print('Check internet failed: $e');
       return false;
     }
   }
-
 
   Future<void> _runCallbacks(bool isConnected) async {
     final callbacks = isConnected ? _onConnectedCallbacks : _onDisconnectedCallbacks;
