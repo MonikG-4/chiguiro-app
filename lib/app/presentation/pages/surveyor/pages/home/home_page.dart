@@ -98,13 +98,7 @@ class HomePage extends GetView<HomeController> {
                   child: 'Nuevo hogar',
                 )
               else
-              // Si ya hay código generado, mostrar loading o contenido
-                controller.isSurveysLoading.value
-                    ? const Padding(
-                  padding: EdgeInsets.only(top: 20),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-                    :
+
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -115,14 +109,20 @@ class HomePage extends GetView<HomeController> {
                       onSurveyTap: (survey) => _redirectToSurvey(survey),
                     ),
                     const SizedBox(height: 8),
-
+                    // Si ya hay código generado, mostrar loading o contenido
+                    controller.isSurveysRespondedLoading.value
+                        ? const Padding(
+                      padding: EdgeInsets.only(top: 20),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                        :
                      CustomCard(
                       children: [
                         SurveyDisplaySection(
                           title: 'Encuestas realizadas',
                           surveys: controller.surveysResponded,
                           isResponded: true,
-                          isLoading: controller.isSurveysLoading,
+                          isLoading: controller.isSurveysRespondedLoading,
                         ),
                       ],
                     ),

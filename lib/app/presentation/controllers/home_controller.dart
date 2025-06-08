@@ -29,6 +29,7 @@ class HomeController extends GetxController {
   // Estados de carga separados para cada operación
   final isChangePasswordLoading = false.obs;
   final isSurveysLoading = false.obs;
+  final isSurveysRespondedLoading = false.obs;
   final isSurveyorDataLoading = false.obs;
   final isDownloadingSurveys = false.obs;
   final showContent = false.obs;
@@ -142,9 +143,9 @@ class HomeController extends GetxController {
 
 
   Future<void> fetchSurveysResponded(String homeCode) async {
-    if (isSurveysLoading.value) return;
+    if (isSurveysRespondedLoading.value) return;
 
-    isSurveysLoading.value = true;
+    isSurveysRespondedLoading.value = true;
 
     try {
       final userId = _storageService.authResponse!.id;
@@ -168,7 +169,7 @@ class HomeController extends GetxController {
     } catch (e) {
       _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
-      isSurveysLoading.value = false;
+      isSurveysRespondedLoading.value = false;
     }
   }
 
@@ -190,6 +191,7 @@ class HomeController extends GetxController {
         },
         (data) {
           surveys.value = data..sort((a, b) => a.id.compareTo(b.id));
+
           _handlePermissions(data);
         },
       );

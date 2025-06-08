@@ -26,8 +26,6 @@ abstract class BaseRepository {
       'pollsterChangePassword',
     };
 
-    await _connectivityService.waitForConnection();
-
     try {
       final result = await request();
 
@@ -58,7 +56,6 @@ abstract class BaseRepository {
     required Function(T data) saveToCache,
     String unknownErrorMessage = 'Error desconocido',
   }) async {
-    await _connectivityService.waitForConnection();
 
     if (_connectivityService.isOnline) {
       try {

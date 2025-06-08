@@ -142,7 +142,7 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
   }
 
   /// Espera conexión estable
-  Future<bool> waitForConnection([Duration timeout = const Duration(seconds: 3)]) async {
+  Future<bool> waitForConnection([Duration timeout = const Duration(milliseconds: 500)]) async {
     await waitForInit();
     if (isOnline) return true;
 
