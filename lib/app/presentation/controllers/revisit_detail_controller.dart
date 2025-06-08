@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
@@ -60,14 +62,32 @@ class RevisitDetailController extends GetxController {
     final location = _locationService.cachedPosition;
 
     if (location == null) {
-      // Retorna solo el punto de la revisita si no se obtiene ubicación actual
       return [LatLng(revisit.latitude, revisit.longitude)];
     }
 
-    final current = LatLng(location.latitude, location.longitude);
-    final revisitPoint = LatLng(revisit.latitude, revisit.longitude);
+    final start = '${location.longitude},${location.latitude}';
+    final end = '${revisit.longitude},${revisit.latitude}';
 
-    return [current, revisitPoint];
+    final url = Uri.parse(
+      'https://router.project-osrm.org/route/v1/driving/$start;$end?overview=full&geometries=geojson',
+    );
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final coords = data['routes'][0]['geometry']['coordinates'] as List;
+        return coords.map<LatLng>((c) => LatLng(c[1], c[0])).toList();
+      }
+    } catch (e) {
+      print('Error obteniendo ruta OSRM: $e');
+    }
+
+    // Fallback: línea recta
+    return [
+      LatLng(location.latitude, location.longitude),
+      LatLng(revisit.latitude, revisit.longitude)
+    ];
   }
 
   Future<void> fetchSurveysResponded(String homeCode) async {

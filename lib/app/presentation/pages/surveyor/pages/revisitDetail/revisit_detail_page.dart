@@ -134,7 +134,7 @@ class RevisitDetailPage extends GetView<RevisitDetailController> {
                       TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   Text(
-                    controller.revisit.value!.address,
+                    controller.revisit.value!.address != '' ? controller.revisit.value!.address : 'No localizado',
                     style: const TextStyle(fontSize: 14),
                   ),
                   const SizedBox(height: 16),
