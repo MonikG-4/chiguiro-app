@@ -178,20 +178,15 @@ class SurveyController extends GetxController {
   Future<void> redirectToMap() async {
     const String url = 'https://chiguiro.capibara.lat/geodata';
 
-    final Uri uri = Uri.parse(url);
-
-    if (await canLaunchUrl(uri)) {
       final bool launched = await launchUrl(
-        uri,
+        Uri.parse(url),
         mode: LaunchMode.externalApplication,
       );
 
       if (!launched) {
         _showMessage('Ver mapa', 'No se pudo abrir el navegador', 'error');
       }
-    } else {
-      _showMessage('Ver mapa', 'URL inválida', 'error');
-    }
+
   }
 
   Future<void> pickImage(SurveyQuestion question) async {

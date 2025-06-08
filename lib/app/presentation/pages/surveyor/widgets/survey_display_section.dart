@@ -61,7 +61,6 @@ class SurveyDisplaySection extends StatelessWidget {
               );
             }).toList(),
           ),
-        const SizedBox(height: 24),
       ],
     );
   }

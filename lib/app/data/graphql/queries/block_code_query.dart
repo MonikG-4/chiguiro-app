@@ -6,6 +6,7 @@ class BlockCodeQuery {
         blockCode
         region
         zone
+        area
       }
     }
   ''';

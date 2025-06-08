@@ -26,6 +26,7 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
   final _blockCodeController = TextEditingController();
   final _regionController = TextEditingController();
   final _zoneController = TextEditingController();
+  final _areaController = TextEditingController();
 
   final List<String> _regionOptions = [
     'Amazonía y Orinoquía',
@@ -37,6 +38,11 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
   ];
 
   final List<String> _zoneOptions = [
+    'Rural',
+    'Urbano',
+  ];
+
+  final List<String> _areaOptions = [
     'Cabecera municipal',
     'Centro poblado',
     'Rural disperso',
@@ -47,6 +53,7 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
       _blockCodeController.text.trim(),
       _regionController.text.trim(),
       _zoneController.text.trim(),
+      _areaController.text.trim(),
     ];
 
     final isEmpty = values.every((element) => element.isEmpty);
@@ -73,6 +80,7 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
     _blockCodeController.addListener(_updateResponse);
     _regionController.addListener(_updateResponse);
     _zoneController.addListener(_updateResponse);
+    _areaController.addListener(_updateResponse);
   }
 
   @override
@@ -80,6 +88,7 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
     _blockCodeController.dispose();
     _regionController.dispose();
     _zoneController.dispose();
+    _areaController.dispose();
     super.dispose();
   }
 
@@ -107,6 +116,8 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
                         _blockCodeController.text = blockCode.blockCode;
                         _regionController.text = blockCode.region;
                         _zoneController.text = blockCode.zone;
+                        _areaController.text = blockCode.area;
+
                         _updateResponse();
                         setState(() {});
                       }
@@ -128,14 +139,7 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () async {
-                      final url =
-                          Uri.tryParse('https://chiguiro.capibara.lat/geodata');
-                      if (url != null) {
-                        await launchUrl(url,
-                            mode: LaunchMode.externalApplication);
-                      } else {
-                        Get.snackbar('Error', 'No se pudo abrir el enlace');
-                      }
+                      widget.controller.redirectToMap();
                     },
                     icon: const Icon(Icons.map_outlined),
                     label: const Text('Ver mapa'),
@@ -190,6 +194,20 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
               state: state,
               onSelected: (value) {
                 _zoneController.text = value!;
+                _updateResponse();
+              },
+            ),
+            const SizedBox(height: 16),
+            const Text('Area',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+            CustomSelect(
+              value: _areaController.text.isEmpty ? null : _areaController.text,
+              items: _areaOptions,
+              label: 'Area',
+              keyDropdown: GlobalKey(debugLabel: '${widget.question.id}_zone'),
+              state: state,
+              onSelected: (value) {
+                _areaController.text = value!;
                 _updateResponse();
               },
             ),

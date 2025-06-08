@@ -27,8 +27,9 @@ class AppBinding {
         permanent: true);
     await Get.putAsync<AudioService>(() async => AudioService(),
         permanent: true);
+    await Get.putAsync<ConnectivityService>(() async => ConnectivityService(),
+        permanent: true);
 
-    Get.put(ConnectivityService(), permanent: true);
     Get.put(LocalStorageService(), permanent: true);
 
     await Get.putAsync<SyncTaskStorageService>(() async => SyncTaskStorageService(),

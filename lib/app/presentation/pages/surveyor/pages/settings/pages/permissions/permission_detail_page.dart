@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../widgets/primary_button.dart';
 import 'widgets/permission_modal.dart';
 
 class PermissionDetailPage extends StatelessWidget {
@@ -75,27 +76,15 @@ class PermissionDetailPage extends StatelessWidget {
           right: 8,
           top: 4,
         ),
-        child: ElevatedButton(
+        child: PrimaryButton(
           onPressed: () async {
             final confirmed = await Get.dialog<bool>(
               const PermissionModal(),
             );
             if (confirmed == true) onOpenSettings();
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF189F8E),
-            minimumSize: const Size.fromHeight(48),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
-          ),
-          child: const Text(
-            'Actualizar configuración del dispositivo',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-            ),
-          ),
+          isLoading: false,
+          child: 'Actualizar configuración del dispositivo',
         ),
       ),
     );

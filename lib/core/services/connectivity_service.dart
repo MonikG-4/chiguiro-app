@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dart_ping/dart_ping.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -17,7 +18,7 @@ class CallbackEntry {
 class ConnectivityService extends GetxService with WidgetsBindingObserver {
   static const _timeout = Duration(seconds: 3);
   static const _retryDelay = Duration(milliseconds: 800);
-  static const _checkUrl = 'https://www.google.com';
+  static const _checkUrl = 'pond.capibara.lat';
 
   late final Connectivity _connectivity;
   late final http.Client _httpClient;
@@ -66,13 +67,13 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
     _isChecking = true;
 
     try {
-      final hasBasicConnectivity = !results.contains(ConnectivityResult.none);
+      final hasNetwork = results.any((result) =>
+      result == ConnectivityResult.wifi || result == ConnectivityResult.mobile);
+
       bool hasInternet = false;
 
-      if (hasBasicConnectivity) {
+      if (hasNetwork) {
         hasInternet = await _checkInternet();
-
-
 
         if (!hasInternet) {
           await Future.delayed(_retryDelay);
@@ -91,15 +92,23 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
   }
 
   Future<bool> _checkInternet() async {
+    final ping = Ping(_checkUrl, count: 5, timeout: 3);
+    int received = 0;
+
     try {
-      final response = await _httpClient
-          .get(Uri.parse(_checkUrl))
-          .timeout(_timeout);
-      return response.statusCode == 200;
+      await for (final event in ping.stream) {
+        if (event.response != null) {
+          received++;
+        }
+      }
+
+      return received > 0;
     } catch (e) {
+      print('Ping error: $e');
       return false;
     }
   }
+
 
   Future<void> _runCallbacks(bool isConnected) async {
     final callbacks = isConnected ? _onConnectedCallbacks : _onDisconnectedCallbacks;
