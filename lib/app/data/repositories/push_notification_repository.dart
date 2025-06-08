@@ -26,8 +26,13 @@ class PushNotificationRepository implements INotificationRepository {
   /// 🔹 **Inicializa el servicio de notificaciones**
   @override
   Future<void> initialize() async {
+    const androidSettings = AndroidInitializationSettings('@mipmap/icon');
+
+    const iosSettings = DarwinInitializationSettings();
+
     const settings = InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/icon'),
+      android: androidSettings,
+      iOS: iosSettings,
     );
 
     await _notificationsPlugin.initialize(settings);
@@ -36,6 +41,7 @@ class PushNotificationRepository implements INotificationRepository {
       await _createNotificationChannel();
     }
   }
+
 
   /// 🔹 **Crea el canal de notificaciones en Android**
   Future<void> _createNotificationChannel() async {
@@ -69,7 +75,11 @@ class PushNotificationRepository implements INotificationRepository {
 
   /// 🔹 **Obtiene el token del dispositivo**
   @override
-  Future<String?> getDeviceToken() => Push.instance.token;
+  Future<String?> getDeviceToken() async {
+    await Push.instance.requestPermission();
+    final token = await Push.instance.token;
+    return token;
+  }
 
   /// 🔹 **Maneja la suscripción/desuscripción a temas (no implementado)**
   @override

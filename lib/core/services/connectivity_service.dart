@@ -16,7 +16,6 @@ class CallbackEntry {
 
 /// Servicio de conectividad simplificado
 class ConnectivityService extends GetxService with WidgetsBindingObserver {
-  static const _timeout = Duration(seconds: 3);
   static const _retryDelay = Duration(milliseconds: 800);
   static const _checkUrl = 'pond.capibara.lat';
 

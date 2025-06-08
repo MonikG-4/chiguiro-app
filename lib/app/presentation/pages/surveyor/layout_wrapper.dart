@@ -1,4 +1,3 @@
- import 'package:chiguiro_front_app/app/presentation/pages/surveyor/pages/settings/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/services/cache_storage_service.dart';
@@ -16,6 +15,7 @@ import 'pages/home/home_page.dart';
 import 'pages/home/widgets/download_splash.dart';
 import 'pages/pendingSurveys/pending_surveys_page.dart';
 import 'pages/revisits/revisit_page.dart';
+import 'pages/settings/settings_page.dart';
 import 'widgets/profile_header.dart';
 
 class DashboardPage extends StatefulWidget {

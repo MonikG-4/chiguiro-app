@@ -44,8 +44,6 @@ class RevisitDetailController extends GetxController {
     revisit.value = Get.arguments;
     homeCode.value = revisit.value!.homeCode;
 
-    print(revisit.value?.revisitNumber);
-
     MessageHandler.setupSnackbarListener(message);
     refreshAllData();
   }

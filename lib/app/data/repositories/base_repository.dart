@@ -29,10 +29,7 @@ abstract class BaseRepository {
     await _connectivityService.waitForConnection();
 
     try {
-      print("request: $request");
       final result = await request();
-
-      print("request: $result");
 
       if (!result.containsKey(dataKey) ||
           (result[dataKey] == null && !keysAllowingNull.contains(dataKey))) {

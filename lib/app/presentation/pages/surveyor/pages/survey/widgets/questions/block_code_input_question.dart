@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../../../../core/values/app_colors.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
