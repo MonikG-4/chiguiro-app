@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 
 import '../../app/domain/entities/auth_response.dart';
 
+// this is not a cache storage service .. is a auth service ...
 class CacheStorageService extends GetxService {
   final _cachedAuthResponse = Rx<AuthResponse?>(null);
   final _cachedToken = Rx<String?>(null);
@@ -27,7 +28,9 @@ class CacheStorageService extends GetxService {
   }
 
   String? get token => _cachedToken.value;
+
   AuthResponse? get authResponse => _cachedAuthResponse.value;
+
   bool get isAuthenticated => _cachedToken.value != null;
 
   Future<void> saveAuthResponse(AuthResponse authResponse) async {

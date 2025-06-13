@@ -1,18 +1,19 @@
 import 'dart:math';
 
 import 'package:get/get.dart';
+
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/services/cache_storage_service.dart';
 import '../../../core/services/connectivity_service.dart';
-import '../../../core/utils/message_handler.dart';
-import '../../../core/utils/snackbar_message_model.dart';
-import '../../domain/entities/survey.dart';
-import '../../domain/entities/survey_responded.dart';
-import '../../data/models/revisit_model.dart';
-import '../../domain/repositories/i_home_repository.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/revisit_storage_service.dart';
+import '../../../core/utils/message_handler.dart';
+import '../../../core/utils/snackbar_message_model.dart';
+import '../../data/models/revisit_model.dart';
+import '../../domain/entities/survey.dart';
+import '../../domain/entities/survey_responded.dart';
+import '../../domain/repositories/i_home_repository.dart';
 
 class HomeController extends GetxController {
   final IHomeRepository repository;
@@ -61,6 +62,7 @@ class HomeController extends GetxController {
   void _initializeServices() {
     _locationService = Get.find<LocationService>();
     _audioService = Get.find<AudioService>();
+    // Rename to Auth Service
     _storageService = Get.find<CacheStorageService>();
     _revisitStorageService = Get.find<RevisitStorageService>();
   }
@@ -85,7 +87,6 @@ class HomeController extends GetxController {
 
       // Carga inicial con splash
       refreshAllData();
-
     } catch (e) {
       print('Error initializing dashboard: $e');
     }
@@ -96,18 +97,18 @@ class HomeController extends GetxController {
 
     final letters = String.fromCharCodes([
       65 + (now.millisecond % 26), // Letra 1
-      65 + (now.second % 26),      // Letra 2
-      65 + (now.minute % 26),      // Letra 3
-      65 + (now.hour % 26),        // Letra 4
+      65 + (now.second % 26), // Letra 2
+      65 + (now.minute % 26), // Letra 3
+      65 + (now.hour % 26), // Letra 4
     ]);
 
-    final random = Random(now.microsecond + now.millisecond + now.second + now.minute + now.hour);
+    final random = Random(
+        now.microsecond + now.millisecond + now.second + now.minute + now.hour);
     final numbers = List.generate(4, (_) => random.nextInt(10)).join();
 
     homeCode.value = "$letters-$numbers";
     isCodeGenerated.value = true;
   }
-
 
   void resetHomeCode() {
     homeCode.value = "";
@@ -134,13 +135,13 @@ class HomeController extends GetxController {
     isChangePasswordLoading.value = false;
   }
 
-  Future<void> refreshAllData({bool all = true}) async {
+  Future<void> refreshAllData(
+      {bool all = true, bool forceServer = false}) async {
     if (all) {
-      await fetchSurveys();
+      await fetchSurveys(forceServer: forceServer);
     }
     await fetchSurveysResponded(homeCode.value);
   }
-
 
   Future<void> fetchSurveysResponded(String homeCode) async {
     if (isSurveysRespondedLoading.value) return;
@@ -173,14 +174,17 @@ class HomeController extends GetxController {
     }
   }
 
-  Future<void> fetchSurveys() async {
+  Future<void> fetchSurveys({bool forceServer = false}) async {
     if (isSurveysLoading.value) return;
 
     isSurveysLoading.value = true;
 
     try {
       final userId = _storageService.authResponse!.id;
-      final surveysResult = await repository.fetchSurveys(userId);
+      print(
+          "FETCHING PROJECTS -----------------------------------------------------------------");
+      final surveysResult =
+          await repository.fetchSurveys(userId, forceServer: forceServer);
 
       surveysResult.fold(
         (failure) {

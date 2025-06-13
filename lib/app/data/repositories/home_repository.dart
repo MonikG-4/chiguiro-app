@@ -18,8 +18,7 @@ import '../models/survey_responded_model.dart';
 import '../models/surveyor_model.dart';
 import 'base_repository.dart';
 
-class HomeRepository extends BaseRepository
-    implements IHomeRepository {
+class HomeRepository extends BaseRepository implements IHomeRepository {
   final GraphQLService _graphqlService = Get.find<GraphQLService>();
   final LocalStorageService _localStorageService = Get.find();
 
@@ -31,10 +30,7 @@ class HomeRepository extends BaseRepository
     return safeApiCall<bool>(
       request: () => _graphqlService.mutate(
         document: PasswordMutations.pollsterChangePassword,
-        variables: {
-          "id": pollsterId,
-          "password": password
-        },
+        variables: {"id": pollsterId, "password": password},
       ),
       onSuccess: (data) => data['pollsterChangePassword'] == null,
       dataKey: 'pollsterChangePassword',
@@ -42,7 +38,17 @@ class HomeRepository extends BaseRepository
   }
 
   @override
-  Future<Either<Failure, List<Survey>>> fetchSurveys(int surveyorId) async {
+  Future<Either<Failure, List<Survey>>> fetchSurveys(int surveyorId,
+      {bool forceServer = false}) async {
+    if (!_localStorageService.projectsEmpty() && forceServer == false) {
+      print(
+          "Engage from LOCAL ==================================================================================");
+      return Right(_localStorageService.getSurveys());
+    }
+
+    print(
+        "Engage from SERVER ====================================================================================");
+
     return safeApiCallWithCache<List<Survey>>(
       request: () => _graphqlService.query(
         document: SurveyQuery.pollstersProjectByPollster,
@@ -85,7 +91,8 @@ class HomeRepository extends BaseRepository
   }
 
   @override
-  Future<Either<Failure, List<SurveyResponded>>> fetchSurveyResponded(String homeCode, int surveyorId) async{
+  Future<Either<Failure, List<SurveyResponded>>> fetchSurveyResponded(
+      String homeCode, int surveyorId) async {
     return safeApiCallWithCache<List<SurveyResponded>>(
       request: () => _graphqlService.query(
         document: SurveyRespondedQuery.pollsterStatisticHome,
@@ -99,7 +106,8 @@ class HomeRepository extends BaseRepository
           .toList(),
       dataKey: 'pollsterStatisticHome',
       getCacheData: () async => _localStorageService.getSurveysResponded(),
-      saveToCache: (surveys) => _localStorageService.saveSurveysResponded(surveys),
+      saveToCache: (surveys) =>
+          _localStorageService.saveSurveysResponded(surveys),
       unknownErrorMessage: 'No se encontraron encuestas respondidas',
     );
   }

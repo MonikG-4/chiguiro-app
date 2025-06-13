@@ -11,13 +11,14 @@ import '../../app/domain/entities/surveyor.dart';
 
 class LocalStorageService {
   final _surveysBox = Hive.box<SurveyModel>('surveysBox');
-  final _surveysRespondedBox = Hive.box<SurveyRespondedModel>('surveysRespondedBox');
+  final _surveysRespondedBox =
+      Hive.box<SurveyRespondedModel>('surveysRespondedBox');
   final _statisticsBox = Hive.box<SurveyStatisticsModel>('statisticsBox');
   final _surveyorBox = Hive.box<SurveyorModel>('surveyorBox');
 
   void saveSurveys(List<Survey> surveys) {
     final projectsModels =
-    surveys.map((s) => SurveyModel.fromEntity(s)).toList();
+        surveys.map((s) => SurveyModel.fromEntity(s)).toList();
     for (final project in projectsModels) {
       final existingProject = _surveysBox.get(project.id);
       if (existingProject == null || existingProject != project) {
@@ -30,13 +31,17 @@ class LocalStorageService {
     return _surveysBox.values.map((s) => s.toEntity()).toList();
   }
 
+  bool projectsEmpty() {
+    return _surveysBox.isEmpty;
+  }
+
   void clearSurveys() {
     _surveysBox.clear();
   }
 
   void saveSurveysResponded(List<SurveyResponded> surveys) {
     final projectsModels =
-    surveys.map((s) => SurveyRespondedModel.fromEntity(s)).toList();
+        surveys.map((s) => SurveyRespondedModel.fromEntity(s)).toList();
     for (final project in projectsModels) {
       final existingProject = _surveysRespondedBox.get(project.survey?.id);
       if (existingProject == null || existingProject != project) {

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../../../../../core/values/app_colors.dart';
 import '../../../../../../core/values/routes.dart';
+import '../../../../../domain/entities/survey.dart';
+import '../../../../controllers/home_controller.dart';
 import '../../../../widgets/confirmation_dialog.dart';
 import '../../../../widgets/connectivity_banner.dart';
 import '../../../../widgets/primary_button.dart';
 import '../../widgets/body_wrapper.dart';
 import '../../widgets/custom_card.dart';
-import '../../widgets/survey_display_section.dart';
-import '../../../../../../core/values/app_colors.dart';
-import '../../../../../domain/entities/survey.dart';
-import '../../../../controllers/home_controller.dart';
 import '../../widgets/home_code_widget.dart';
+import '../../widgets/survey_display_section.dart';
 import 'widgets/revisit_dialog.dart';
 
 class HomePage extends GetView<HomeController> {
@@ -21,7 +22,7 @@ class HomePage extends GetView<HomeController> {
     return Obx(() => BodyWrapper(
           onRefresh: () async {
             controller.isDownloadingSurveys.value = true;
-            await controller.refreshAllData();
+            await controller.refreshAllData(forceServer: true);
             controller.isDownloadingSurveys.value = false;
           },
           showBottomButton: controller.showContent.value,
@@ -98,7 +99,6 @@ class HomePage extends GetView<HomeController> {
                   child: 'Nuevo hogar',
                 )
               else
-
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -112,23 +112,21 @@ class HomePage extends GetView<HomeController> {
                     // Si ya hay código generado, mostrar loading o contenido
                     controller.isSurveysRespondedLoading.value
                         ? const Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                        :
-                     CustomCard(
-                      children: [
-                        SurveyDisplaySection(
-                          title: 'Encuestas realizadas',
-                          surveys: controller.surveysResponded,
-                          isResponded: true,
-                          isLoading: controller.isSurveysRespondedLoading,
-                        ),
-                      ],
-                    ),
+                            padding: EdgeInsets.only(top: 20),
+                            child: Center(child: CircularProgressIndicator()),
+                          )
+                        : CustomCard(
+                            children: [
+                              SurveyDisplaySection(
+                                title: 'Encuestas realizadas',
+                                surveys: controller.surveysResponded,
+                                isResponded: true,
+                                isLoading: controller.isSurveysRespondedLoading,
+                              ),
+                            ],
+                          ),
                   ],
                 ),
-
             ],
           ),
         ));

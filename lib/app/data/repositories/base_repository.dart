@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:get/get.dart';
 import 'package:dartz/dartz.dart';
+import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../../../core/error/exceptions/exceptions.dart';
@@ -9,7 +9,6 @@ import '../../../core/error/failures/failure.dart';
 import '../../../core/services/connectivity_service.dart';
 
 abstract class BaseRepository {
-
   final ConnectivityService _connectivityService = Get.find();
 
   /// Envuelve una solicitud GraphQL en un Either para manejo de éxito/error
@@ -20,7 +19,6 @@ abstract class BaseRepository {
     String offlineErrorMessage = 'Sin conexión a internet',
     String unknownErrorMessage = 'Error desconocido',
   }) async {
-
     const Set<String> keysAllowingNull = {
       'pollsterForgotPassword',
       'pollsterChangePassword',
@@ -46,7 +44,6 @@ abstract class BaseRepository {
     }
   }
 
-
   /// Maneja operaciones con almacenamiento local cuando está sin conexión
   Future<Either<Failure, T>> safeApiCallWithCache<T>({
     required Future<Map<String, dynamic>> Function() request,
@@ -56,7 +53,6 @@ abstract class BaseRepository {
     required Function(T data) saveToCache,
     String unknownErrorMessage = 'Error desconocido',
   }) async {
-
     if (_connectivityService.isOnline) {
       try {
         final result = await request();
@@ -88,5 +84,4 @@ abstract class BaseRepository {
       }
     }
   }
-
 }
