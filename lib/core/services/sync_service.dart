@@ -4,13 +4,13 @@ import '../../app/data/models/sync_task_model.dart';
 import '../../app/domain/repositories/i_survey_repository.dart';
 import '../utils/message_handler.dart';
 import '../utils/snackbar_message_model.dart';
-import 'cache_storage_service.dart';
+import 'auth_storage_service.dart';
 import 'connectivity_service.dart';
 import 'sync_task_storage_service.dart';
 
 class SyncService extends GetxService {
   final SyncTaskStorageService _taskStorageService = Get.find<SyncTaskStorageService>();
-  final CacheStorageService _authResponse = Get.find();
+  final AuthStorageService _authResponse = Get.find();
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
   final ConnectivityService _connectivityService = Get.find();
 

@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../../core/error/failures/failure.dart';
-import '../../../core/services/cache_storage_service.dart';
+import '../../../core/services/auth_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../../core/values/routes.dart';
@@ -11,8 +11,8 @@ import 'session_controller.dart';
 
 class AuthController extends GetxController {
   final IAuthRepository repository;
-  final CacheStorageService _cacheStorageService =
-  Get.find<CacheStorageService>();
+  final AuthStorageService _cacheStorageService =
+  Get.find<AuthStorageService>();
   final NotificationController _notificationController = Get.find();
 
   final isLoading = false.obs;

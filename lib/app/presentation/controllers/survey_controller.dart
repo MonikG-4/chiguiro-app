@@ -11,7 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
-import '../../../core/services/cache_storage_service.dart';
+import '../../../core/services/auth_storage_service.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/sync_task_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
@@ -32,7 +32,7 @@ class SurveyController extends GetxController {
   LocationService? _locationService;
   AudioService? _audioService;
   SyncTaskStorageService? _taskStorageService;
-  CacheStorageService? _storageService;
+  AuthStorageService? _storageService;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
@@ -67,7 +67,7 @@ class SurveyController extends GetxController {
     _locationService = Get.find<LocationService>();
     _audioService = Get.find<AudioService>();
     _taskStorageService = Get.find<SyncTaskStorageService>();
-    _storageService ??= Get.find<CacheStorageService>();
+    _storageService ??= Get.find<AuthStorageService>();
 
     survey.value = Get.arguments?['survey'];
     homeCode.value = Get.arguments?['homeCode'];

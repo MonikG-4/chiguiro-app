@@ -36,8 +36,9 @@ class AppColors {
   static const Color errorBackground = Color(0xFFFFF1F2);
 
   static const Color withOutWifiBackground = Color(0xFFC9E4FA);
-
   static const Color codeBackground = Color(0xFF57E9B4);
+  static const Color iconsStatistic = Color(0xFF57E9B4 );
+  static const Color graphicBackground = Color(0xFF57B3E9);
 
 
   //Borde

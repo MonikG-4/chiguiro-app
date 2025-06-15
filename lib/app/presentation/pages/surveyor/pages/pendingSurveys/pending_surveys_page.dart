@@ -14,48 +14,56 @@ class PendingSurveysPage extends GetView<PendingSurveyController> {
   @override
   Widget build(BuildContext context) {
     return BodyWrapper(
-        onRefresh: () async => controller.fetchSurveys(controller.idSurveyor.value),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Encuestas pendientes',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+      onRefresh: () async =>
+          controller.fetchSurveys(controller.idSurveyor.value),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Encuestas pendientes',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Estas encuestas se guardaron porque no tenías conexión al momento de enviarlas...',
+            style: TextStyle(fontSize: 14, color: Colors.grey),
+          ),
+          const SizedBox(height: 24),
+          CustomCard(children: [
+            const Text("Acciones",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             const SizedBox(height: 8),
-            const Text(
-              'Estas encuestas se guardaron porque no tenías conexión al momento de enviarlas...',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
-            CustomCard(children: [
-              const Text("Acciones", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              const SizedBox(height: 8),
-              _buildPendingSummary(),
-            ]),
-            const SizedBox(height: 24),
-            Obx(() => CustomCard(
-              children: [
-                const Text("Guardadas localmente", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                const SizedBox(height: 8),
-                controller.surveyPending.isEmpty
-                    ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Text(
-                      'No hay encuestas pendientes',
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                )
-                    : _buildPendingList(),
-              ],
-            )),
-
-          ],
-        ),
-      );
+            _buildPendingSummary(),
+          ]),
+          const SizedBox(height: 24),
+          Obx(() => CustomCard(
+                children: [
+                  const Text("Guardadas localmente",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  const SizedBox(height: 8),
+                  controller.surveyPending.isEmpty
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: Text(
+                              'No hay encuestas pendientes',
+                              style: TextStyle(fontWeight: FontWeight.w500),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      : controller.isSendingSurveys.value
+                          ? const Padding(
+                              padding: EdgeInsets.only(top: 20),
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          : _buildPendingList(),
+                ],
+              )),
+        ],
+      ),
+    );
   }
 
   Widget _buildPendingSummary() {
@@ -78,13 +86,17 @@ class PendingSurveysPage extends GetView<PendingSurveyController> {
                         color: const Color(0xFFFF9F44),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.sync_outlined, size: 16, color: Colors.white),
+                      child: const Icon(Icons.sync_outlined,
+                          size: 16, color: Colors.white),
                     ),
                     const SizedBox(width: 8),
                     const Expanded(
                       child: Text(
                         'Encuestas por sincronizar',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, height: 1.1),
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            height: 1.1),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -93,9 +105,10 @@ class PendingSurveysPage extends GetView<PendingSurveyController> {
                 ),
                 const SizedBox(height: 8),
                 Obx(() => Text(
-                  '${controller.surveyPending.length}',
-                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                )),
+                      '${controller.surveyPending.length}',
+                      style: const TextStyle(
+                          fontSize: 28, fontWeight: FontWeight.bold),
+                    )),
               ],
             ),
           ),
@@ -130,13 +143,17 @@ class PendingSurveysPage extends GetView<PendingSurveyController> {
                           color: const Color(0xFF48C9B0),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.cloud_upload_outlined, size: 16, color: Colors.white),
+                        child: const Icon(Icons.cloud_upload_outlined,
+                            size: 16, color: Colors.white),
                       ),
                       const SizedBox(width: 8),
                       const Expanded(
                         child: Text(
                           'Sincronizar encuestas',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, height: 1.1),
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              height: 1.1),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -188,12 +205,14 @@ class PendingSurveysPage extends GetView<PendingSurveyController> {
                         surveyName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '$formattedDate | ${payload.homeCode}',
-                        style: const TextStyle(fontSize: 13, color: Colors.grey),
+                        style:
+                            const TextStyle(fontSize: 13, color: Colors.grey),
                       ),
                     ],
                   ),
@@ -202,7 +221,6 @@ class PendingSurveysPage extends GetView<PendingSurveyController> {
             ),
           ),
         );
-
       }).toList(),
     );
   }
@@ -218,6 +236,4 @@ class PendingSurveysPage extends GetView<PendingSurveyController> {
       ),
     );
   }
-
-
 }

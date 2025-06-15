@@ -4,6 +4,7 @@ class Routes {
   static const DASHBOARD_HOME = '/home';
   static const DASHBOARD_PENDING_SURVEYS = '/pending';
   static const DASHBOARD_REVISITS = '/revisits';
+  static const DASHBOARD_STATISTICS = '/statistics';
 
   static const REVISIT_DETAIL = '/revisit-detail';
   static const SURVEY_DETAIL = '/survey-detail';

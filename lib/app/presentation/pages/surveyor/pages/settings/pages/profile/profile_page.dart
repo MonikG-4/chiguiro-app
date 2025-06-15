@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../../../../core/services/cache_storage_service.dart';
+import '../../../../../../../../core/services/auth_storage_service.dart';
 import '../../../../../../../../core/values/app_colors.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -9,7 +9,7 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = Get.find<CacheStorageService>().authResponse!;
+    final user = Get.find<AuthStorageService>().authResponse!;
 
     return Scaffold(
       backgroundColor: AppColors.background,

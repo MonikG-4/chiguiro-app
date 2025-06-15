@@ -3,22 +3,23 @@ import 'dart:async';
 import 'package:get/get.dart';
 
 import '../../../core/error/failures/failure.dart';
-import '../../../core/services/cache_storage_service.dart';
+import '../../../core/services/auth_storage_service.dart';
 import '../../../core/services/sync_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
-import '../../domain/repositories/i_survey_repository.dart';
+import '../../domain/repositories/i_pending_survey_repository.dart';
 
 class PendingSurveyController extends GetxController {
-  final ISurveyRepository repository;
-  CacheStorageService? _storageService;
+  final IPendingSurveyRepository repository;
+  AuthStorageService? _storageService;
   SyncService? _syncService;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
   final idSurveyor = 0.obs;
   final surveyPending = <Map<String, dynamic>>[].obs;
-  final isLoadingQuestion = false.obs;
+  final isLoadingSurveys = false.obs;
+  final isSendingSurveys = false.obs;
 
   PendingSurveyController(this.repository);
 
@@ -26,7 +27,7 @@ class PendingSurveyController extends GetxController {
   void onInit() {
     super.onInit();
 
-    _storageService ??= Get.find<CacheStorageService>();
+    _storageService ??= Get.find<AuthStorageService>();
     _syncService ??= Get.find<SyncService>();
 
     if (idSurveyor.value == 0) {
@@ -42,7 +43,7 @@ class PendingSurveyController extends GetxController {
   }
 
   Future<void> fetchSurveys(int surveyorId) async {
-    isLoadingQuestion.value = true;
+    isLoadingSurveys.value = true;
 
     try {
       final result = await repository.fetchSurveys(surveyorId);
@@ -55,12 +56,15 @@ class PendingSurveyController extends GetxController {
     } catch (e) {
       _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
     } finally {
-      isLoadingQuestion.value = false;
+      isLoadingSurveys.value = false;
     }
   }
 
   Future<void> saveAllPendingSurveys() async {
+    isSendingSurveys.value = true;
     _syncService?.syncPendingTasks();
+    isSendingSurveys.value = false;
+
   }
 
   String _mapFailureToMessage(Failure failure) {

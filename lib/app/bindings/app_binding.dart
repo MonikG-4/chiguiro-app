@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../core/network/graphql_client_provider.dart';
 import '../../core/services/audio_service.dart';
-import '../../core/services/cache_storage_service.dart';
+import '../../core/services/auth_storage_service.dart';
 import '../../core/services/connectivity_service.dart';
 import '../../core/services/graphql_service.dart';
 import '../../core/services/local_storage_service.dart';
@@ -21,7 +21,7 @@ import '../presentation/controllers/session_controller.dart';
 class AppBinding {
   Future<void> initAsyncDependencies(
       FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
-    await Get.putAsync<CacheStorageService>(() async => CacheStorageService(),
+    await Get.putAsync<AuthStorageService>(() async => AuthStorageService(),
         permanent: true);
     await Get.putAsync<LocationService>(() async => LocationService(),
         permanent: true);
@@ -35,7 +35,7 @@ class AppBinding {
     await Get.putAsync<SyncTaskStorageService>(() async => SyncTaskStorageService(),
         permanent: true);
 
-    final cacheStorageService = Get.find<CacheStorageService>();
+    final cacheStorageService = Get.find<AuthStorageService>();
     Get.put(SessionController(cacheStorageService), permanent: true);
     Get.lazyPut<ISurveyRepository>(() => SurveyRepository(), fenix: true);
     Get.put(SyncService(), permanent: true);

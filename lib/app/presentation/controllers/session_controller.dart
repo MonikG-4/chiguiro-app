@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
 
-import '../../../core/services/cache_storage_service.dart';
+import '../../../core/services/auth_storage_service.dart';
 import '../../../core/services/local_storage_service.dart';
 import '../../../core/values/routes.dart';
 
 class SessionController extends GetxController {
-  final CacheStorageService _cacheStorageService;
+  final AuthStorageService _cacheStorageService;
   var isAuthenticated = false.obs;
   final LocalStorageService _localStorageService = Get.find();
 

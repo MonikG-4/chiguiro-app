@@ -1,44 +1,35 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'survey_statistics_model.dart';
+part of 'statistic_day_model.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class StatisticsModelAdapter extends TypeAdapter<StatisticsModel> {
+class StatisticDayModelAdapter extends TypeAdapter<StatisticDayModel> {
   @override
-  final int typeId = 6;
+  final int typeId = 10;
 
   @override
-  StatisticsModel read(BinaryReader reader) {
+  StatisticDayModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return StatisticsModel(
-      homes: fields[0] as int,
+    return StatisticDayModel(
+      date: fields[0] as DateTime,
       entries: fields[1] as int,
-      completedPercent: fields[2] as double,
-      duration: fields[3] as double,
-      days: (fields[4] as List).cast<StatisticDayModel>(),
     );
   }
 
   @override
-  void write(BinaryWriter writer, StatisticsModel obj) {
+  void write(BinaryWriter writer, StatisticDayModel obj) {
     writer
-      ..writeByte(5)
-      ..writeByte(0)
-      ..write(obj.homes)
-      ..writeByte(1)
-      ..write(obj.entries)
       ..writeByte(2)
-      ..write(obj.completedPercent)
-      ..writeByte(3)
-      ..write(obj.duration)
-      ..writeByte(4)
-      ..write(obj.days);
+      ..writeByte(0)
+      ..write(obj.date)
+      ..writeByte(1)
+      ..write(obj.entries);
   }
 
   @override
@@ -47,7 +38,7 @@ class StatisticsModelAdapter extends TypeAdapter<StatisticsModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is StatisticsModelAdapter &&
+      other is StatisticDayModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

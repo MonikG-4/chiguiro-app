@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
-import '../../../core/services/cache_storage_service.dart';
+import '../../../core/services/auth_storage_service.dart';
 import '../../../core/services/connectivity_service.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/revisit_storage_service.dart';
@@ -20,7 +20,7 @@ class HomeController extends GetxController {
   final ConnectivityService connectivityService = Get.find();
   late LocationService _locationService;
   late final AudioService _audioService;
-  late final CacheStorageService _storageService;
+  late final AuthStorageService _storageService;
   late final RevisitStorageService _revisitStorageService;
 
   // Variables reactivas para la UI
@@ -35,6 +35,7 @@ class HomeController extends GetxController {
   final isDownloadingSurveys = false.obs;
   final showContent = false.obs;
   final isCodeGenerated = false.obs;
+  final isSavingRevisit = false.obs;
 
   // Datos del encuestador
   final idSurveyor = 0.obs;
@@ -63,7 +64,7 @@ class HomeController extends GetxController {
     _locationService = Get.find<LocationService>();
     _audioService = Get.find<AudioService>();
     // Rename to Auth Service
-    _storageService = Get.find<CacheStorageService>();
+    _storageService = Get.find<AuthStorageService>();
     _revisitStorageService = Get.find<RevisitStorageService>();
   }
 

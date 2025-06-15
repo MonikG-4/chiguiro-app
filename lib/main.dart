@@ -9,6 +9,7 @@ import 'app/bindings/app_binding.dart';
 import 'app/data/models/jumper_model.dart';
 import 'app/data/models/revisit_model.dart';
 import 'app/data/models/sections_model.dart';
+import 'app/data/models/statistic_day_model.dart';
 import 'app/data/models/survey_model.dart';
 import 'app/data/models/survey_question_model.dart';
 import 'app/data/models/survey_responded_model.dart';
@@ -60,7 +61,8 @@ Future<void> _initHive() async {
   Hive.registerAdapter(SurveyEntryModelAdapter());
   Hive.registerAdapter(SyncTaskModelAdapter());
   Hive.registerAdapter(SurveyorModelAdapter());
-  Hive.registerAdapter(SurveyStatisticsModelAdapter());
+  Hive.registerAdapter(StatisticsModelAdapter());
+  Hive.registerAdapter(StatisticDayModelAdapter());
   Hive.registerAdapter(SurveyRespondedModelAdapter());
   Hive.registerAdapter(SurveyModelAdapter());
   Hive.registerAdapter(SurveyQuestionModelAdapter());
@@ -74,7 +76,7 @@ Future<void> _initHive() async {
     Hive.openBox<SyncTaskModel>('sync_tasks'),
     Hive.openBox<SurveyModel>('surveysBox'),
     Hive.openBox<SurveyRespondedModel>('surveysRespondedBox'),
-    Hive.openBox<SurveyStatisticsModel>('statisticsBox'),
+    Hive.openBox<StatisticsModel>('statisticsBox'),
     Hive.openBox<SurveyorModel>('surveyorBox'),
     Hive.openBox<RevisitModel>('revisitsBox'),
   ]);

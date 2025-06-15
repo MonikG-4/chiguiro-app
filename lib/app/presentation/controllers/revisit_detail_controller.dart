@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
-import '../../../core/services/cache_storage_service.dart';
+import '../../../core/services/auth_storage_service.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/revisit_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
@@ -16,12 +16,11 @@ import '../../domain/repositories/i_home_repository.dart';
 
 class RevisitDetailController extends GetxController {
   final IHomeRepository repository;
-  late final CacheStorageService _storageService;
+  late final AuthStorageService _storageService;
   late LocationService _locationService;
   late final AudioService _audioService;
   late final RevisitStorageService _revisitStorageService;
 
-  // Variables reactivas para la UI
   final revisit = Rxn<RevisitModel>();
   final surveys = <Survey>[].obs;
   final surveysResponded = <SurveyResponded>[].obs;
@@ -38,7 +37,7 @@ class RevisitDetailController extends GetxController {
   void onInit() {
     super.onInit();
 
-    _storageService = Get.find<CacheStorageService>();
+    _storageService = Get.find<AuthStorageService>();
     _audioService = Get.find<AudioService>();
     _locationService = Get.find<LocationService>();
     _revisitStorageService = Get.find<RevisitStorageService>();

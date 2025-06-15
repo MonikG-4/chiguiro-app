@@ -3,8 +3,8 @@ import '../../core/middleware/session_middleware.dart';
 import '../../core/values/routes.dart';
 import '../bindings/auth_binding.dart';
 import '../bindings/home_binding.dart';
-import '../bindings/detail_survey_binding.dart';
 import '../bindings/revisit_detail_binding.dart';
+import '../bindings/statistic_binding.dart';
 import '../bindings/survey_pending_binding.dart';
 import '../bindings/survey_binding.dart';
 import '../bindings/revisit_binding.dart';
@@ -19,9 +19,9 @@ import '../presentation/pages/surveyor/pages/settings/pages/changePassword/chang
 import '../presentation/pages/surveyor/pages/settings/pages/permissions/permission_detail_wrapper.dart';
 import '../presentation/pages/surveyor/pages/settings/pages/permissions/permissions_page.dart';
 import '../presentation/pages/surveyor/pages/settings/pages/profile/profile_page.dart';
+import '../presentation/pages/surveyor/pages/statistic/statistic_page.dart';
 import '../presentation/pages/surveyor/pages/survey/survey_page.dart';
 import '../presentation/pages/surveyor/pages/revisits/revisit_page.dart';
-import '../presentation/pages/surveyor/pages/surveyDetail/survey_detail_page.dart';
 import '../presentation/pages/surveyor/pages/surveyWithoutResponses/survey_without_responses_page.dart';
 
 class AppPages {
@@ -38,12 +38,17 @@ class AppPages {
     GetPage(
       name: Routes.DASHBOARD_PENDING_SURVEYS,
       page: () => const PendingSurveysPage(),
-      binding: SurveyPendingBinding(),
+      binding: PendingSurveyBinding(),
     ),
     GetPage(
       name: Routes.DASHBOARD_REVISITS,
       page: () => const RevisitsPage(),
       binding: RevisitsBinding(),
+    ),
+    GetPage(
+      name: Routes.DASHBOARD_STATISTICS,
+      page: () => const StatisticPage(),
+      binding: StatisticBinding(),
     ),
     GetPage(
       name: Routes.REVISIT_DETAIL,
@@ -54,12 +59,6 @@ class AppPages {
       name: Routes.SURVEY_WITHOUT_RESPONSE,
       page: () => SurveyWithoutResponsesPage(),
       middlewares: [SessionMiddleware()],
-    ),
-    GetPage(
-        name: Routes.SURVEY_DETAIL,
-        page: () => SurveyDetailPage(),
-        middlewares: [SessionMiddleware()],
-        binding: DetailSurveyBinding()
     ),
     GetPage(
         name: Routes.SURVEY,

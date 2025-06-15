@@ -42,7 +42,9 @@ class HomePage extends GetView<HomeController> {
                           );
 
                           if (reason != null && reason.isNotEmpty) {
-                            controller.saveRevisit(reason);
+                            controller.isSavingRevisit.value = true;
+                            await controller.saveRevisit(reason);
+                            controller.isSavingRevisit.value = false;
                           }
                         },
                         backgroundColor: AppColors.secondaryButton,
@@ -74,61 +76,79 @@ class HomePage extends GetView<HomeController> {
                   ],
                 )
               : const SizedBox.shrink(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ConnectivityBanner(),
-
-              // Mostrar siempre el código (aunque esté vacío)
-              HomeCodeWidget(
-                homeCode: controller.homeCode.value,
-                readOnly: true,
-              ),
-
-              const SizedBox(height: 16),
-
-              // Si no hay código, mostrar botón para generar uno
-              if (controller.homeCode.value.isEmpty)
-                PrimaryButton(
-                  onPressed: () {
-                    controller.generateHomeCode();
-                    controller.showContent.value = true;
-                    controller.fetchSurveysResponded(controller.homeCode.value);
-                  },
-                  isLoading: false,
-                  child: 'Nuevo hogar',
+          child: controller.isSavingRevisit.value
+              ? const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text(
+                        'Guardando hogar',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
                 )
-              else
-                Column(
+              : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SurveyDisplaySection(
-                      title: 'Formularios',
-                      surveys: controller.surveys,
-                      isResponded: false,
-                      onSurveyTap: (survey) => _redirectToSurvey(survey),
+                    ConnectivityBanner(),
+
+                    // Mostrar siempre el código (aunque esté vacío)
+                    HomeCodeWidget(
+                      homeCode: controller.homeCode.value,
+                      readOnly: true,
                     ),
-                    const SizedBox(height: 8),
-                    // Si ya hay código generado, mostrar loading o contenido
-                    controller.isSurveysRespondedLoading.value
-                        ? const Padding(
-                            padding: EdgeInsets.only(top: 20),
-                            child: Center(child: CircularProgressIndicator()),
-                          )
-                        : CustomCard(
-                            children: [
-                              SurveyDisplaySection(
-                                title: 'Encuestas realizadas',
-                                surveys: controller.surveysResponded,
-                                isResponded: true,
-                                isLoading: controller.isSurveysRespondedLoading,
-                              ),
-                            ],
+
+                    const SizedBox(height: 16),
+
+                    // Si no hay código, mostrar botón para generar uno
+                    if (controller.homeCode.value.isEmpty)
+                      PrimaryButton(
+                        onPressed: () {
+                          controller.generateHomeCode();
+                          controller.showContent.value = true;
+                          controller
+                              .fetchSurveysResponded(controller.homeCode.value);
+                        },
+                        isLoading: false,
+                        child: 'Nuevo hogar',
+                      )
+                    else
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SurveyDisplaySection(
+                            title: 'Formularios',
+                            surveys: controller.surveys,
+                            isResponded: false,
+                            onSurveyTap: (survey) => _redirectToSurvey(survey),
                           ),
+                          const SizedBox(height: 8),
+                          // Si ya hay código generado, mostrar loading o contenido
+                          controller.isSurveysRespondedLoading.value
+                              ? const Padding(
+                                  padding: EdgeInsets.only(top: 20),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
+                                )
+                              : CustomCard(
+                                  children: [
+                                    SurveyDisplaySection(
+                                      title: 'Encuestas realizadas',
+                                      surveys: controller.surveysResponded,
+                                      isResponded: true,
+                                      isLoading:
+                                          controller.isSurveysRespondedLoading,
+                                    ),
+                                  ],
+                                ),
+                        ],
+                      ),
                   ],
                 ),
-            ],
-          ),
         ));
   }
 

@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 
 class CustomCard extends StatelessWidget {
   final List<Widget> children;
+  final Color? color;
+  final EdgeInsets? padding;
 
   const CustomCard({
     required this.children,
+    this.color,
+    this.padding,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.white,
+      color: color ?? Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: padding ?? const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: children,

@@ -6,14 +6,14 @@ import '../../app/data/models/survey_statistics_model.dart';
 import '../../app/data/models/surveyor_model.dart';
 import '../../app/domain/entities/survey.dart';
 import '../../app/domain/entities/survey_responded.dart';
-import '../../app/domain/entities/survey_statistics.dart';
+import '../../app/domain/entities/statistics.dart';
 import '../../app/domain/entities/surveyor.dart';
 
 class LocalStorageService {
   final _surveysBox = Hive.box<SurveyModel>('surveysBox');
   final _surveysRespondedBox =
       Hive.box<SurveyRespondedModel>('surveysRespondedBox');
-  final _statisticsBox = Hive.box<SurveyStatisticsModel>('statisticsBox');
+  final _statisticsBox = Hive.box<StatisticsModel>('statisticsBox');
   final _surveyorBox = Hive.box<SurveyorModel>('surveyorBox');
 
   void saveSurveys(List<Survey> surveys) {
@@ -58,17 +58,17 @@ class LocalStorageService {
     _surveysRespondedBox.clear();
   }
 
-  void saveStatisticsSurvey(int surveyId, SurveyStatistics surveyStatistics) {
-    final existingStats = _statisticsBox.get(surveyId);
-    final newStats = SurveyStatisticsModel.fromEntity(surveyStatistics);
+  void saveStatisticsSurvey(int surveyorId, Statistic statistic) {
+    final existingStats = _statisticsBox.get(surveyorId);
+    final newStats = StatisticsModel.fromEntity(statistic);
     if (existingStats == null || existingStats != newStats) {
-      _statisticsBox.put(surveyId, newStats);
+      _statisticsBox.put(surveyorId, newStats);
     }
   }
 
-  SurveyStatistics getStatisticsSurvey(int surveyId) {
-    return _statisticsBox.get(surveyId)?.toEntity() ??
-        SurveyStatisticsModel.empty().toEntity();
+  Statistic getStatisticsSurvey(int surveyorId) {
+    return _statisticsBox.get(surveyorId)?.toEntity() ??
+        StatisticsModel.empty().toEntity();
   }
 
   void clearStatistics() {
