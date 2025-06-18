@@ -178,6 +178,7 @@ class RevisitDetailPage extends GetView<RevisitDetailController> {
                       isResponded: false,
                       onSurveyTap: (survey) => _redirectToSurvey(survey),
                       isLoading: controller.isSurveysLoading,
+                      showOnlySurvey: controller.shouldShowOnlySurvey6(controller.homeCode.value),
                     ),
                     const SizedBox(height: 8),
 

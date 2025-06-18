@@ -125,6 +125,8 @@ class HomePage extends GetView<HomeController> {
                             surveys: controller.surveys,
                             isResponded: false,
                             onSurveyTap: (survey) => _redirectToSurvey(survey),
+                            showOnlySurvey: controller.shouldShowOnlySurvey6(controller.homeCode.value),
+
                           ),
                           const SizedBox(height: 8),
                           // Si ya hay código generado, mostrar loading o contenido

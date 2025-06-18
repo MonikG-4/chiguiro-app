@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/services/auth_storage_service.dart';
+import '../../../core/services/local_storage_service.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/sync_task_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
@@ -33,6 +34,7 @@ class SurveyController extends GetxController {
   AudioService? _audioService;
   SyncTaskStorageService? _taskStorageService;
   AuthStorageService? _storageService;
+  LocalStorageService? _localStorageService;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
@@ -68,6 +70,7 @@ class SurveyController extends GetxController {
     _audioService = Get.find<AudioService>();
     _taskStorageService = Get.find<SyncTaskStorageService>();
     _storageService ??= Get.find<AuthStorageService>();
+    _localStorageService = Get.find<LocalStorageService>();
 
     survey.value = Get.arguments?['survey'];
     homeCode.value = Get.arguments?['homeCode'];
@@ -354,6 +357,9 @@ class SurveyController extends GetxController {
       }, (data) {
         _taskStorageService?.removeTask(taskId!);
         _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
+        if (survey.value?.id == 6 && homeCode.value != null) {
+          _localStorageService?.setSurvey6Completed(homeCode.value!, true);
+        }
       });
     } catch (e) {
       _showMessage(
@@ -376,13 +382,20 @@ class SurveyController extends GetxController {
   }
 
   Future<String> _saveSurveyLocally(SurveyEntryModel entryInput) async {
-    return await _taskStorageService!.addTask(SyncTaskModel(
+    final taskId = await _taskStorageService!.addTask(SyncTaskModel(
       id: generateUniqueId(),
       surveyName: survey.value?.name ?? 'Desconocido',
       payload: entryInput,
       repositoryKey: 'surveyRepository',
     ));
+
+    if (survey.value?.id == 6 && homeCode.value != null) {
+      _localStorageService?.setSurvey6Completed(homeCode.value!, true);
+    }
+
+    return taskId;
   }
+
 
   Future<SurveyEntryModel> _createSurveyEntry(
       int projectId, int pollsterId, String? audioBase64) async {

@@ -26,24 +26,26 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await _initHive();
-  final flutterLocalNotificationsPlugin = await initializeFlutterLocalNotifications();
+  final flutterLocalNotificationsPlugin =
+      await initializeFlutterLocalNotifications();
 
   await AppBinding().initAsyncDependencies(flutterLocalNotificationsPlugin);
 
   runApp(const MyApp());
 }
 
-Future<FlutterLocalNotificationsPlugin> initializeFlutterLocalNotifications() async {
+Future<FlutterLocalNotificationsPlugin>
+    initializeFlutterLocalNotifications() async {
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   const AndroidInitializationSettings initializationSettingsAndroid =
-  AndroidInitializationSettings('@mipmap/icon');
+      AndroidInitializationSettings('@mipmap/icon');
 
   const DarwinInitializationSettings initializationSettingsApple =
-  DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestSoundPermission: true,
-      requestBadgePermission: true);
+      DarwinInitializationSettings(
+          requestAlertPermission: true,
+          requestSoundPermission: true,
+          requestBadgePermission: true);
 
   const InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
@@ -70,7 +72,6 @@ Future<void> _initHive() async {
   Hive.registerAdapter(SectionsModelAdapter());
   Hive.registerAdapter(RevisitModelAdapter());
 
-
   await Future.wait([
     Hive.openBox('authBox'),
     Hive.openBox<SyncTaskModel>('sync_tasks'),
@@ -79,6 +80,7 @@ Future<void> _initHive() async {
     Hive.openBox<StatisticsModel>('statisticsBox'),
     Hive.openBox<SurveyorModel>('surveyorBox'),
     Hive.openBox<RevisitModel>('revisitsBox'),
+    Hive.openBox<bool>('survey6CompletedBox'),
   ]);
 }
 
@@ -93,21 +95,22 @@ class MyApp extends StatelessWidget {
         : Routes.LOGIN;
 
     return GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Chiwi Censo',
-        theme: AppTheme.theme,
-        defaultTransition: Transition.fade,
-        initialRoute: initialRoute,
-        getPages: AppPages.routes,
-        locale: const Locale('es', 'ES'), // Español
-        supportedLocales: const [
-          Locale('es', 'ES'), // Español
-        ],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
+      debugShowCheckedModeBanner: false,
+      title: 'Chiwi Censo',
+      theme: AppTheme.theme,
+      defaultTransition: Transition.fade,
+      initialRoute: initialRoute,
+      getPages: AppPages.routes,
+      locale: const Locale('es', 'ES'),
+      // Español
+      supportedLocales: const [
+        Locale('es', 'ES'), // Español
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
     );
   }
 }

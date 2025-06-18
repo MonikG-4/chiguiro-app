@@ -29,7 +29,7 @@ class SessionController extends GetxController {
 
   void logout() async {
     _cacheStorageService.clearData();
-    _localStorageService.clearAll();
+    await _localStorageService.clearAll();
     Get.offAllNamed(Routes.LOGIN);
   }
 }

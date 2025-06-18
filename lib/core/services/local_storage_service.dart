@@ -15,6 +15,7 @@ class LocalStorageService {
       Hive.box<SurveyRespondedModel>('surveysRespondedBox');
   final _statisticsBox = Hive.box<StatisticsModel>('statisticsBox');
   final _surveyorBox = Hive.box<SurveyorModel>('surveyorBox');
+  final _survey6CompletedBox = Hive.box<bool>('survey6CompletedBox');
 
   void saveSurveys(List<Survey> surveys) {
     final projectsModels =
@@ -91,10 +92,24 @@ class LocalStorageService {
     _surveyorBox.delete('surveyor');
   }
 
-  void clearAll() {
+  Future<void> clearAll() async {
     clearSurveyor();
     clearStatistics();
     clearSurveys();
     clearSurveysResponded();
+    clearSurvey6Completed();
+  }
+
+  void setSurvey6Completed(String homeId, bool isCompleted) {
+    _survey6CompletedBox.put(homeId, isCompleted);
+  }
+
+
+  bool isSurvey6Completed(String homeId) {
+    return _survey6CompletedBox.get(homeId, defaultValue: false) ?? false;
+  }
+
+  void clearSurvey6Completed() {
+    _survey6CompletedBox.clear();
   }
 }
