@@ -368,8 +368,6 @@ class SurveyController extends GetxController {
         throw Exception("Tipo de entrada no válido para guardar resultados");
       }
 
-      print('Payload a enviar: $payload');
-
       final result = await repository.saveSurveyResults(payload);
 
       result.fold((failure) {
