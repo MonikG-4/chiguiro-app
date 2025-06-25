@@ -2,17 +2,19 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:signature/signature.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/services/auth_storage_service.dart';
-import '../../../core/services/local_storage_service.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/sync_task_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
@@ -34,7 +36,6 @@ class SurveyController extends GetxController {
   AudioService? _audioService;
   SyncTaskStorageService? _taskStorageService;
   AuthStorageService? _storageService;
-  LocalStorageService? _localStorageService;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
@@ -70,7 +71,6 @@ class SurveyController extends GetxController {
     _audioService = Get.find<AudioService>();
     _taskStorageService = Get.find<SyncTaskStorageService>();
     _storageService ??= Get.find<AuthStorageService>();
-    _localStorageService = Get.find<LocalStorageService>();
 
     survey.value = Get.arguments?['survey'];
     homeCode.value = Get.arguments?['homeCode'];
@@ -226,6 +226,25 @@ class SurveyController extends GetxController {
     }
   }
 
+  Future<void> saveSignature(SurveyQuestion question, SignatureController signatureController) async {
+    if (signatureController.isNotEmpty) {
+      final Uint8List? data = await signatureController.toPngBytes();
+      if (data != null) {
+        final directory = await getTemporaryDirectory();
+        final path = '${directory.path}/signature_${question.id}.png';
+        final file = File(path);
+        await file.writeAsBytes(data);
+
+        responses[question.id] = {
+          'question': question.question,
+          'type': question.type,
+          'value': <File>[file], // igual que con foto
+        };
+        responses.refresh();
+      }
+    }
+  }
+
   Future<void> _loadSurveyData() async {
     if (survey.value != null) {
       isGeoLocation.value = survey.value!.geoLocation;
@@ -349,6 +368,8 @@ class SurveyController extends GetxController {
         throw Exception("Tipo de entrada no válido para guardar resultados");
       }
 
+      print('Payload a enviar: $payload');
+
       final result = await repository.saveSurveyResults(payload);
 
       result.fold((failure) {
@@ -357,9 +378,6 @@ class SurveyController extends GetxController {
       }, (data) {
         _taskStorageService?.removeTask(taskId!);
         _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
-        if (survey.value?.id == 6 && homeCode.value != null) {
-          _localStorageService?.setSurvey6Completed(homeCode.value!, true);
-        }
       });
     } catch (e) {
       _showMessage(
@@ -382,18 +400,12 @@ class SurveyController extends GetxController {
   }
 
   Future<String> _saveSurveyLocally(SurveyEntryModel entryInput) async {
-    final taskId = await _taskStorageService!.addTask(SyncTaskModel(
+    return await _taskStorageService!.addTask(SyncTaskModel(
       id: generateUniqueId(),
       surveyName: survey.value?.name ?? 'Desconocido',
       payload: entryInput,
       repositoryKey: 'surveyRepository',
     ));
-
-    if (survey.value?.id == 6 && homeCode.value != null) {
-      _localStorageService?.setSurvey6Completed(homeCode.value!, true);
-    }
-
-    return taskId;
   }
 
 

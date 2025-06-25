@@ -14,10 +14,10 @@ import 'questions/integer_input_question.dart';
 import 'questions/matrix_double_question.dart';
 import 'questions/matrix_question.dart';
 import 'questions/matrix_time_question.dart';
-import 'questions/photo_input_question.dart';
 import 'questions/radio_input_question.dart';
 import 'questions/scale_question.dart';
 import 'questions/select_input_question.dart';
+import 'questions/signature_input_question.dart';
 import 'questions/star_rating_question.dart';
 import 'questions/string_input_question.dart';
 
@@ -129,7 +129,7 @@ class _QuestionBody extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (question.type) {
       case 'Photo':
-        return PhotoInputQuestion(question: question, controller: controller);
+        return SignatureInputQuestion(question: question, controller: controller);
       case 'Date':
         return DateInputQuestion(question: question, controller: controller);
       case 'String':

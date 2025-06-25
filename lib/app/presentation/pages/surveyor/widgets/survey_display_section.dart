@@ -12,7 +12,6 @@ class SurveyDisplaySection extends StatelessWidget {
   final bool isResponded;
   final void Function(Survey)? onSurveyTap;
   final RxBool? isLoading;
-  final bool? showOnlySurvey;
 
   const SurveyDisplaySection({
     super.key,
@@ -21,17 +20,13 @@ class SurveyDisplaySection extends StatelessWidget {
     this.isResponded = false,
     this.onSurveyTap,
     this.isLoading,
-    this.showOnlySurvey = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final filteredSurveys = isResponded
         ? surveys
-        : surveys.where((s) {
-            if (showOnlySurvey == true) return s.id == 6;
-            return s.active == true && s.id != 6;
-          }).toList();
+        : surveys.where((s) => s.active == true).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

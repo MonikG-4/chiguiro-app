@@ -73,7 +73,7 @@ class RevisitDetailPage extends GetView<RevisitDetailController> {
                     },
                     backgroundColor: AppColors.secondaryButton,
                     isLoading: false,
-                    child: 'Guardar hogar',
+                    text: 'Guardar hogar',
                     textSize: 15,
                   ),
                 ),
@@ -94,7 +94,7 @@ class RevisitDetailPage extends GetView<RevisitDetailController> {
                       }
                     },
                     isLoading: false,
-                    child: 'Finalizar hogar',
+                    text: 'Finalizar hogar',
                     textSize: 15,
                   ),
                 ),
@@ -178,7 +178,6 @@ class RevisitDetailPage extends GetView<RevisitDetailController> {
                       isResponded: false,
                       onSurveyTap: (survey) => _redirectToSurvey(survey),
                       isLoading: controller.isSurveysLoading,
-                      showOnlySurvey: controller.shouldShowOnlySurvey6(controller.homeCode.value),
                     ),
                     const SizedBox(height: 8),
 

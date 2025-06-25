@@ -29,7 +29,7 @@ class ConfirmationDialog extends StatelessWidget {
         PrimaryButton(
           onPressed: () => Navigator.of(context).pop(false),
           isLoading: false,
-          child: cancelText,
+          text: cancelText,
           width: 110,
           height: 40,
           textSize: 12,
@@ -39,7 +39,7 @@ class ConfirmationDialog extends StatelessWidget {
         PrimaryButton(
           onPressed: () => Navigator.of(context).pop(true),
           isLoading: false,
-          child: confirmText,
+          text: confirmText,
           width: 110,
           height: 40,
           textSize: 12,

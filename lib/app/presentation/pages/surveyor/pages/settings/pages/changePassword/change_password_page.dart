@@ -68,7 +68,7 @@ class ChangePasswordPage extends GetView<HomeController> {
                 }
               },
               isLoading: controller.isChangePasswordLoading.value,
-              child: 'Guardar cambios',
+              text: 'Guardar cambios',
             ),
           ],
         )),

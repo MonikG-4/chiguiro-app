@@ -42,7 +42,7 @@ class AppColors {
 
 
   //Borde
-  static const Color inputs = Color(0xFF748299);
+  static const Color inputs = Color(0xE0E0E0FF);
   static const Color errorInputs = Color(0xFFB91C1C);
 
   static const Color infoBorder = Color(0xFF2563EB);

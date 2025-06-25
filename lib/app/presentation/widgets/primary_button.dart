@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class PrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
-  final String child;
+  final String text;
+  final Widget? icon;
 
   final double? textSize;
   final double? width;
@@ -15,7 +16,8 @@ class PrimaryButton extends StatelessWidget {
     super.key,
     required this.onPressed,
     required this.isLoading,
-    required this.child,
+    required this.text,
+    this.icon,
     this.textSize,
     this.width,
     this.height,
@@ -40,12 +42,22 @@ class PrimaryButton extends StatelessWidget {
         ),
         child: isLoading
             ? const CircularProgressIndicator(color: Colors.white)
-            : Text(
-          child,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: textSize,
-          ),
+            : Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              icon!,
+              const SizedBox(width: 6),
+            ],
+            Text(
+              text,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: textSize,
+              ),
+            ),
+          ],
         ),
       ),
     );

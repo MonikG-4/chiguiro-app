@@ -2,10 +2,10 @@ import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/services/auth_storage_service.dart';
-import '../../../core/services/local_storage_service.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/revisit_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
@@ -21,7 +21,6 @@ class RevisitDetailController extends GetxController {
   late LocationService _locationService;
   late final AudioService _audioService;
   late final RevisitStorageService _revisitStorageService;
-  late final LocalStorageService _localStorageService;
 
   final revisit = Rxn<RevisitModel>();
   final surveys = <Survey>[].obs;
@@ -43,7 +42,6 @@ class RevisitDetailController extends GetxController {
     _audioService = Get.find<AudioService>();
     _locationService = Get.find<LocationService>();
     _revisitStorageService = Get.find<RevisitStorageService>();
-    _localStorageService = Get.find<LocalStorageService>();
 
     revisit.value = Get.arguments;
     homeCode.value = revisit.value!.homeCode;
@@ -57,10 +55,6 @@ class RevisitDetailController extends GetxController {
       await fetchSurveys();
     }
     await fetchSurveysResponded(homeCode.value);
-  }
-
-  bool shouldShowOnlySurvey6(String homeId) {
-    return !_localStorageService.isSurvey6Completed(homeId);
   }
 
   Future<List<LatLng>> getCurrentToRevisitRoute(RevisitModel revisit) async {

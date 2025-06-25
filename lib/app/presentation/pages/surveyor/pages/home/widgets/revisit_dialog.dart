@@ -66,7 +66,7 @@ class _RevisitDialogState extends State<RevisitDialog> {
           textSize: 13,
           borderRadius: 8,
           isLoading: false,
-          child: widget.cancelText,
+          text: widget.cancelText,
         ),
         PrimaryButton(
           onPressed: () {
@@ -81,7 +81,7 @@ class _RevisitDialogState extends State<RevisitDialog> {
           textSize: 13,
           borderRadius: 8,
           isLoading: false,
-          child: widget.confirmText,
+          text: widget.confirmText,
         ),
       ],
     );

@@ -80,7 +80,6 @@ Future<void> _initHive() async {
     Hive.openBox<StatisticsModel>('statisticsBox'),
     Hive.openBox<SurveyorModel>('surveyorBox'),
     Hive.openBox<RevisitModel>('revisitsBox'),
-    Hive.openBox<bool>('survey6CompletedBox'),
   ]);
 }
 

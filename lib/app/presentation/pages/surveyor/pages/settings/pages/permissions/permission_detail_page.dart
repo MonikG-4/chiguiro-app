@@ -84,7 +84,7 @@ class PermissionDetailPage extends StatelessWidget {
             if (confirmed == true) onOpenSettings();
           },
           isLoading: false,
-          child: 'Actualizar configuración del dispositivo',
+          text: 'Actualizar configuración del dispositivo',
         ),
       ),
     );

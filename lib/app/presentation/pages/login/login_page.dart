@@ -58,7 +58,7 @@ class LoginPage extends GetView<AuthController> {
                         }
                       },
                 isLoading: controller.isLoading.value,
-                child: 'Ingresar',
+                text: 'Ingresar',
               ),
             ],
           ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:html/parser.dart' as html_parser;
+import 'package:html/dom.dart' as dom;
 
 import '../../../../../../core/values/app_colors.dart';
 import '../../../../widgets/confirmation_dialog.dart';
@@ -67,7 +69,7 @@ class SurveyPage extends GetView<SurveyController> {
                   ? null
                   : () => _submitSurvey(),
               isLoading: controller.isLoadingSendSurvey.value,
-              child: 'Enviar Encuesta',
+              text: 'Enviar Encuesta',
             ),
         );
       }),
@@ -132,17 +134,17 @@ class SurveyPage extends GetView<SurveyController> {
                   ),
                   child: Column(
                     children: [
-                      Text(
-                        section.name,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      RichText(
                         textAlign: TextAlign.center,
+                        text: parseSimpleHtml(section.name),
                       ),
+                      const SizedBox(height: 8.0),
                       if (section.description != null)
-                        Text(
-                          section.description!,
-                          style: const TextStyle(fontSize: 14),
+                        RichText(
                           textAlign: TextAlign.center,
-                        )
+                          text: parseSimpleHtml(section.description!),
+                        ),
+
                     ],
                   ),
                 ),
@@ -165,6 +167,47 @@ class SurveyPage extends GetView<SurveyController> {
         }),
       ),
     );
+  }
+
+  TextSpan parseSimpleHtml(String html, {TextStyle? baseStyle}) {
+    final document = html_parser.parse(html);
+    final body = document.body;
+
+    return _parseNode(
+      body!,
+      baseStyle ?? const TextStyle(fontSize: 16, color: Colors.black),
+    );
+  }
+
+  TextSpan _parseNode(dom.Node node, TextStyle currentStyle) {
+    if (node is dom.Text) {
+      return TextSpan(text: node.text, style: currentStyle);
+    }
+
+    if (node is dom.Element) {
+      TextStyle updatedStyle = currentStyle;
+
+      switch (node.localName) {
+        case 'b':
+          updatedStyle = updatedStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
+          break;
+        case 'i':
+          updatedStyle = updatedStyle.merge(const TextStyle(fontStyle: FontStyle.italic));
+          break;
+        case 'u':
+          updatedStyle = updatedStyle.merge(const TextStyle(decoration: TextDecoration.underline));
+          break;
+        case 'p':
+          break;
+      }
+
+      return TextSpan(
+        style: updatedStyle,
+        children: node.nodes.map((child) => _parseNode(child, updatedStyle)).toList(),
+      );
+    }
+
+    return const TextSpan(text: '');
   }
 
   Widget _buildProgressBar() {

@@ -49,7 +49,7 @@ class HomePage extends GetView<HomeController> {
                         },
                         backgroundColor: AppColors.secondaryButton,
                         isLoading: false,
-                        child: 'Guardar hogar',
+                        text: 'Guardar hogar',
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -70,7 +70,7 @@ class HomePage extends GetView<HomeController> {
                           }
                         },
                         isLoading: false,
-                        child: 'Finalizar hogar',
+                        text: 'Finalizar hogar',
                       ),
                     ),
                   ],
@@ -114,7 +114,7 @@ class HomePage extends GetView<HomeController> {
                               .fetchSurveysResponded(controller.homeCode.value);
                         },
                         isLoading: false,
-                        child: 'Nuevo hogar',
+                        text: 'Nuevo hogar',
                       )
                     else
                       Column(
@@ -125,8 +125,6 @@ class HomePage extends GetView<HomeController> {
                             surveys: controller.surveys,
                             isResponded: false,
                             onSurveyTap: (survey) => _redirectToSurvey(survey),
-                            showOnlySurvey: controller.shouldShowOnlySurvey6(controller.homeCode.value),
-
                           ),
                           const SizedBox(height: 8),
                           // Si ya hay código generado, mostrar loading o contenido

@@ -30,7 +30,7 @@ class CustomInput extends StatelessWidget {
       decoration: InputDecoration(
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(
-            color: controller.text.isNotEmpty ? AppColors.successBorder : Colors.grey[300]!,
+            color: controller.text.isNotEmpty ? AppColors.successBorder : AppColors.inputs,
           ),
           borderRadius: BorderRadius.circular(8.0),
         ),

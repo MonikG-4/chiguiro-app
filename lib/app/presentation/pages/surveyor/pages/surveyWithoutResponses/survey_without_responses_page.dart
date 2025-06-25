@@ -66,7 +66,7 @@ class SurveyWithoutResponsesPage extends GetView {
                           },
                         )),
                     isLoading: false,
-                    child: 'Iniciar encuesta'),
+                    text: 'Iniciar encuesta'),
                 const SizedBox(height: 16),
                 CustomTextButtonRedirect(
                     onPressed: () => Get.offAllNamed(Routes.DASHBOARD),

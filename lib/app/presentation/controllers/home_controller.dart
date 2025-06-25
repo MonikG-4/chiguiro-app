@@ -6,7 +6,6 @@ import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/services/auth_storage_service.dart';
 import '../../../core/services/connectivity_service.dart';
-import '../../../core/services/local_storage_service.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/revisit_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
@@ -23,7 +22,6 @@ class HomeController extends GetxController {
   late final AudioService _audioService;
   late final AuthStorageService _storageService;
   late final RevisitStorageService _revisitStorageService;
-  late final LocalStorageService _localStorageService;
 
 
   // Variables reactivas para la UI
@@ -69,8 +67,6 @@ class HomeController extends GetxController {
     // Rename to Auth Service
     _storageService = Get.find<AuthStorageService>();
     _revisitStorageService = Get.find<RevisitStorageService>();
-    _localStorageService = Get.find<LocalStorageService>();
-
   }
 
   void _initializeUserData() {
@@ -119,10 +115,6 @@ class HomeController extends GetxController {
   void resetHomeCode() {
     homeCode.value = "";
     isCodeGenerated.value = false;
-  }
-
-  bool shouldShowOnlySurvey6(String homeId) {
-    return !_localStorageService.isSurvey6Completed(homeId);
   }
 
   Future<void> changePassword(String password) async {
