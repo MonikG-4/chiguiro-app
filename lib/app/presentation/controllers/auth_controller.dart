@@ -2,18 +2,18 @@ import 'package:get/get.dart';
 
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/auth_storage_service.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../../core/values/routes.dart';
 import '../../domain/repositories/i_auth_repository.dart';
-import 'notification_controller.dart';
 import 'session_controller.dart';
 
 class AuthController extends GetxController {
   final IAuthRepository repository;
   final AuthStorageService _cacheStorageService =
   Get.find<AuthStorageService>();
-  final NotificationController _notificationController = Get.find();
+  final NotificationService _notificationService = Get.find();
 
   final isLoading = false.obs;
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
@@ -29,9 +29,10 @@ class AuthController extends GetxController {
   Future<void> login(String email, String password) async {
     isLoading.value = true;
 
-    print('Device Token: ${_notificationController.deviceToken.value}');
+    final appToken = await _notificationService.getFCMToken();
+    print("Token FCM: $appToken");
 
-    final result = await repository.login(email, password, _notificationController.deviceToken.value);
+    final result = await repository.login(email, password, appToken);
 
     result.fold(
             (failure) {

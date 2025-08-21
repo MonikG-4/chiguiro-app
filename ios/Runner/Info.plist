@@ -57,11 +57,8 @@
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
-		<key>NSAppTransportSecurity</key>
-		<dict>
-			<key>NSAllowsArbitraryLoads</key>
-			<true/>
-		</dict>
+        <key>UIStatusBarHidden</key>
+		<false/>
 		<!--  Permiso para redirección -->
 		<key>LSApplicationQueriesSchemes</key>
         <array>

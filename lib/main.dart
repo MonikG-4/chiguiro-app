@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
@@ -26,35 +25,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await _initHive();
-  final flutterLocalNotificationsPlugin =
-      await initializeFlutterLocalNotifications();
 
-  await AppBinding().initAsyncDependencies(flutterLocalNotificationsPlugin);
+  await AppBinding().initAsyncDependencies();
 
   runApp(const MyApp());
-}
-
-Future<FlutterLocalNotificationsPlugin>
-    initializeFlutterLocalNotifications() async {
-  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-  const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/icon');
-
-  const DarwinInitializationSettings initializationSettingsApple =
-      DarwinInitializationSettings(
-          requestAlertPermission: true,
-          requestSoundPermission: true,
-          requestBadgePermission: true);
-
-  const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsApple,
-      macOS: initializationSettingsApple);
-
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
-  return flutterLocalNotificationsPlugin;
 }
 
 /// **Inicialización de Hive**
