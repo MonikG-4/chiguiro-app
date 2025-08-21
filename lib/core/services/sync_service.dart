@@ -1,16 +1,16 @@
 import 'dart:async';
-import 'package:chiguiro_front_app/core/services/cache_storage_service.dart';
 import 'package:get/get.dart';
 import '../../app/data/models/sync_task_model.dart';
 import '../../app/domain/repositories/i_survey_repository.dart';
 import '../utils/message_handler.dart';
 import '../utils/snackbar_message_model.dart';
+import 'auth_storage_service.dart';
 import 'connectivity_service.dart';
 import 'sync_task_storage_service.dart';
 
 class SyncService extends GetxService {
-  final SyncTaskStorageService _taskStorageService = Get.find();
-  final CacheStorageService _authResponse = Get.find();
+  final SyncTaskStorageService _taskStorageService = Get.find<SyncTaskStorageService>();
+  final AuthStorageService _authResponse = Get.find();
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
   final ConnectivityService _connectivityService = Get.find();
 
@@ -22,7 +22,13 @@ class SyncService extends GetxService {
     super.onInit();
     MessageHandler.setupSnackbarListener(message);
     syncPendingTasks();
-    _connectivityService.addCallback(true, 1, () => syncPendingTasks());
+
+    _connectivityService.addCallback(
+        true,
+        priority: 1,
+        () async { await syncPendingTasks(); },
+        id: 'sync_service'
+    );
   }
 
   Future<void> syncPendingTasks() async {
@@ -40,8 +46,12 @@ class SyncService extends GetxService {
       List<String> failedTaskIds = [];
 
       if (pendingTasks.isEmpty) {
+        if (Get.overlayContext != null) {
+          _showMessage('Encuestas', 'No hay encuestas pendientes para enviar', 'success');
+        }
         return;
       }
+
 
       final results = await Future.wait(
           pendingTasks.map((task) async {

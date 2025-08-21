@@ -2,39 +2,51 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
+
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:signature/signature.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/audio_service.dart';
+import '../../../core/services/auth_storage_service.dart';
+import '../../../core/services/location_service.dart';
 import '../../../core/services/sync_task_storage_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../../core/values/location.dart';
 import '../../../core/values/routes.dart';
+import '../../data/models/revisit_model.dart';
 import '../../data/models/survey_entry_model.dart';
 import '../../data/models/sync_task_model.dart';
+import '../../domain/entities/block_code.dart';
 import '../../domain/entities/sections.dart';
 import '../../domain/entities/survey.dart';
 import '../../domain/entities/survey_question.dart';
 import '../../domain/repositories/i_survey_repository.dart';
-import '../../../core/services/location_service.dart';
 
 class SurveyController extends GetxController {
   final ISurveyRepository repository;
-  late final LocationService _locationService;
-  late final AudioService _audioService;
-  late final SyncTaskStorageService _taskStorageService;
+  LocationService? _locationService;
+  AudioService? _audioService;
+  SyncTaskStorageService? _taskStorageService;
+  AuthStorageService? _storageService;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
-  final surveyPending = <Map<String, dynamic>>[].obs;
+  final idSurveyor = 0.obs;
+
   final survey = Rx<Survey?>(null);
   final sections = <Sections>[].obs;
   final homeCode = RxnString();
+
+  final revisit = Rxn<RevisitModel>();
+
   final responses = <String, dynamic>{}.obs;
   final hiddenQuestions = <String>{}.obs;
   final RxMap<int, Set<String>> jumperHiddenQuestions =
@@ -44,6 +56,7 @@ class SurveyController extends GetxController {
   final isLoadingSendSurvey = false.obs;
   final isGeoLocation = false.obs;
   final isVoiceRecorder = false.obs;
+  final RxBool allowPop = false.obs;
 
   final Rx<File?> imageFile = Rx<File?>(null);
   final timeAnswerStart = DateTime.now().obs;
@@ -57,9 +70,18 @@ class SurveyController extends GetxController {
     _locationService = Get.find<LocationService>();
     _audioService = Get.find<AudioService>();
     _taskStorageService = Get.find<SyncTaskStorageService>();
+    _storageService ??= Get.find<AuthStorageService>();
 
     survey.value = Get.arguments?['survey'];
     homeCode.value = Get.arguments?['homeCode'];
+    revisit.value = Get.arguments?['revisit'];
+
+    if (idSurveyor.value == 0) {
+      final auth = _storageService?.authResponse;
+      if (auth != null) {
+        idSurveyor.value = auth.id;
+      }
+    }
 
     if (survey.value != null) {
       sections.assignAll(survey.value!.sections);
@@ -78,8 +100,8 @@ class SurveyController extends GetxController {
 
   @override
   void onClose() {
-    if (_audioService.isRecording.value) {
-      _audioService.stopRecording();
+    if (_audioService!.isRecording.value) {
+      _audioService?.stopRecording();
     }
     super.onClose();
   }
@@ -89,8 +111,8 @@ class SurveyController extends GetxController {
 
     if (survey.value?.geoLocation == true) {
       final hasLocationPermission =
-          await _locationService.requestLocationPermission();
-      if (!hasLocationPermission) {
+          await _locationService?.requestLocationPermission();
+      if (!hasLocationPermission!) {
         _showMessage(
             'Permisos necesarios',
             'Esta encuesta requiere acceso a tu ubicación. Por favor, otorga los permisos necesarios.',
@@ -100,8 +122,8 @@ class SurveyController extends GetxController {
     }
 
     if (survey.value?.voiceRecorder == true) {
-      final hasAudioPermission = await _audioService.requestAudioPermission();
-      if (!hasAudioPermission) {
+      final hasAudioPermission = await _audioService?.requestAudioPermission();
+      if (!hasAudioPermission!) {
         _showMessage(
             'Permisos necesarios',
             'Esta encuesta requiere acceso a tu micrófono. Por favor, otorga los permisos necesarios.',
@@ -114,19 +136,60 @@ class SurveyController extends GetxController {
   }
 
   Future<void> getLocation(SurveyQuestion question) async {
-    var position = _locationService.cachedPosition;
-    if (position == null) {
-      await _fetchLocation();
-      position = _locationService.cachedPosition;
-    }
+    await _fetchLocation();
+
+    var position = _locationService?.cachedPosition;
 
     final location =
         getDepartmentAndCityFromCoords(position!.latitude, position.longitude);
+
     responses[question.id] = {
       'question': question.question,
       'type': question.type,
       'value': ['Colombia', '${location['department']}', '${location['city']}'],
     };
+  }
+
+  Future<BlockCode?> fetchBlockCode() async {
+    await _fetchLocation();
+    final position = _locationService?.cachedPosition;
+
+    if (position == null) {
+      _showMessage('Error', 'No se pudo obtener la ubicación', 'error');
+      return null;
+    }
+
+    final result = await repository.fecthBlockCode(
+      position.latitude,
+      position.longitude,
+    );
+
+    BlockCode? blockCode;
+
+    result.fold(
+      (failure) {
+        _showMessage('Error', failure.message, 'error');
+      },
+      (data) {
+        blockCode = data;
+      },
+    );
+
+    return blockCode;
+  }
+
+  Future<void> redirectToMap() async {
+    const String url = 'https://chiguiro.capibara.lat/geodata';
+
+      final bool launched = await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched) {
+        _showMessage('Ver mapa', 'No se pudo abrir el navegador', 'error');
+      }
+
   }
 
   Future<void> pickImage(SurveyQuestion question) async {
@@ -163,21 +226,22 @@ class SurveyController extends GetxController {
     }
   }
 
-  Future<void> fetchSurveys(int surveyorId) async {
-    isLoadingQuestion.value = true;
+  Future<void> saveSignature(SurveyQuestion question, SignatureController signatureController) async {
+    if (signatureController.isNotEmpty) {
+      final Uint8List? data = await signatureController.toPngBytes();
+      if (data != null) {
+        final directory = await getTemporaryDirectory();
+        final path = '${directory.path}/signature_${question.id}.png';
+        final file = File(path);
+        await file.writeAsBytes(data);
 
-    try {
-      final result = await repository.fetchSurveys(surveyorId);
-
-      result.fold((failure) {
-        _showMessage('Error', _mapFailureToMessage(failure), 'error');
-      }, (data) {
-        surveyPending.value = data;
-      });
-    } catch (e) {
-      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
-    } finally {
-      isLoadingQuestion.value = false;
+        responses[question.id] = {
+          'question': question.question,
+          'type': question.type,
+          'value': <File>[file], // igual que con foto
+        };
+        responses.refresh();
+      }
     }
   }
 
@@ -187,7 +251,7 @@ class SurveyController extends GetxController {
       isVoiceRecorder.value = survey.value!.voiceRecorder;
 
       if (isVoiceRecorder.value) {
-        await _audioService.startRecording();
+        await _audioService?.startRecording();
       }
 
       if (isGeoLocation.value) {
@@ -197,7 +261,7 @@ class SurveyController extends GetxController {
   }
 
   Future<void> _fetchLocation() async {
-    await _locationService.initializeCachedPosition();
+    await _locationService?.initializeCachedPosition();
   }
 
   String? Function(dynamic value) validatorMandatory(SurveyQuestion question) {
@@ -255,107 +319,110 @@ class SurveyController extends GetxController {
     return '$timestamp$randomValue';
   }
 
-  Future<void> saveSurveyResults(
-      [int? pollsterId, Map<String, dynamic>? entryInputPending]) async {
+  Future<void> saveLocalSurvey(int surveyorId) async {
     isLoadingSendSurvey.value = true;
+    String? audioBase64 = '';
+
+    if (!validateAllQuestions()) {
+      isLoadingSendSurvey.value = false;
+      return;
+    }
+
+    if (isVoiceRecorder.value && _audioService!.isRecording.value) {
+      audioBase64 = await _audioService?.stopRecording();
+    }
+
+    final entryInput = await _createSurveyEntry(
+      survey.value!.id,
+      surveyorId,
+      audioBase64,
+    );
 
     try {
-      String? audioBase64 = '';
-
-      if (entryInputPending == null) {
-        if (!validateAllQuestions()) {
-          isLoadingSendSurvey.value = false;
-          return;
-        }
-
-        if (isVoiceRecorder.value && _audioService.isRecording.value) {
-          audioBase64 = await _audioService.stopRecording();
-        }
-      }
-
-      final entryInput = entryInputPending != null
-          ? entryInputPending['payload'] as SurveyEntryModel
-          : await _createSurveyEntry(
-              survey.value!.id,
-              pollsterId!,
-              audioBase64,
-            );
-
-      //printEntryInput(entryInput.toJson());
-
-      try {
-        final result = await repository.saveSurveyResults(entryInput.toJson());
-
-        result.fold((failure) {
-          throw Exception(_mapFailureToMessage(failure));
-        }, (data) {
-          if (!data) {
-            throw Exception('Fallo al enviar la encuesta al servidor');
-          }
-
-          if (entryInputPending != null) {
-            _taskStorageService.removeTask(entryInputPending['id']);
-          }
-          _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
-        });
-      } catch (e) {
-        _showMessage(
-            'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
-        await _saveSurveyLocally(entryInputPending, entryInput);
-      }
+      String taskId = await _saveSurveyLocally(entryInput);
+      await saveSurveyResults(entryInput, taskId: taskId);
     } catch (e) {
       _showMessage(
           'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
-      await _saveSurveyLocally(
-          entryInputPending, entryInputPending?['payload'] ?? {});
     } finally {
       isLoadingSendSurvey.value = false;
-      if (survey.value?.entriesCount == 0) {
-        Get.offNamedUntil(
-          Routes.SURVEY_DETAIL,
-          (route) => route.settings.name != Routes.SURVEY,
-          arguments: {'survey': survey.value},
+    }
+  }
+
+  Future<void> saveSurveyResults(dynamic entryInput, {String? taskId}) async {
+    isLoadingSendSurvey.value = true;
+
+    try {
+      late Map<String, dynamic> payload;
+
+      if (entryInput is Map<String, dynamic>) {
+        if (entryInput.containsKey('payload') && entryInput.containsKey('id')) {
+          payload = entryInput['payload'].toJson();
+          taskId = entryInput['id'];
+        } else {
+          throw Exception("Map de entrada inválido: falta 'payload' o 'id'");
+        }
+      } else if (entryInput is SurveyEntryModel) {
+        payload = entryInput.toJson();
+      } else {
+        throw Exception("Tipo de entrada no válido para guardar resultados");
+      }
+
+      final result = await repository.saveSurveyResults(payload);
+
+      result.fold((failure) {
+        _showMessage('Encuesta', 'Encuesta guardada localmente.', 'success');
+        throw Exception(_mapFailureToMessage(failure));
+      }, (data) {
+        _taskStorageService?.removeTask(taskId!);
+        _showMessage('Encuesta', 'Encuesta enviada correctamente', 'success');
+      });
+    } catch (e) {
+      _showMessage(
+          'Encuesta', e.toString().replaceAll("Exception: ", ""), 'error');
+    } finally {
+      isLoadingSendSurvey.value = false;
+      Get.until((route) => route.settings.name != Routes.SURVEY);
+
+      if (revisit.value != null) {
+        Get.toNamed(
+          Routes.REVISIT_DETAIL,
+          arguments: revisit.value,
         );
       } else {
-        Get.until(
-          (route) =>
-              route.settings.name ==
-              (entryInputPending != null
-                  ? Routes.DASHBOARD_SURVEYOR
-                  : Routes.SURVEY_DETAIL),
+        Get.toNamed(
+          Routes.DASHBOARD,
         );
       }
     }
   }
 
-  Future<void> _saveSurveyLocally(Map<String, dynamic>? entryInputPending,
-      SurveyEntryModel entryInput) async {
-    await _taskStorageService.addTask(SyncTaskModel(
-      id: entryInputPending?['id'] ?? generateUniqueId(),
-      surveyName: entryInputPending?['surveyName'] ??
-          survey.value?.name ??
-          'Desconocido',
+  Future<String> _saveSurveyLocally(SurveyEntryModel entryInput) async {
+    return await _taskStorageService!.addTask(SyncTaskModel(
+      id: generateUniqueId(),
+      surveyName: survey.value?.name ?? 'Desconocido',
       payload: entryInput,
       repositoryKey: 'surveyRepository',
     ));
-    _showMessage(
-        'Encuesta',
-        'Encuesta guardada localmente, por favor verificar en ENCUESTAS PENDIENTES.',
-        'info');
   }
+
 
   Future<SurveyEntryModel> _createSurveyEntry(
       int projectId, int pollsterId, String? audioBase64) async {
+
     return SurveyEntryModel(
       homeCode: homeCode.value ?? '',
       projectId: projectId,
       pollsterId: pollsterId,
       audio: audioBase64,
       answers: await _buildAnswers(),
-      latitude: _locationService.cachedPosition?.latitude.toString(),
-      longitude: _locationService.cachedPosition?.longitude.toString(),
+      latitude: _locationService?.cachedPosition?.latitude.toString(),
+      longitude: _locationService?.cachedPosition?.longitude.toString(),
       startedOn: timeAnswerStart.value.toIso8601String(),
       finishedOn: DateTime.now().toIso8601String(),
+      comments: revisit.value?.reason,
+      revisit: revisit.value != null,
+
     );
   }
 
@@ -378,6 +445,7 @@ class SurveyController extends GetxController {
         case 'Double':
         case 'Star':
         case 'Scale':
+        case 'Address':
           answer['answer'] = responseValue.toString();
           break;
 
@@ -393,6 +461,7 @@ class SurveyController extends GetxController {
 
         case 'Check':
         case 'Location':
+        case 'Block_Code':
           answer['checkResults'] = List<String>.from(responseValue);
           break;
 
@@ -550,14 +619,16 @@ class SurveyController extends GetxController {
     _rebuildHiddenQuestions();
   }
 
-  Map<String, String> getDepartmentAndCityFromCoords(double lat, double lon) {
+  Map getDepartmentAndCityFromCoords(double lat, double lon) {
     final locationData = LocationData.getLocationData();
 
+    // Función para calcular la distancia entre dos puntos usando la fórmula de Haversine
     double calculateDistance(
         double lat1, double lon1, double lat2, double lon2) {
       const earthRadius = 6371; // Radio de la Tierra en km
       final dLat = (lat2 - lat1) * (3.141592653589793 / 180);
       final dLon = (lon2 - lon1) * (3.141592653589793 / 180);
+
       final a = (sin(dLat / 2) * sin(dLat / 2)) +
           cos(lat1 * (3.141592653589793 / 180)) *
               cos(lat2 * (3.141592653589793 / 180)) *
@@ -566,88 +637,35 @@ class SurveyController extends GetxController {
       return earthRadius * c;
     }
 
-    String? closestDepartment;
-    String? closestCity;
-    double minDistance = double.infinity;
+    // Variables para almacenar el resultado
+    String closestDepartmentName = 'Desconocido';
+    String closestCityName = 'Desconocido';
+    double minCityDistance = double.infinity;
 
+    // Buscar directamente la ciudad más cercana entre todas las ciudades
     for (var country in locationData['countries']) {
       for (var department in country['departments']) {
-        final depLat = department['latitude'];
-        final depLon = department['longitude'];
-        final depDistance = calculateDistance(lat, lon, depLat, depLon);
-
-        if (depDistance < minDistance) {
-          minDistance = depDistance;
-          closestDepartment = department['departamento'];
-        }
-
         for (var city in department['ciudades']) {
           final cityLat = city['latitude'];
           final cityLon = city['longitude'];
+
+          // Calcular la distancia entre las coordenadas del usuario y la ciudad
           final cityDistance = calculateDistance(lat, lon, cityLat, cityLon);
 
-          if (cityDistance < minDistance) {
-            minDistance = cityDistance;
-            closestDepartment = department['departamento'];
-            closestCity = city['name'];
+          // Si esta ciudad está más cerca que la anterior más cercana
+          if (cityDistance < minCityDistance) {
+            minCityDistance = cityDistance;
+            closestCityName = city['name'];
+            closestDepartmentName = department['departamento'];
           }
         }
       }
     }
 
     return {
-      'department': closestDepartment ?? 'Desconocido',
-      'city': closestCity ?? 'Desconocido'
+      'department': closestDepartmentName,
+      'city': closestCityName,
+      'distance': minCityDistance, // Opcional: para información de depuración
     };
-  }
-
-  Future<void> printEntryInput(Map<String, dynamic> entryInput) async {
-    final jsonString = const JsonEncoder.withIndent('  ').convert(entryInput);
-
-    try {
-      // Obtiene el directorio de almacenamiento externo
-      Directory? directory = await getExternalStorageDirectory();
-      if (directory == null) {
-        print("No se pudo obtener el directorio externo.");
-        return;
-      }
-
-      final String filePath = '${directory.path}/debug_data.json';
-      final File jsonFile = File(filePath);
-      await jsonFile.writeAsString(jsonString);
-
-      print("\n=== ARCHIVO JSON GUARDADO ===");
-      print("Ruta: $filePath");
-    } catch (e) {
-      print("\n=== ERROR AL GUARDAR ARCHIVO ===");
-      print("Error: $e");
-    }
-  }
-
-  Map<String, dynamic> _convertDateTimeInMap(Map<String, dynamic> map) {
-    return map.map((key, value) {
-      if (value is DateTime) {
-        return MapEntry(key, value.toIso8601String());
-      } else if (value is Map) {
-        return MapEntry(
-            key, _convertDateTimeInMap(value.cast<String, dynamic>()));
-      } else if (value is List) {
-        return MapEntry(key, _convertDateTimeInList(value));
-      }
-      return MapEntry(key, value);
-    });
-  }
-
-  List<dynamic> _convertDateTimeInList(List<dynamic> list) {
-    return list.map((value) {
-      if (value is DateTime) {
-        return value.toIso8601String();
-      } else if (value is Map) {
-        return _convertDateTimeInMap(value.cast<String, dynamic>());
-      } else if (value is List) {
-        return _convertDateTimeInList(value);
-      }
-      return value;
-    }).toList();
   }
 }

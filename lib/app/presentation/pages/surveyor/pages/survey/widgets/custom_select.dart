@@ -1,98 +1,98 @@
 import 'package:flutter/material.dart';
-import 'custom_input.dart';
 
-class CustomSelect extends StatefulWidget {
+import 'custom_input_select.dart';
+
+class CustomSelect extends StatelessWidget {
   final String? value;
   final List<String> items;
   final String label;
-  final ValueChanged<String?> onSelected;
   final FormFieldState? state;
+
+  final ValueChanged<String?> onSelected;
   final GlobalKey keyDropdown;
   final double maxHeight;
+  final bool hasError;
 
   const CustomSelect({
     super.key,
     required this.value,
     required this.items,
     required this.label,
-    required this.onSelected,
     this.state,
+    required this.onSelected,
     required this.keyDropdown,
     this.maxHeight = 300.0,
+    this.hasError = false,
   });
 
-  @override
-  State<CustomSelect> createState() => _CustomSelectState();
-}
-
-class _CustomSelectState extends State<CustomSelect> {
   Future<void> _showDropdownMenu(BuildContext context) async {
-    final RenderBox renderBox =
-        widget.keyDropdown.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox renderBox = keyDropdown.currentContext!.findRenderObject() as RenderBox;
     final Offset offset = renderBox.localToGlobal(Offset.zero);
+    final size = renderBox.size;
+    final screenSize = MediaQuery.of(context).size;
+    final spaceBelow = screenSize.height - offset.dy - size.height;
+    final spaceAbove = offset.dy;
+    final requiredHeight = (items.length * 44.0).clamp(0.0, maxHeight);
+    final showAbove = spaceBelow < requiredHeight && spaceAbove > spaceBelow;
 
-    final int selectedIndex =
-        widget.value != null ? widget.items.indexOf(widget.value!) : -1;
+    final double calculatedHeight = showAbove
+        ? spaceAbove.clamp(0.0, maxHeight)
+        : spaceBelow.clamp(0.0, maxHeight);
+
+    final RelativeRect position = RelativeRect.fromLTRB(
+      offset.dx,
+      offset.dy,
+      offset.dx + size.width,
+      offset.dy + size.height,
+    );
 
     final selectedValue = await Navigator.of(context).push(
       _CustomPopupMenuRoute<String>(
-        position: RelativeRect.fromLTRB(
-          offset.dx,
-          offset.dy + renderBox.size.height,
-          offset.dx + renderBox.size.width,
-          offset.dy + renderBox.size.height + widget.maxHeight,
-        ),
-        items: widget.items,
-        selectedIndex: selectedIndex,
-        menuWidth: renderBox.size.width,
-        maxHeight: widget.maxHeight,
+        position: position,
+        items: items,
+        selectedIndex: items.indexOf(value ?? ''),
+        menuWidth: size.width,
+        maxHeight: calculatedHeight,
+        showAbove: showAbove,
       ),
     );
 
-    if (selectedValue == widget.value) {
-      widget.onSelected(null);
-    } else if (selectedValue != null) {
-      widget.onSelected(selectedValue);
+    if (selectedValue != null) {
+      onSelected(selectedValue == value ? null : selectedValue);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final FocusNode focusNode = FocusNode();
-
-    return Focus(
-      focusNode: focusNode,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 80),
-        child: CustomInput(
-          key: widget.keyDropdown,
-          hasError: widget.state?.hasError ?? false,
-          hasValue: widget.value != null,
-          onTap: () {
-            FocusScope.of(context).requestFocus(FocusNode());
-            _showDropdownMenu(context);
-          },
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text(
-                  widget.value ?? widget.label,
-                  style: TextStyle(
-                    color: widget.value != null ? Colors.black : Colors.grey,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 80),
+      child: CustomInputSelect(
+        key: keyDropdown,
+        hasError: state?.hasError ?? false,
+        hasValue: value != null,
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+          _showDropdownMenu(context);
+        },
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                value ?? label,
+                style: TextStyle(
+                  color: value != null ? Colors.black : Colors.grey,
                 ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
               ),
             ),
-            const Icon(Icons.arrow_drop_down),
-          ],
-        ),
+          ),
+          const Icon(Icons.arrow_drop_down),
+        ],
       ),
     );
   }
-
 }
 
 class _CustomPopupMenuRoute<T> extends PopupRoute<T> {
@@ -101,6 +101,7 @@ class _CustomPopupMenuRoute<T> extends PopupRoute<T> {
   final int selectedIndex;
   final double menuWidth;
   final double maxHeight;
+  final bool showAbove;
 
   _CustomPopupMenuRoute({
     required this.position,
@@ -108,33 +109,53 @@ class _CustomPopupMenuRoute<T> extends PopupRoute<T> {
     required this.selectedIndex,
     required this.menuWidth,
     required this.maxHeight,
+    required this.showAbove,
   });
 
   @override
-  Color? get barrierColor => null;
+  Duration get transitionDuration => const Duration(milliseconds: 200);
 
   @override
   bool get barrierDismissible => true;
 
   @override
+  Color? get barrierColor => Colors.transparent;
+
+  @override
   String? get barrierLabel => null;
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return CustomSingleChildLayout(
-      delegate: _PopupMenuRouteLayout(position),
+      delegate: _PopupMenuRouteLayout(position, showAbove),
       child: Material(
-        elevation: 2.0,
-        child: Container(
-          width: menuWidth,
-          constraints: BoxConstraints(maxHeight: maxHeight, minHeight: 0),
-          child: _PopupMenuList(
-            items: items,
-            selectedIndex: selectedIndex,
+        elevation: 4.0,
+        borderRadius: BorderRadius.circular(4),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: maxHeight,
+            maxWidth: menuWidth,
+          ),
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return InkWell(
+                onTap: () => Navigator.of(context).pop(item),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  color: index == selectedIndex ? Colors.grey[200] : null,
+                  child: Text(
+                    item,
+                    style: TextStyle(
+                      fontWeight: index == selectedIndex ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -142,114 +163,28 @@ class _CustomPopupMenuRoute<T> extends PopupRoute<T> {
   }
 }
 
-class _PopupMenuList extends StatefulWidget {
-  final List<String> items;
-  final int selectedIndex;
-
-  const _PopupMenuList({
-    required this.items,
-    required this.selectedIndex,
-  });
-
-  @override
-  State<_PopupMenuList> createState() => _PopupMenuListState();
-}
-
-class _PopupMenuListState extends State<_PopupMenuList> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToSelected();
-    });
-  }
-
-  void _scrollToSelected() {
-    if (widget.selectedIndex >= 0 && widget.selectedIndex < widget.items.length) {
-      double offset = (widget.selectedIndex * 44.0).clamp(
-        0.0,
-        _scrollController.position.maxScrollExtent,
-      );
-
-      _scrollController.animateTo(
-        offset,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ScrollConfiguration(
-      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-      child: ListView.builder(
-        controller: _scrollController,
-        padding: EdgeInsets.zero,
-        itemCount: widget.items.length,
-        itemBuilder: (context, index) {
-          return InkWell(
-            onTap: () {
-              Navigator.of(context).pop(widget.items[index]);
-            },
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              child: Text(
-                widget.items[index],
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: index == widget.selectedIndex
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-}
-
-
 class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   final RelativeRect position;
+  final bool showAbove;
 
-  _PopupMenuRouteLayout(this.position);
+  _PopupMenuRouteLayout(this.position, this.showAbove);
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return BoxConstraints.loose(constraints.biggest);
-  }
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) => BoxConstraints.loose(constraints.biggest);
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    double x = position.left;
-    if (x + childSize.width > size.width) {
-      x = size.width - childSize.width;
-    }
+    double dx = position.left;
+    double dy = showAbove ? position.top - childSize.height : position.bottom;
 
-    double y = position.top;
-    if (y + childSize.height > size.height) {
-      y = position.bottom - childSize.height;
-    }
+    if (dx + childSize.width > size.width) dx = size.width - childSize.width;
+    if (dy + childSize.height > size.height) dy = size.height - childSize.height;
+    if (dy < 0) dy = 0;
 
-    return Offset(x, y);
+    return Offset(dx, dy);
   }
 
   @override
-  bool shouldRelayout(_PopupMenuRouteLayout oldDelegate) {
-    return position != oldDelegate.position;
-  }
+  bool shouldRelayout(covariant _PopupMenuRouteLayout oldDelegate) =>
+      position != oldDelegate.position || showAbove != oldDelegate.showAbove;
 }

@@ -15,6 +15,9 @@ class AppColors {
 
   //Boton
   static const Color primaryButton = Color(0xFF0D9488);
+  static const Color secondaryButton = Color(0xFF214FAC);
+  static const Color confirmButton = Color(0xFF0D9488);
+  static const Color cancelButton = Color(0xFF9F9B9B);
 
   //Fondo
   static const Color background = Color(0xFFEEF4F8);
@@ -33,14 +36,16 @@ class AppColors {
   static const Color errorBackground = Color(0xFFFFF1F2);
 
   static const Color withOutWifiBackground = Color(0xFFC9E4FA);
-
   static const Color codeBackground = Color(0xFF57E9B4);
+  static const Color iconsStatistic = Color(0xFF57E9B4 );
+  static const Color graphicBackground = Color(0xFF57B3E9);
 
 
   //Borde
-  static const Color inputs = Color(0xFF748299);
+  static const Color inputs = Color(0xE0E0E0FF);
   static const Color errorInputs = Color(0xFFB91C1C);
 
+  static const Color infoBorder = Color(0xFF2563EB);
   static const Color successBorder = Color(0xFF26D87B);
   static const Color warningBorder = Color(0xFFFACC15);
   static const Color errorBorder = Color(0xFFEF4444);

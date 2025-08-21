@@ -1,54 +1,44 @@
+import 'dart:async';
+
+import 'package:dartz/dartz.dart';
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../../core/error/exceptions/exceptions.dart';
 import '../../../core/error/failures/failure.dart';
-import '../../../core/network/network_request_interceptor.dart';
 import '../../../core/services/connectivity_service.dart';
 
 abstract class BaseRepository {
-  final NetworkRequestInterceptor _interceptor =
-      Get.find<NetworkRequestInterceptor>();
   final ConnectivityService _connectivityService = Get.find();
-
-  /// Procesa una solicitud GraphQL con manejo de conectividad y errores
-  Future<QueryResult> processRequest(
-      Future<QueryResult> Function() request) async {
-    return await _interceptor.handleRequest(request);
-  }
 
   /// Envuelve una solicitud GraphQL en un Either para manejo de éxito/error
   Future<Either<Failure, T>> safeApiCall<T>({
-    required Future<QueryResult> Function() request,
+    required Future<Map<String, dynamic>> Function() request,
     required T Function(Map<String, dynamic> data) onSuccess,
     required String dataKey,
     String offlineErrorMessage = 'Sin conexión a internet',
     String unknownErrorMessage = 'Error desconocido',
   }) async {
-
-    if (!_connectivityService.isStableConnection.value) {
-      return Left(NetworkFailure(offlineErrorMessage));
-    }
+    const Set<String> keysAllowingNull = {
+      'pollsterForgotPassword',
+      'pollsterChangePassword',
+    };
 
     try {
-      final result = await processRequest(request);
+      final result = await request();
 
-      if (result.hasException) {
-        final networkException = result.exception?.linkException;
-        if (networkException != null) {
-          return Left(NetworkFailure(offlineErrorMessage));
-        }
-
-        final error = result.exception?.graphqlErrors.firstOrNull;
-        return Left(ServerFailure(error?.message ?? unknownErrorMessage));
-      }
-
-      if (result.data == null || result.data![dataKey] == null) {
+      if (!result.containsKey(dataKey) ||
+          (result[dataKey] == null && !keysAllowingNull.contains(dataKey))) {
         return Left(UnknownFailure(unknownErrorMessage));
       }
 
-      return Right(onSuccess(result.data!));
+      return Right(onSuccess(result));
+    } on CheckException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } on GateException catch (e) {
+      return Left(AuthFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message ?? 'Error de red'));
     } on Exception catch (e) {
       return Left(UnknownFailure(e.toString()));
     }
@@ -56,29 +46,30 @@ abstract class BaseRepository {
 
   /// Maneja operaciones con almacenamiento local cuando está sin conexión
   Future<Either<Failure, T>> safeApiCallWithCache<T>({
-    required Future<QueryResult> Function() request,
+    required Future<Map<String, dynamic>> Function() request,
     required T Function(Map<String, dynamic> data) onSuccess,
     required String dataKey,
     required Future<T> Function() getCacheData,
     required Function(T data) saveToCache,
     String unknownErrorMessage = 'Error desconocido',
   }) async {
-    if (_connectivityService.isConnected.value) {
+    if (_connectivityService.isOnline) {
       try {
-        final result = await processRequest(request);
+        final result = await request();
 
-        if (result.hasException) {
-          final error = result.exception?.graphqlErrors.firstOrNull;
-          return Left(ServerFailure(error?.message ?? unknownErrorMessage));
-        }
-
-        if (result.data == null || result.data![dataKey] == null) {
+        if (!result.containsKey(dataKey) || result[dataKey] == null) {
           return Left(UnknownFailure(unknownErrorMessage));
         }
 
-        final data = onSuccess(result.data!);
+        final data = onSuccess(result);
         saveToCache(data);
         return Right(data);
+      } on CheckException catch (e) {
+        return Left(ValidationFailure(e.message));
+      } on GateException catch (e) {
+        return Left(AuthFailure(e.message));
+      } on NetworkException catch (e) {
+        return Left(NetworkFailure(e.message ?? 'Error de red'));
       } on Exception catch (e) {
         return Left(UnknownFailure(e.toString()));
       }

@@ -1,14 +1,18 @@
+import 'survey.dart';
 
 class SurveyResponded {
   final int totalEntries;
   final DateTime lastSurvey;
-  final int surveyId;
-  final String surveyName;
+  final Survey survey;
 
   SurveyResponded({
     required this.totalEntries,
     required this.lastSurvey,
-    required this.surveyId,
-    required this.surveyName,
+    required this.survey,
   });
+
+  @override
+  String toString() {
+    return 'SurveyResponded(totalEntries: $totalEntries, lastSurvey: $lastSurvey, survey: $survey)';
+  }
 }

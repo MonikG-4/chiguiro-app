@@ -6,4 +6,9 @@ class Surveyor {
     required this.totalEntries,
     required this.lastSurvey,
   });
+
+  @override
+  String toString() {
+    return 'Surveyor(totalEntries: $totalEntries, lastSurvey: $lastSurvey)';
+  }
 }

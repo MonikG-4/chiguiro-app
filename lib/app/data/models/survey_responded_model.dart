@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
-import '../../domain/entities/survey.dart';
+import '../../domain/entities/survey_responded.dart';
+import 'survey_model.dart';
 
 part 'survey_responded_model.g.dart';
 
@@ -12,45 +13,41 @@ class SurveyRespondedModel extends HiveObject {
   final DateTime lastSurvey;
 
   @HiveField(2)
-  final int surveyId;
+  final SurveyModel? survey;
 
-  @HiveField(3)
-  final String surveyName;
 
   SurveyRespondedModel({
     required this.totalEntries,
     required this.lastSurvey,
-    required this.surveyId,
-    required this.surveyName,
+    this.survey,
   });
 
   factory SurveyRespondedModel.fromJson(Map<String, dynamic> json) {
     return SurveyRespondedModel(
-      totalEntries: json['totalEntries'],
-      lastSurvey: json['lastSurvey'] != null ? DateTime.parse(json['lastSurvey']) : DateTime.now(),
-      surveyId: int.tryParse(json['project']['id'].toString()) ?? 0,
-      surveyName: json['project']['name'],
+      totalEntries: json['totalEntries'] ?? 0,
+      lastSurvey: json['lastSurvey'] != null
+          ? DateTime.tryParse(json['lastSurvey']) ?? DateTime.now()
+          : DateTime.now(),
+      survey: json['project'] != null
+          ? SurveyModel.fromJson(json['project'])
+          : null,
     );
   }
 
-  factory SurveyRespondedModel.fromEntity(Survey survey) {
+
+  factory SurveyRespondedModel.fromEntity(SurveyResponded survey) {
     return SurveyRespondedModel(
-      totalEntries: survey.entriesCount,
-      lastSurvey: survey.lastSurvey!,
-      surveyId: survey.id,
-      surveyName: survey.name,
+      totalEntries: survey.totalEntries,
+      lastSurvey: survey.lastSurvey,
+      survey: SurveyModel.fromEntity(survey.survey),
     );
   }
 
-  Survey toEntity() {
-    return Survey(
-      id: surveyId,
-      name: surveyName,
+  SurveyResponded toEntity() {
+    return SurveyResponded(
       lastSurvey: lastSurvey,
-      entriesCount: totalEntries,
-      geoLocation: false,
-      voiceRecorder: false,
-      sections: [],
+      totalEntries: totalEntries,
+      survey: survey!.toEntity(),
     );
   }
 }

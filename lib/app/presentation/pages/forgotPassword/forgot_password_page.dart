@@ -64,7 +64,7 @@ class ForgotPasswordPage extends GetView<AuthController> {
                           }
                         },
                   isLoading: controller.isLoading.value,
-                  child: 'Enviar correo',
+                  text: 'Enviar correo',
                 ),
               ],
             )),

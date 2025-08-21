@@ -3,7 +3,8 @@
     <application
         android:label="Chiwi"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -46,6 +47,11 @@
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.receivers.NotificationReceiver"
             android:exported="false"/>
+
+        <!-- Configuración del canal de notificación -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
 
         <!-- Configuración del icono de notificación -->
         <meta-data

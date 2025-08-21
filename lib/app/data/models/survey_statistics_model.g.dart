@@ -6,39 +6,39 @@ part of 'survey_statistics_model.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class SurveyStatisticsModelAdapter extends TypeAdapter<SurveyStatisticsModel> {
+class StatisticsModelAdapter extends TypeAdapter<StatisticsModel> {
   @override
   final int typeId = 6;
 
   @override
-  SurveyStatisticsModel read(BinaryReader reader) {
+  StatisticsModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return SurveyStatisticsModel(
-      totalEntries: fields[0] as int,
-      totalCompleted: fields[1] as int,
-      totalUncompleted: fields[2] as int,
-      completedPercentage: fields[3] as String,
-      lastSurvey: fields[4] as DateTime,
+    return StatisticsModel(
+      homes: fields[0] as int,
+      entries: fields[1] as int,
+      completedPercent: fields[2] as double,
+      duration: fields[3] as double,
+      days: (fields[4] as List).cast<StatisticDayModel>(),
     );
   }
 
   @override
-  void write(BinaryWriter writer, SurveyStatisticsModel obj) {
+  void write(BinaryWriter writer, StatisticsModel obj) {
     writer
       ..writeByte(5)
       ..writeByte(0)
-      ..write(obj.totalEntries)
+      ..write(obj.homes)
       ..writeByte(1)
-      ..write(obj.totalCompleted)
+      ..write(obj.entries)
       ..writeByte(2)
-      ..write(obj.totalUncompleted)
+      ..write(obj.completedPercent)
       ..writeByte(3)
-      ..write(obj.completedPercentage)
+      ..write(obj.duration)
       ..writeByte(4)
-      ..write(obj.lastSurvey);
+      ..write(obj.days);
   }
 
   @override
@@ -47,7 +47,7 @@ class SurveyStatisticsModelAdapter extends TypeAdapter<SurveyStatisticsModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is SurveyStatisticsModelAdapter &&
+      other is StatisticsModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

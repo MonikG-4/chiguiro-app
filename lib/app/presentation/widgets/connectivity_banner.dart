@@ -12,7 +12,7 @@ class ConnectivityBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (!_connectivityService.isConnected.value) {
+      if (!_connectivityService.isOnline) {
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.all(8.0),

@@ -5,6 +5,8 @@ class LoginQuery {
         id
         name
         surname
+        email
+        phone
         accessToken
       }
     }

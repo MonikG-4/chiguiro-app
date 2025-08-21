@@ -1,0 +1,137 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../../../../../domain/entities/survey_responded.dart';
+
+class ResponseSurveyList extends StatelessWidget {
+  final List<SurveyResponded> surveyResponded;
+  final RxBool isLoadingAnswerSurvey;
+  final bool shrinkWrap;
+  final ScrollPhysics? physics;
+  final double? maxHeight;
+
+  ResponseSurveyList({
+    super.key,
+    required this.surveyResponded,
+    required this.isLoadingAnswerSurvey,
+    this.shrinkWrap = false,
+    this.physics,
+    this.maxHeight = 300,
+  });
+
+  final List<String> headers = ['Fecha', 'Formulario', 'Cantidad'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (isLoadingAnswerSurvey.value) {
+        return const Center(
+          child: CircularProgressIndicator(color: Colors.black),
+        );
+      }
+
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildHeader(),
+          const Divider(height: 2, color: Color(0xFFE3EAF3)),
+          ListView.separated(
+            physics: physics ?? const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            padding: EdgeInsets.zero,
+            itemCount: surveyResponded.length,
+            separatorBuilder: (context, index) =>
+            const Divider(height: 1, color: Color(0xFFE3EAF3)),
+            itemBuilder: (context, index) =>
+                _buildItem(surveyResponded[index]),
+          ),
+        ],
+      );
+    });
+  }
+
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: headers.map((title) {
+          final isEstado = title.toLowerCase() == 'estado' ||
+              title.toLowerCase() == 'cantidad';
+          return Expanded(
+            flex: isEstado ? 2 : 3,
+            child: Text(
+              title,
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                  fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildItem(SurveyResponded item) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Text(
+              _formatDate(item.lastSurvey),
+              style: const TextStyle(color: Color(0xFF6C7A9C), fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Text(
+              item.survey.name,
+              style: const TextStyle(color: Color(0xFF6C7A9C), fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              item.totalEntries.toString(),
+              style: const TextStyle(color: Color(0xFF6C7A9C), fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = _getSpanishMonth(date.month).substring(0, 3).toLowerCase();
+    final year = date.year.toString().substring(2);
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '$day. $month. $year  $hour:$minute';
+  }
+
+  String _getSpanishMonth(int month) {
+    const months = [
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre'
+    ];
+    return months[month - 1];
+  }
+}

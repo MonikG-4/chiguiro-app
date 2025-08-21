@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../../../../../../core/values/app_colors.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
-import '../custom_input.dart';
+import '../custom_input_select.dart';
 
 class RadioInputQuestion extends StatelessWidget {
   final SurveyQuestion question;
@@ -29,6 +29,8 @@ class RadioInputQuestion extends StatelessWidget {
                       controller.responses[question.id]?['value'] == option;
 
                   void toggleSelection(String option) {
+                    FocusScope.of(context).requestFocus(FocusNode());
+
                     bool isSelected = controller.responses[question.id]?['value'] == option;
                     if (isSelected) {
                       controller.responses.remove(question.id);
@@ -47,7 +49,7 @@ class RadioInputQuestion extends StatelessWidget {
                     state.validate();
                   }
 
-                  return CustomInput(
+                  return CustomInputSelect(
                     hasError: state.hasError,
                     hasValue: controller.responses[question.id] != null,
                     onTap: () => toggleSelection(option),

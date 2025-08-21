@@ -14,4 +14,9 @@ class Sections {
     required this.sort,
     required this.surveyQuestion,
   });
+
+  @override
+  String toString() {
+    return 'Sections(id: $id, name: $name, description: $description, sort: $sort, surveyQuestion: $surveyQuestion)';
+  }
 }

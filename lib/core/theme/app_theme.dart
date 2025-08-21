@@ -33,7 +33,7 @@ class AppTheme {
             fontWeight: FontWeight.w600,
             fontFamily: AppTypography.defaultFontFamily,
           ),
-          foregroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
           backgroundColor: AppColors.primaryButton,
         ),
       ),

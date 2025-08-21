@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 
-import '../../../../../../../../core/values/app_colors.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
+import '../custom_input.dart';
 
 class IntegerInputQuestion extends StatefulWidget {
   final SurveyQuestion question;
@@ -39,7 +37,7 @@ class _IntegerInputQuestionState extends State<IntegerInputQuestion> {
 
   void _updateControllerText() {
     final currentValue = widget.controller.responses[widget.question.id]?['value'];
-    final currentText = currentValue != null && currentValue != 0
+    final currentText = currentValue != null
         ? currentValue.toString()
         : '';
 
@@ -50,16 +48,15 @@ class _IntegerInputQuestionState extends State<IntegerInputQuestion> {
   }
 
   void _onTextChanged() {
-    final value = int.tryParse(_textController.text);
-
-    if (value != null && value != 0) {
+    final value = _textController.text;
+    if (value.isEmpty) {
+      widget.controller.responses.remove(widget.question.id);
+    } else {
       widget.controller.responses[widget.question.id] = {
         'question': widget.question.question,
         'type': widget.question.type,
         'value': value,
       };
-    } else {
-      widget.controller.responses.remove(widget.question.id);
     }
     widget.controller.responses.refresh();
   }
@@ -75,40 +72,21 @@ class _IntegerInputQuestionState extends State<IntegerInputQuestion> {
         return error;
       },
       builder: (FormFieldState<String> state) {
-        return Obx(() {
-          _updateControllerText();
-
-          final hasValue = widget.controller.responses[widget.question.id]?['value'] != null;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
+              CustomInput(
                 controller: _textController,
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: hasValue ? AppColors.successBorder : Colors.grey[300]!,
-                    ),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: AppColors.successBorder),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  errorText: state.errorText,
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
+                inputType: InputValueType.integer,
+                hintText: 'Ejemplo: 10',
+                errorText: state.errorText,
                 onChanged: (value) {
                   state.validate();
                 },
               ),
             ],
           );
-        });
       },
     );
   }

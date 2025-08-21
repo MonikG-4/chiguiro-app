@@ -8,6 +8,14 @@ class ServerFailure extends Failure {
   ServerFailure(super.message);
 }
 
+class ValidationFailure extends Failure {
+  ValidationFailure(super.message);
+}
+
+class AuthFailure extends Failure {
+  AuthFailure(super.message);
+}
+
 class NetworkFailure extends Failure {
   NetworkFailure(super.message);
 }

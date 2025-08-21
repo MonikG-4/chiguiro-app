@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../../../../core/values/app_colors.dart';
 import '../../../../../../core/values/routes.dart';
+import '../../../../../data/models/revisit_model.dart';
 import '../../../../../domain/entities/survey.dart';
 import '../../../../widgets/custom_text_button_redirect.dart';
 import '../../../../widgets/primary_button.dart';
@@ -10,10 +11,12 @@ import '../../../../widgets/primary_button.dart';
 class SurveyWithoutResponsesPage extends GetView {
   final Survey? survey;
   final String? homeCode;
+  final RevisitModel? revisit;
 
   SurveyWithoutResponsesPage({super.key})
-      : survey = Get.arguments['survey'],
-        homeCode = Get.arguments['homeCode'];
+      : survey = Get.arguments?['survey'],
+        homeCode = Get.arguments?['homeCode'],
+        revisit = Get.arguments?['revisit'];
 
   @override
   Widget build(BuildContext context) {
@@ -59,13 +62,14 @@ class SurveyWithoutResponsesPage extends GetView {
                           arguments: {
                             'survey': survey,
                             'homeCode': homeCode,
+                            'revisit': revisit,
                           },
                         )),
                     isLoading: false,
-                    child: 'Iniciar encuesta'),
+                    text: 'Iniciar encuesta'),
                 const SizedBox(height: 16),
                 CustomTextButtonRedirect(
-                    onPressed: () => Get.offAllNamed(Routes.DASHBOARD_SURVEYOR),
+                    onPressed: () => Get.offAllNamed(Routes.DASHBOARD),
                     label: 'Volver al inicio'),
               ],
             ),

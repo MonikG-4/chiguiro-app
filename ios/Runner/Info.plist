@@ -5,7 +5,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Chigüiro</string>
+		<string>Chiwi Censo</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -57,11 +57,14 @@
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
-		<key>NSAppTransportSecurity</key>
-		<dict>
-			<key>NSAllowsArbitraryLoads</key>
-			<true/>
-		</dict>
+        <key>UIStatusBarHidden</key>
+		<false/>
+		<!--  Permiso para redirección -->
+		<key>LSApplicationQueriesSchemes</key>
+        <array>
+          <string>http</string>
+          <string>https</string>
+        </array>
 		<!--  Permiso para notificaciones -->
 		<key>NSUserNotificationAlertStyle</key>
 		<string>alert</string>
@@ -73,8 +76,12 @@
 			<string>remote-notification</string>
 		</array>
 		<!--  Permisos para ubicación -->
+		<key>NSLocationUsageDescription</key>
+		<string>La app registra tu ubicación para asociar cada encuesta con el lugar donde la envías.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>La app registra tu ubicación para asociar cada encuesta con el lugar donde la envías.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>Esta aplicación necesita acceso a tu ubicación mientras la usas.</string>
+		<string>La app registra tu ubicación para asociar cada encuesta con el lugar donde la envías.</string>
 		<key>NSLocationAlwaysUsageDescription</key>
 		<string>Esta aplicación necesita acceso a tu ubicación en segundo plano.</string>
 		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

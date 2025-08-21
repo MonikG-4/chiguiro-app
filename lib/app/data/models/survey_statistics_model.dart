@@ -1,79 +1,71 @@
 import 'package:hive/hive.dart';
 
-import '../../domain/entities/survey_statistics.dart';
+import '../../domain/entities/statistics.dart';
+import 'statistic_day_model.dart';
 
 part 'survey_statistics_model.g.dart';
 
 @HiveType(typeId: 6)
-class SurveyStatisticsModel extends HiveObject {
+class StatisticsModel extends HiveObject {
   @HiveField(0)
-  final int totalEntries;
+  final int homes;
   @HiveField(1)
-  final int totalCompleted;
+  final int entries;
   @HiveField(2)
-  final int totalUncompleted;
+  final double completedPercent;
   @HiveField(3)
-  final String completedPercentage;
+  final double duration;
   @HiveField(4)
-  final DateTime lastSurvey;
+  final List<StatisticDayModel> days;
 
-  SurveyStatisticsModel({
-    required this.totalEntries,
-    required this.totalCompleted,
-    required this.totalUncompleted,
-    required this.completedPercentage,
-    required this.lastSurvey,
+  StatisticsModel({
+    required this.homes,
+    required this.entries,
+    required this.completedPercent,
+    required this.duration,
+    required this.days,
   });
 
-  factory SurveyStatisticsModel.fromEntity(SurveyStatistics entity) {
-    return SurveyStatisticsModel(
-      totalEntries: entity.totalEntries,
-      totalCompleted: entity.totalCompleted,
-      totalUncompleted: entity.totalUncompleted,
-      completedPercentage: entity.completedPercentage,
-      lastSurvey: entity.lastSurvey,
+  factory StatisticsModel.fromEntity(Statistic entity) {
+    return StatisticsModel(
+      homes: entity.entries,
+      entries: entity.entries,
+      completedPercent: entity.completedPercent,
+      duration: entity.duration,
+      days: entity.days.map((s) => StatisticDayModel.fromEntity(s)).toList(),
     );
   }
 
-  factory SurveyStatisticsModel.fromJson(Map<String, dynamic> json) {
-    return SurveyStatisticsModel(
-      totalEntries: json['totalEntries'] ?? 0,
-      totalCompleted: json['totalCompleted'] ?? 0,
-      totalUncompleted: json['totalUncompleted'] ?? 0,
-      completedPercentage: json['completedPercentage'] ?? '0',
-      lastSurvey: json['lastSurvey'] != null
-          ? DateTime.parse(json['lastSurvey'])
-          : DateTime(1970),
+  factory StatisticsModel.fromJson(Map<String, dynamic> json) {
+    return StatisticsModel(
+      homes: json['homes'] ?? 0,
+      entries: json['entries'] ?? 0,
+      completedPercent: json['completed_percentage'] ?? 0,
+      duration: json['duration_seconds'] ?? '0',
+      days: json['days'] != null
+          ? List<StatisticDayModel>.from(
+              json['days'].map((x) => StatisticDayModel.fromJson(x)))
+          : [],
     );
   }
 
-  factory SurveyStatisticsModel.empty() {
-    return SurveyStatisticsModel(
-      totalEntries: 0,
-      totalCompleted: 0,
-      totalUncompleted: 0,
-      completedPercentage: '0',
-      lastSurvey: DateTime(1970),
+  Statistic toEntity() {
+    return Statistic(
+      homes: homes,
+      entries: entries,
+      completedPercent: completedPercent,
+      duration: duration,
+      days: days.map((day) => day.toEntity()).toList(),
     );
   }
 
-  SurveyStatistics toEntity() {
-    return SurveyStatistics(
-      totalEntries: totalEntries,
-      totalCompleted: totalCompleted,
-      totalUncompleted: totalUncompleted,
-      completedPercentage: completedPercentage,
-      lastSurvey: lastSurvey,
+  factory StatisticsModel.empty() {
+    return StatisticsModel(
+      homes: 0,
+      entries: 0,
+      completedPercent: 0,
+      duration: 0,
+      days: [],
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'totalEntries': totalEntries,
-      'totalCompleted': totalCompleted,
-      'totalUncompleted': totalUncompleted,
-      'completedPercentage': completedPercentage,
-      'lastSurvey': lastSurvey.toIso8601String(),
-    };
   }
 }
