@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../../core/values/app_colors.dart';
+import '../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../controllers/statistic_controller.dart';
+
 import '../../widgets/body_wrapper.dart';
 import '../../widgets/custom_card.dart';
 import 'widgets/weekly_bar_chart.dart';
@@ -12,122 +13,126 @@ class StatisticPage extends GetView<StatisticController> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
+
     return Obx(() {
       final values = controller.values;
       final labels = controller.weekDays;
 
       return BodyWrapper(
-        onRefresh: () async => controller.fetchStatistics(),
-        child: CustomCard(
+        onRefresh: () async {
+          await controller.fetchStatistics();
+          await controller
+              .fetchPendingCount(); // <- actualiza el contador local
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: Text(
-                    'Estadísticas',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: Text(
+                'Estadísticas',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
 
-                // Grid de métricas
-                Obx(() {
-                  final data = controller.statistics.value;
+            // ====== GRID 2x2 con "Guardadas localmente" primero ======
+            Obx(() {
+              final data = controller.statistics.value;
+              final pending = controller.pendingCount.value; // <- reactivo
 
-                  if (controller.isLoading.value) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (data == null) {
+                return const Center(child: Text("No hay datos disponibles"));
+              }
 
-                  if (data == null) {
-                    return const Center(
-                        child: Text("No hay datos disponibles"));
-                  }
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final double cardWidth = (constraints.maxWidth - 8) / 2 - 0.5;
 
-                  return LayoutBuilder(
-                    builder: (context, constraints) {
-                      final double cardWidth = (constraints.maxWidth -4) / 2;
-
-                      return Wrap(
-                        spacing: 4,
-                        runSpacing: 8,
-                        children: [
-                          SizedBox(
-                            width: cardWidth,
-                            child: _StatCard(
-                              title: 'Hogares encuestados',
-                              icon: Icons.home_outlined,
-                              value: '${data.homes}',
-                            ),
-                          ),
-                          SizedBox(
-                            width: cardWidth,
-                            child: _StatCard(
-                              title: 'Encuestas realizadas',
-                              icon: Icons.assignment_outlined,
-                              value: '${data.entries}',
-                            ),
-                          ),
-                          SizedBox(
-                            width: cardWidth,
-                            child: _StatCard(
-                              title: 'Tasa de finalización',
-                              icon: Icons.check_circle_outline,
-                              value:
-                                  '${data.completedPercent.toStringAsFixed(0)}%',
-                            ),
-                          ),
-                          SizedBox(
-                            width: cardWidth,
-                            child: _StatCard(
-                              title: 'Duración promedio',
-                              icon: Icons.timer_outlined,
-                              value: controller.formattedDuration,
-                              valueSuffix: 'min',
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }),
-
-                const SizedBox(height: 16),
-
-                // Mostrar gráfica solo si hay datos
-                if (controller.statistics.value != null &&
-                    controller.statistics.value!.days.isNotEmpty)
-                  CustomCard(
-                    color: const Color(0xFFEFF6FF),
+                  return Wrap(
+                    spacing: 8,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: AppColors.graphicBackground,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(Icons.bar_chart,
-                                color: Colors.white, size: 20),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Respuestas en el tiempo',
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
+                      // 1) Guardadas localmente
                       SizedBox(
-                        width: double.infinity,
-                        child: controller.isLoading.value
-                            ? const Center(child: CircularProgressIndicator())
-                            : WeeklyBarChart(values: values, weekDays: labels),
+                        width: cardWidth,
+                        child: _StatCard(
+                          title: 'Guardadas localmente',
+                          icon: Icons.sync_outlined,
+                          value: '$pending',
+                        ),
+                      ),
+
+                      // 2) Encuestas realizadas
+                      SizedBox(
+                        width: cardWidth,
+                        child: _StatCard(
+                          title: 'Encuestas realizadas',
+                          icon: Icons.assignment_outlined,
+                          value: '${data.entries}',
+                        ),
+                      ),
+
+                      // 3) Tasa de finalización
+                      SizedBox(
+                        width: cardWidth,
+                        child: _StatCard(
+                          title: 'Tasa de finalización',
+                          icon: Icons.check_circle_outline,
+                          value: '${data.completedPercent.toStringAsFixed(0)}%',
+                        ),
+                      ),
+
+                      // 4) Duración promedio
+                      SizedBox(
+                        width: cardWidth,
+                        child: _StatCard(
+                          title: 'Duración promedio',
+                          icon: Icons.timer_outlined,
+                          value: controller.formattedDuration,
+                          valueSuffix: 'min',
+                        ),
                       ),
                     ],
+                  );
+                },
+              );
+            }),
+
+            const SizedBox(height: 16),
+
+            // ====== Gráfica ======
+            if (controller.statistics.value != null &&
+                controller.statistics.value!.days.isNotEmpty)
+              CustomCard(
+                color: const Color(0xFFEFF6FF),
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: scheme.secondButtonBackground,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.bar_chart,
+                            color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('Respuestas en el tiempo'),
+                    ],
                   ),
-              ],
-            ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: controller.isLoading.value
+                        ? const Center(child: CircularProgressIndicator())
+                        : WeeklyBarChart(values: values, weekDays: labels),
+                  ),
+                ],
+              ),
           ],
         ),
       );
@@ -135,6 +140,7 @@ class StatisticPage extends GetView<StatisticController> {
   }
 }
 
+// ====== Tarjeta de KPI reutilizable ======
 class _StatCard extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -151,7 +157,6 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomCard(
-      color: const Color(0xFFE9F9F1),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
       children: [
         Row(
@@ -159,10 +164,10 @@ class _StatCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: AppColors.iconsStatistic,
+                color: AppColorScheme.indicator1,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: Colors.white, size: 28),
+              child: Icon(icon, color: Colors.white, size: 24),
             ),
             const SizedBox(width: 8),
             Flexible(
@@ -177,9 +182,8 @@ class _StatCard extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          mainAxisAlignment: MainAxisAlignment.center,
           textBaseline: TextBaseline.alphabetic,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               value,

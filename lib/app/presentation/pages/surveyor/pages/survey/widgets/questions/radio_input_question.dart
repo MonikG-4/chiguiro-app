@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
 import '../custom_input_select.dart';
@@ -74,11 +74,11 @@ class RadioInputQuestion extends StatelessWidget {
                         value: option,
                         groupValue: controller.responses[question.id]?['value'],
                         onChanged: (value) => toggleSelection(option),
-                        activeColor: AppColors.successText,
+                        activeColor: AppColorScheme.primary,
                         fillColor: WidgetStateProperty.resolveWith<Color>(
                           (Set<WidgetState> states) {
                             return isSelected
-                                ? AppColors.successText
+                                ? AppColorScheme.primary
                                 : Colors.grey;
                           },
                         ),

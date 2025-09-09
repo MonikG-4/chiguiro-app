@@ -1,6 +1,7 @@
+// pending_survey_controller.dart
 import 'dart:async';
-
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 
 import '../../../core/error/failures/failure.dart';
 import '../../../core/services/auth_storage_service.dart';
@@ -8,6 +9,7 @@ import '../../../core/services/sync_service.dart';
 import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../domain/repositories/i_pending_survey_repository.dart';
+import '../../data/models/sync_task_model.dart';
 
 class PendingSurveyController extends GetxController {
   final IPendingSurveyRepository repository;
@@ -21,6 +23,9 @@ class PendingSurveyController extends GetxController {
   final isLoadingSurveys = false.obs;
   final isSendingSurveys = false.obs;
 
+  StreamSubscription? _hiveWatchSub;
+  StreamSubscription? _syncFinishSub;
+
   PendingSurveyController(this.repository);
 
   @override
@@ -32,22 +37,28 @@ class PendingSurveyController extends GetxController {
 
     if (idSurveyor.value == 0) {
       final auth = _storageService?.authResponse;
-      if (auth != null) {
-        idSurveyor.value = auth.id;
-      }
+      if (auth != null) idSurveyor.value = auth.id;
     }
 
     fetchSurveys(idSurveyor.value);
+    _hiveWatchSub = Hive.box<SyncTaskModel>('sync_tasks').watch().listen((_) {
+      fetchSurveys(idSurveyor.value);
+    });
 
     MessageHandler.setupSnackbarListener(message);
   }
 
+  @override
+  void onClose() {
+    _hiveWatchSub?.cancel();
+    _syncFinishSub?.cancel();
+    super.onClose();
+  }
+
   Future<void> fetchSurveys(int surveyorId) async {
     isLoadingSurveys.value = true;
-
     try {
       final result = await repository.fetchSurveys(surveyorId);
-
       result.fold((failure) {
         _showMessage('Error', _mapFailureToMessage(failure), 'error');
       }, (data) {
@@ -61,10 +72,19 @@ class PendingSurveyController extends GetxController {
   }
 
   Future<void> saveAllPendingSurveys() async {
+    if (isSendingSurveys.value) return; // guard para evitar dobles toques
     isSendingSurveys.value = true;
-    _syncService?.syncPendingTasks();
-    isSendingSurveys.value = false;
+    try {
+      await _syncService?.syncPendingTasks();
 
+      await fetchSurveys(idSurveyor.value);
+
+      _showMessage('Listo', 'Se enviaron las encuestas pendientes.', 'success');
+    } catch (e) {
+      _showMessage('Error', e.toString().replaceAll("Exception:", ""), 'error');
+    } finally {
+      isSendingSurveys.value = false;
+    }
   }
 
   String _mapFailureToMessage(Failure failure) {

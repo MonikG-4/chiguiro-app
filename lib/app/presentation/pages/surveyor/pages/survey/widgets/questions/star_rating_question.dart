@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
 
@@ -47,7 +47,7 @@ class StarRatingQuestion extends StatelessWidget {
                             constraints: const BoxConstraints(),
                             icon: Icon(
                               index < rating ? Icons.star : Icons.star_border,
-                              color: index < rating ? AppColors.star : Colors.grey,
+                              color: index < rating ? AppColorScheme.primary : Colors.grey,
                               size: iconSize,
                             ),
                             onPressed: () {

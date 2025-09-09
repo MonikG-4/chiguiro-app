@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../core/theme/app_colors_theme.dart';
 
 class WeeklyBarChart extends StatelessWidget {
   final List<double> values;
@@ -14,7 +14,7 @@ class WeeklyBarChart extends StatelessWidget {
     required this.values,
     required this.weekDays,
     this.maxHeight = 150,
-    this.barColor = AppColors.tertiary,
+    this.barColor = AppColorScheme.primary,
     this.spacing = 1,
   });
 
@@ -56,7 +56,7 @@ class WeeklyBarChart extends StatelessWidget {
                     width: barWidth * 0.9,
                     height: height,
                     decoration: BoxDecoration(
-                      color: value > 0 ? AppColors.graphicBackground : AppColors.secondary.withOpacity(0.6),
+                      color: value > 0 ? AppColorScheme.primary : AppColorScheme.primary.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     alignment: Alignment.center,

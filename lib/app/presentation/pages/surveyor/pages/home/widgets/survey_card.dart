@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../domain/entities/survey.dart';
 
 class SurveyCard extends StatelessWidget {
@@ -15,9 +15,10 @@ class SurveyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      color: Colors.white,
+      color: scheme.secondBackground,
       child: InkWell(
         onTap: onTap,
         child: ListTile(
@@ -61,7 +62,7 @@ class SurveyCard extends StatelessWidget {
                 survey.active ? 'En proceso' : 'Finalizada',
                 style: const TextStyle(
                   fontSize: 14,
-                  color: AppColors.secondary,
+                  color: AppColorScheme.primary,
                 ),
               )
             : const SizedBox(

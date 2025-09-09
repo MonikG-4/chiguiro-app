@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../../../../core/services/auth_storage_service.dart';
-import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../../core/theme/app_colors_theme.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -10,99 +10,147 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = Get.find<AuthStorageService>().authResponse!;
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text("Información Personal"),
-        backgroundColor: Colors.transparent,
+        title: const Text(
+          "Información Personal",
+        ),
         elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 40,
-              backgroundColor: Color(0xFF27C3B1),
-              child: Icon(Icons.person, color: Colors.white, size: 48),
+              backgroundColor: scheme.iconBackground, // acento de marca
+              child: const Icon(Icons.person, color: Colors.white, size: 48),
             ),
             const SizedBox(height: 24),
-            _buildTextField(label: 'Nombre', initialValue: user.name),
-            const SizedBox(height: 12),
-            _buildTextField(label: 'Apellido', initialValue: user.surname),
-            const SizedBox(height: 12),
+
             _buildTextField(
-                label: 'Correo', initialValue: user.email),
+              context: context,
+              label: 'Nombre',
+              initialValue: user.name,
+            ),
             const SizedBox(height: 12),
-            _buildPhoneField(user.phone),
+
+            _buildTextField(
+              context: context,
+              label: 'Apellido',
+              initialValue: user.surname,
+            ),
+            const SizedBox(height: 12),
+
+            _buildTextField(
+              context: context,
+              label: 'Correo',
+              initialValue: user.email,
+            ),
+            const SizedBox(height: 12),
+
+            _buildPhoneField(context, user.phone),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTextField(
-      {required String label, required String initialValue}) {
+  // ------------ helpers ------------
+
+  Widget _buildTextField({
+    required BuildContext context,
+    required String label,
+    required String initialValue,
+  }) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
+    final textTheme = Theme.of(context).textTheme;
+
     return TextFormField(
       initialValue: initialValue,
       readOnly: true,
+      style: textTheme.bodyMedium?.copyWith(
+        color: scheme.secondaryText,
+        fontWeight: FontWeight.w500,
+      ),
       decoration: InputDecoration(
         labelText: label,
+        // Dejamos que el Theme maneje borders; solo afinamos colores del label y el fill
+        labelStyle: TextStyle(color: scheme.secondaryText),
         filled: true,
-        fillColor: Colors.white,
-        enabledBorder: _border(),
-        focusedBorder: _border(),
-        labelStyle: const TextStyle(color: Colors.grey),
+        fillColor: scheme.secondBackground, // match con tu paleta (Select)
+        enabledBorder: _border(context),
+        focusedBorder: _focusedBorder(context),
       ),
     );
   }
 
-  Widget _buildPhoneField(String initialValue) {
+  Widget _buildPhoneField(BuildContext context, String initialValue) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
+    final textTheme = Theme.of(context).textTheme;
+
     return TextFormField(
       initialValue: initialValue,
       readOnly: true,
+      style: textTheme.bodyMedium?.copyWith(
+        color: scheme.secondaryText,
+        fontWeight: FontWeight.w500,
+      ),
       decoration: InputDecoration(
         labelText: 'Número Telefónico',
+        labelStyle: TextStyle(color: scheme.secondaryText),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: scheme.secondBackground,
         prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
         prefix: Container(
           margin: const EdgeInsets.only(right: 8),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             border: Border(
-              right: BorderSide(
-                color: Color(0xFFE3EAF3),
-                width: 1.5,
-              ),
+              right: BorderSide(color: scheme.border, width: 1.5),
             ),
           ),
           padding: const EdgeInsets.only(right: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
-                'assets/images/co.png',
-                width: 24,
-                height: 24,
-              ),
+              Image.asset('assets/images/co.png', width: 24, height: 24),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 '+57',
-                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                style: textTheme.bodyMedium?.copyWith(
+                  color: scheme.onFirstBackground,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
         ),
-        enabledBorder: _border(),
-        focusedBorder: _border(),
-        labelStyle: const TextStyle(color: Colors.grey),
+        enabledBorder: _border(context),
+        focusedBorder: _focusedBorder(context),
       ),
     );
   }
 
-  OutlineInputBorder _border() => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.transparent),
-      );
+  OutlineInputBorder _border(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: scheme.border.withOpacity(0.0)), // sin borde visible
+    );
+  }
+
+  OutlineInputBorder _focusedBorder(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(
+        color: isDark ? scheme.iconBackground : AppColorScheme.focusBorder,
+        width: 1.2,
+      ),
+    );
+  }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/app_colors_theme.dart';
+
 class CustomCard extends StatelessWidget {
   final List<Widget> children;
   final Color? color;
@@ -15,7 +17,6 @@ class CustomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: color ?? Colors.white,
       child: Padding(
         padding: padding ?? const EdgeInsets.all(16),
         child: Column(

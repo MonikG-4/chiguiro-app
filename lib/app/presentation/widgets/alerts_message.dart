@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/values/app_colors.dart';
+import '../../../core/theme/app_colors_theme.dart';
 
 class AlertMessage {
   static const Map<String, Map<String, dynamic>> typeAlert = {
     'Text': {
-      'info': AppColors.infoText,
-      'success': AppColors.successText,
-      'error': AppColors.errorText,
-      'warning': AppColors.warningText,
+      'info': AppColorScheme.infoText,
+      'success': AppColorScheme.successText,
+      'error': AppColorScheme.errorText,
+      'warning': AppColorScheme.warningText,
     },
     'Background': {
-      'info': AppColors.infoBackground,
-      'success': AppColors.successBackground,
-      'error': AppColors.errorBackground,
-      'warning': AppColors.warningBackground,
+      'info': AppColorScheme.infoBackground,
+      'success': AppColorScheme.successBackground,
+      'error': AppColorScheme.errorBackground,
+      'warning': AppColorScheme.warningBackground,
     },
     'Icon': {
       'info': Icons.info,

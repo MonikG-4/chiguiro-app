@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
 
@@ -64,12 +64,12 @@ class MatrixQuestionState extends State<MatrixQuestion> {
                             },
                             child: Card(
                               color: isSelected
-                                  ? AppColors.successBackground
+                                  ? AppColorScheme.primary
                                   : const Color(0xFFF8FAFC),
                               shape: RoundedRectangleBorder(
                                 side: BorderSide(
                                   color: isSelected
-                                      ? AppColors.successBorder
+                                      ? AppColorScheme.primary
                                       : Colors.grey[300]!,
                                 ),
                                 borderRadius: BorderRadius.circular(4.0),

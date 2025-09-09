@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../widgets/primary_button.dart';
 import 'widgets/permission_modal.dart';
 
@@ -28,11 +28,10 @@ class PermissionDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(title),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: Text(
+          title,
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -84,7 +83,9 @@ class PermissionDetailPage extends StatelessWidget {
             if (confirmed == true) onOpenSettings();
           },
           isLoading: false,
+          textSize: 14,
           text: 'Actualizar configuración del dispositivo',
+
         ),
       ),
     );

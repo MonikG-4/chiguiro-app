@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../../../../core/theme/app_colors_theme.dart';
+
 class PermissionTile extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -16,6 +18,7 @@ class PermissionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: InkWell(
@@ -24,12 +27,12 @@ class PermissionTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: scheme.secondBackground,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
-              Icon(icon, size: 20, color: Colors.black),
+              Icon(icon, size: 20, color: scheme.secondaryText),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(label, style: const TextStyle(fontSize: 16)),

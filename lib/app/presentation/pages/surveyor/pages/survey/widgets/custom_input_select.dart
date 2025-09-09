@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../core/theme/app_colors_theme.dart';
 
 class CustomInputSelect extends StatelessWidget {
   final bool hasError;
@@ -19,6 +19,7 @@ class CustomInputSelect extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -27,17 +28,17 @@ class CustomInputSelect extends StatelessWidget {
         decoration: BoxDecoration(
           color: (isSelected != null)
               ? isSelected!
-                  ? AppColors.successBackground
+                  ? scheme.selectBackground
                   : Colors.transparent
               : Colors.transparent,
           border: Border.all(
             color: hasError
                 ? Colors.red
                 : hasValue && isSelected == null
-                    ? AppColors.successBorder
+                    ? AppColorScheme.primary
                     : (isSelected ?? false)
-                        ? AppColors.successBorder
-                        : Colors.grey[300]!,
+                        ? AppColorScheme.primary
+                        : scheme.secondaryText,
           ),
           borderRadius: BorderRadius.circular(8.0),
         ),

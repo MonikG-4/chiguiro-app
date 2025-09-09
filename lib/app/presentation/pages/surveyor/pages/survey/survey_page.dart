@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:html/dom.dart' as dom;
 
-import '../../../../../../core/values/app_colors.dart';
+import '../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../widgets/confirmation_dialog.dart';
 import '../../../../widgets/connectivity_banner.dart';
 import '../../../../widgets/primary_button.dart';
@@ -21,6 +21,7 @@ class SurveyPage extends GetView<SurveyController> {
   @override
   Widget build(BuildContext context) {
     _setupPopHandler(context);
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
 
     return Scaffold(
       appBar: AppBar(
@@ -34,9 +35,7 @@ class SurveyPage extends GetView<SurveyController> {
           },
         ),
         title: Obx(() => Text(controller.survey.value?.name ?? 'Encuesta')),
-        backgroundColor: AppColors.background,
       ),
-      backgroundColor: AppColors.background,
       body: Obx(() {
         if (controller.isLoadingQuestion.value) {
           return const Center(child: CircularProgressIndicator());
@@ -102,6 +101,7 @@ class SurveyPage extends GetView<SurveyController> {
   }
 
   Widget _buildQuestionsForm(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return Padding(
       padding: EdgeInsets.only(
         top: (controller.isVoiceRecorder.value || controller.isGeoLocation.value) ? 80.0 : 40.0,
@@ -129,8 +129,12 @@ class SurveyPage extends GetView<SurveyController> {
                   margin: const EdgeInsets.symmetric(vertical: 8.0),
                   padding: const EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
-                    color: AppColors.section,
+                    color: scheme.sectionBg,
                     borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(
+                      color: scheme.sectionBorder,
+                      width: 1.2,
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -225,7 +229,6 @@ class SurveyPage extends GetView<SurveyController> {
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          color: AppColors.background,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

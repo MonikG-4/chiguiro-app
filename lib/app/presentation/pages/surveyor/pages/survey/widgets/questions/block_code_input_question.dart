@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
 import '../custom_input.dart';
@@ -123,12 +123,12 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
                     icon: const Icon(Icons.location_on_outlined),
                     label: const Text('Ubicar'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.successBorder.withOpacity(0.1),
-                      foregroundColor: AppColors.successText,
+                      backgroundColor: AppColorScheme.primary.withOpacity(0.1),
+                      foregroundColor: AppColorScheme.primary,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
-                        side: const BorderSide(color: AppColors.successBorder),
+                        side: const BorderSide(color: AppColorScheme.primary),
                       ),
                     ),
                   ),
@@ -142,12 +142,12 @@ class _BlockCodeInputQuestionState extends State<BlockCodeInputQuestion> {
                     icon: const Icon(Icons.map_outlined),
                     label: const Text('Ver mapa'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.infoBorder.withOpacity(0.1),
-                      foregroundColor: AppColors.infoText,
+                      backgroundColor: AppColorScheme.primary.withOpacity(0.1),
+                      foregroundColor: AppColorScheme.primary,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
-                        side: const BorderSide(color: AppColors.infoBorder),
+                        side: const BorderSide(color: AppColorScheme.primary),
                       ),
                     ),
                   ),

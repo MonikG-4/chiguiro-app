@@ -6,12 +6,14 @@ import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../domain/entities/statistics.dart';
 import '../../domain/repositories/i_statistic_repository.dart';
+import '../../domain/repositories/i_pending_survey_repository.dart';
 
 class StatisticController extends GetxController {
   final IStatisticRepository repository;
+  final IPendingSurveyRepository pendingRepository;
   late final AuthStorageService _storageService;
 
-  StatisticController(this.repository);
+  StatisticController(this.repository, this.pendingRepository);
 
   final isLoading = false.obs;
   final isError = false.obs;
@@ -22,6 +24,7 @@ class StatisticController extends GetxController {
   // Datos para la gráfica
   final values = <double>[].obs;
   final weekDays = <String>[].obs;
+  final pendingCount = 0.obs;
 
   final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
@@ -32,6 +35,7 @@ class StatisticController extends GetxController {
 
     MessageHandler.setupSnackbarListener(message);
     fetchStatistics();
+    fetchPendingCount();
   }
 
   String get formattedDuration {
@@ -85,6 +89,19 @@ class StatisticController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> fetchPendingCount() async {
+    try {
+      final result = await pendingRepository.fetchSurveys(_storageService.authResponse!.id);
+      result.fold(
+            (failure) => pendingCount.value = 0,
+            (data) => pendingCount.value = data.length,
+      );
+    } catch (_) {
+      pendingCount.value = 0;
+    }
+  }
+
 
   String _mapFailureToMessage(Failure failure) {
     switch (failure.runtimeType) {

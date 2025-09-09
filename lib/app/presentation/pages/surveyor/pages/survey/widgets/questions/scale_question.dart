@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
 
@@ -38,13 +38,13 @@ class ScaleQuestion extends StatelessWidget {
 
               return SliderTheme(
                 data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: AppColors.scale,
-                  inactiveTrackColor: AppColors.scale,
-                  thumbColor: AppColors.primaryButton,
-                  overlayColor: AppColors.primaryButton.withOpacity(0.2),
-                  valueIndicatorColor: AppColors.primaryButton,
-                  activeTickMarkColor: AppColors.primaryButton,
-                  inactiveTickMarkColor: AppColors.primaryButton,
+                  activeTrackColor: AppColorScheme.primary,
+                  inactiveTrackColor: AppColorScheme.primary,
+                  thumbColor: AppColorScheme.primary,
+                  overlayColor: AppColorScheme.primary.withOpacity(0.2),
+                  valueIndicatorColor: AppColorScheme.primary,
+                  activeTickMarkColor: AppColorScheme.primary,
+                  inactiveTickMarkColor: AppColorScheme.primary,
                 ),
                 child: Slider(
                   value: rating.toDouble(),

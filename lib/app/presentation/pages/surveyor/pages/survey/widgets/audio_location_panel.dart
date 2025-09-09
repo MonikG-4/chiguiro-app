@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../../core/services/audio_service.dart';
 
-class AudioLocationPanel extends StatefulWidget {
+class AudioLocationPanel extends StatelessWidget {
   final bool showLocation;
   final bool showAudioRecorder;
 
@@ -14,219 +14,211 @@ class AudioLocationPanel extends StatefulWidget {
     required this.showAudioRecorder,
   });
 
-  @override
-  State<AudioLocationPanel> createState() => _AudioLocationPanelState();
-}
-
-class _AudioLocationPanelState extends State<AudioLocationPanel> {
-  bool isRecording = false;
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  String _formatDuration(int seconds) {
-    final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
-    final secs = (seconds % 60).toString().padLeft(2, '0');
-    return "$minutes:$secs";
+  String _fmt(int s) {
+    final m = (s ~/ 60).toString().padLeft(2, '0');
+    final ss = (s % 60).toString().padLeft(2, '0');
+    return '$m:$ss';
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.showLocation && !widget.showAudioRecorder) {
-      return const SizedBox.shrink();
-    }
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
+    if (!showLocation && !showAudioRecorder) return const SizedBox.shrink();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+    // 3 combinaciones posibles:
+    if (showLocation && showAudioRecorder) {
+      // Ubicación compacta + audio expandido
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            const _LocationBadge(expanded: false),
+            const SizedBox(width: 8),
+            Expanded(child: _RecorderPill(scheme: scheme, fmt: _fmt)),
+          ],
+        ),
+      );
+    } else if (showLocation && !showAudioRecorder) {
+      // Solo ubicación -> expandida
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            Expanded(child: _LocationBadge(expanded: true)),
+          ],
+        ),
+      );
+    } else {
+      // Solo audio -> expandido
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            Expanded(child: _RecorderPill(scheme: scheme, fmt: _fmt)),
+          ],
+        ),
+      );
+    }
+  }
+}
+
+class _LocationBadge extends StatelessWidget {
+  final bool expanded; // true = ícono + texto (se expande), false = solo ícono (compacto)
+
+  const _LocationBadge({required this.expanded});
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = AppColorScheme.successBackground.withOpacity(0.15);
+
+    final box = Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: bg,
+        border: Border.all(color: AppColorScheme.successText),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.location_on_outlined,
+            size: 20,
+            color: AppColorScheme.successText,
+          ),
+          if (expanded) ...[
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                "Esta encuesta usa geolocalización",
+                style: TextStyle(
+                  color: AppColorScheme.successText,
+                  fontSize: 13,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+
+    // Si expanded es true, el padre ya envuelve con Expanded. Aquí devolvemos tal cual.
+    // Si es compacta, tampoco necesitamos Expanded aquí.
+    return box;
+  }
+}
+
+class _RecorderPill extends StatelessWidget {
+  final AppColorScheme scheme;
+  final String Function(int) fmt;
+
+  const _RecorderPill({required this.scheme, required this.fmt});
+
+  @override
+  Widget build(BuildContext context) {
+    final audio = Get.find<AudioService>();
+
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: scheme.secondBackground,
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Row(
         children: [
-          if (widget.showLocation)
-            if (widget.showAudioRecorder)
-              Container(
-                margin: const EdgeInsets.only(bottom: 8, right: 8),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: AppColors.successBorder),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.location_on_outlined,
-                  color: AppColors.successBorder,
-                ),
-              )
-            else
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: AppColors.successBorder),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        color: AppColors.successBorder,
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          "Esta encuesta usa geolocalización",
-                          style: TextStyle(color: AppColors.successBorder),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          if (widget.showAudioRecorder)
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: Obx(() {
-                        final audioService = Get.find<AudioService>();
+          // mic en círculo blanco
+          Container(
+            width: 30,
+            height: 30,
+            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+            alignment: Alignment.center,
+            child: Obx(() {
+              return Icon(
+                audio.isRecording.value ? Icons.mic : Icons.mic_none,
+                size: 18,
+                color: audio.isRecording.value ? Colors.red : Colors.grey[500],
+              );
+            }),
+          ),
+          const SizedBox(width: 10),
 
-                        return audioService.isRecording.value
-                            ? const Icon(Icons.mic, color: Colors.red)
-                            : const Icon(Icons.mic_none, color: Colors.grey);
-                      }),
-                    ),
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 32,
-                              color: Colors.red.withOpacity(0.1),
-                              child: Center(
-                                child: Obx(() {
-                                  final audioService = Get.find<AudioService>();
-                                  return CustomPaint(
-                                    size: const Size(100, 32),
-                                    painter: WavePainter(audioService.amplitude.value),
-                                  );
-                                }),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Obx(() {
-                            final audioService = Get.find<AudioService>();
-                            return Text(
-                              _formatDuration(audioService.recordingDuration.value),
-                              style: const TextStyle(fontSize: 16),
-                            );
-                          }),
-                        ],
-                      ),
-                    ),
-                  ],
+          // Onda
+          Expanded(
+            child: SizedBox(
+              height: 26,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Container(
+                  alignment: Alignment.center,
+                  child: Obx(() {
+                    return CustomPaint(
+                      size: const Size(double.infinity as double, 22),
+                      painter: _BarsWavePainter(amplitude: audio.amplitude.value),
+                    );
+                  }),
                 ),
               ),
             ),
+          ),
+          const SizedBox(width: 10),
+
+          // Tiempo
+          Obx(() => Text(
+            fmt(audio.recordingDuration.value),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          )),
         ],
       ),
     );
   }
 }
 
-class AnimatedWave extends StatefulWidget {
-  const AnimatedWave({super.key});
+/// Onda con barras rojas (tipo ecualizador)
+class _BarsWavePainter extends CustomPainter {
+  final double amplitude; // valor 0..1 proveniente del AudioService
 
-  @override
-  AnimatedWaveState createState() => AnimatedWaveState();
-}
-
-class AnimatedWaveState extends State<AnimatedWave>
-    with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _amplitudeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 1),
-      vsync: this,
-    );
-
-    // Creando una animación que va de 0 a 1 para simular el cambio en amplitud
-    _amplitudeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-
-    // Iniciar la animación de amplitud
-    _animationController.repeat(
-        reverse:
-            true); // Repite la animación (puedes cambiar esto según el caso)
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final audioService = Get.find<AudioService>();
-      audioService.amplitude.value = _amplitudeAnimation.value;
-
-      return CustomPaint(
-        size: const Size(100, 32),
-        painter: WavePainter(audioService.amplitude.value),
-      );
-    });
-  }
-}
-
-class WavePainter extends CustomPainter {
-  final double amplitude;
-
-  WavePainter(this.amplitude);
+  _BarsWavePainter({required this.amplitude});
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()
-      ..color = Colors.blue
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
+    const int bars = 24;
+    const double gap = 3;
+    final double w = (size.width - (bars - 1) * gap) / bars;
+    final double mid = size.height / 2;
 
-    Path path = Path();
-    double midY = size.height / 2;
-    path.moveTo(0, midY);
+    final paint = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFFE11D48), Color(0xFFB91C1C)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.fill;
 
-    // Dibujar una onda simple basada en la amplitud
-    for (double x = 0; x < size.width; x++) {
-      double y = midY + amplitude * 20 * (x / size.width);
-      path.lineTo(x, y);
+    for (int i = 0; i < bars; i++) {
+      final t = i / (bars - 1);
+      final base = 0.3 + 0.7 * (0.5 - (t - 0.5).abs() * 1.2);
+      final h = (base * amplitude).clamp(0.08, 1.0) * mid;
+
+      final left = i * (w + gap);
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(left, mid - h, w, 2 * h),
+        const Radius.circular(3),
+      );
+      canvas.drawRRect(rect, paint);
     }
 
-    canvas.drawPath(path, paint);
+    // Línea roja vertical (cursor) opcional
+    final cursorX = size.width * 0.72;
+    final cursorPaint = Paint()
+      ..color = const Color(0xFFE11D48).withOpacity(0.9)
+      ..strokeWidth = 2;
+    canvas.drawLine(Offset(cursorX, 0), Offset(cursorX, size.height), cursorPaint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
-  }
+  bool shouldRepaint(covariant _BarsWavePainter oldDelegate) =>
+      oldDelegate.amplitude != amplitude;
 }

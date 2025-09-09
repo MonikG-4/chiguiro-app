@@ -57,14 +57,14 @@
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
-        <key>UIStatusBarHidden</key>
+		<key>UIStatusBarHidden</key>
 		<false/>
 		<!--  Permiso para redirección -->
 		<key>LSApplicationQueriesSchemes</key>
-        <array>
-          <string>http</string>
-          <string>https</string>
-        </array>
+		<array>
+			<string>http</string>
+			<string>https</string>
+		</array>
 		<!--  Permiso para notificaciones -->
 		<key>NSUserNotificationAlertStyle</key>
 		<string>alert</string>

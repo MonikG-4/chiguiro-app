@@ -14,18 +14,19 @@ import 'app/data/models/survey_question_model.dart';
 import 'app/data/models/survey_responded_model.dart';
 import 'app/data/models/survey_statistics_model.dart';
 import 'app/data/models/surveyor_model.dart';
-import 'app/routes/app_routes.dart';
-import 'core/theme/app_theme.dart';
 import 'app/data/models/survey_entry_model.dart';
 import 'app/data/models/sync_task_model.dart';
+
 import 'app/presentation/controllers/session_controller.dart';
+import 'app/presentation/controllers/theme_controller.dart'; // <— NUEVO
+import 'app/routes/app_routes.dart';
+import 'core/theme/app_theme.dart'; // usa AppTheme.build(...)
 import 'core/values/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await _initHive();
-
   await AppBinding().initAsyncDependencies();
 
   runApp(const MyApp());
@@ -54,6 +55,7 @@ Future<void> _initHive() async {
     Hive.openBox<StatisticsModel>('statisticsBox'),
     Hive.openBox<SurveyorModel>('surveyorBox'),
     Hive.openBox<RevisitModel>('revisitsBox'),
+    Hive.openBox('settings'), // <— para StorageService / tema
   ]);
 }
 
@@ -67,23 +69,31 @@ class MyApp extends StatelessWidget {
         ? Routes.DASHBOARD
         : Routes.LOGIN;
 
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Chiwi Censo',
-      theme: AppTheme.theme,
-      defaultTransition: Transition.fade,
-      initialRoute: initialRoute,
-      getPages: AppPages.routes,
-      locale: const Locale('es', 'ES'),
-      // Español
-      supportedLocales: const [
-        Locale('es', 'ES'), // Español
-      ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+    // Escucha cambios del ThemeController (claro/oscuro/sistema)
+    return GetBuilder<ThemeController>(
+      builder: (themeController) {
+        return GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Chiwi Censo',
+
+          // Tema con ThemeExtension
+          theme: AppTheme.build(Brightness.light),
+          darkTheme: AppTheme.build(Brightness.dark),
+          themeMode: themeController.themeMode.value,
+
+          defaultTransition: Transition.fade,
+          initialRoute: initialRoute,
+          getPages: AppPages.routes,
+
+          locale: const Locale('es', 'ES'),
+          supportedLocales: const [Locale('es', 'ES')],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+        );
+      },
     );
   }
 }

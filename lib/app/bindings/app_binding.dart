@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:hive/hive.dart'; // <-- NUEVO
 
 import '../../core/network/graphql_client_provider.dart';
 import '../../core/services/audio_service.dart';
@@ -11,35 +12,31 @@ import '../../core/services/notification_service.dart';
 import '../../core/services/revisit_storage_service.dart';
 import '../../core/services/sync_service.dart';
 import '../../core/services/sync_task_storage_service.dart';
+
+// NUEVOS
+import '../../core/services/storage_service.dart';
+import '../presentation/controllers/theme_controller.dart';
+
 import '../data/repositories/survey_repository.dart';
 import '../domain/repositories/i_survey_repository.dart';
 import '../presentation/controllers/session_controller.dart';
 
 class AppBinding {
   Future<void> initAsyncDependencies() async {
+    await Get.putAsync<NotificationService>(() async {
+      final service = NotificationService();
+      await service.initialize();
+      return service;
+    }, permanent: true);
 
-    await Get.putAsync<NotificationService>(
-          () async {
-        final service = NotificationService();
-        await service.initialize();
-        return service;
-      },
-      permanent: true,
-    );
-
-    await Get.putAsync<AuthStorageService>(() async => AuthStorageService(),
-        permanent: true);
-    await Get.putAsync<LocationService>(() async => LocationService(),
-        permanent: true);
-    await Get.putAsync<AudioService>(() async => AudioService(),
-        permanent: true);
-    await Get.putAsync<ConnectivityService>(() async => ConnectivityService(),
-        permanent: true);
+    await Get.putAsync<AuthStorageService>(() async => AuthStorageService(), permanent: true);
+    await Get.putAsync<LocationService>(() async => LocationService(), permanent: true);
+    await Get.putAsync<AudioService>(() async => AudioService(), permanent: true);
+    await Get.putAsync<ConnectivityService>(() async => ConnectivityService(), permanent: true);
 
     Get.put(LocalStorageService(), permanent: true);
 
-    await Get.putAsync<SyncTaskStorageService>(() async => SyncTaskStorageService(),
-        permanent: true);
+    await Get.putAsync<SyncTaskStorageService>(() async => SyncTaskStorageService(), permanent: true);
 
     final cacheStorageService = Get.find<AuthStorageService>();
     Get.put(SessionController(cacheStorageService), permanent: true);
@@ -51,5 +48,15 @@ class AppBinding {
       GraphQLService(clientProvider: GraphQLClientProvider()),
       permanent: true,
     );
+
+    await Get.putAsync<StorageService>(() async {
+      final box = Hive.isBoxOpen('settings')
+          ? Hive.box('settings')
+          : await Hive.openBox('settings');
+      return StorageService(box);
+    }, permanent: true);
+
+    // Controller de tema (persistente)
+    Get.put(ThemeController(), permanent: true);
   }
 }

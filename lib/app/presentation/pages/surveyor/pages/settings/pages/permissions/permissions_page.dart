@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../controllers/permissions_controller.dart';
 import '../../../../widgets/body_wrapper.dart';
 import 'widgets/permission_tile.dart';
@@ -11,11 +11,10 @@ class PermissionsPage extends GetView<PermissionsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Permisos del dispositivo'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: const Text(
+          'Permisos del dispositivo',
+        ),
       ),
       body: BodyWrapper(
         child: Column(

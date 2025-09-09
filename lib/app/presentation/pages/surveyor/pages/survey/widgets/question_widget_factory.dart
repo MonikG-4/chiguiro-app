@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../domain/entities/survey_question.dart';
 import '../../../../../controllers/survey_controller.dart';
 import 'questions/address_input_question.dart';
@@ -58,8 +58,8 @@ class _QuestionHeader extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.successBackground,
-                    border: Border.all(color: AppColors.successBorder),
+                    color: AppColorScheme.primary,
+                    border: Border.all(color: AppColorScheme.primary),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Row(
@@ -67,12 +67,12 @@ class _QuestionHeader extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Icon(Icons.location_on,
-                          size: 16, color: AppColors.successText),
+                          size: 16, color: AppColorScheme.primary),
                       SizedBox(width: 2),
                       Text(
                         'Ubicar',
                         style: TextStyle(
-                          color: AppColors.successText,
+                          color: AppColorScheme.primary,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                         ),
@@ -97,7 +97,7 @@ class _QuestionHeader extends StatelessWidget {
               TextSpan(
                 text: 'P${question.sort} ',
                 style: const TextStyle(
-                    fontWeight: FontWeight.w600, color: AppColors.tertiary),
+                    fontWeight: FontWeight.w600, color: AppColorScheme.primary),
               ),
               TextSpan(
                 text: question.question,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
 import '../custom_input.dart';
@@ -200,8 +200,8 @@ class _AddressInputQuestionState extends State<AddressInputQuestion> {
               padding: const EdgeInsets.all(12),
               margin: const EdgeInsets.only(top: 8),
               decoration: BoxDecoration(
-                color: AppColors.successBorder.withOpacity(0.1),
-                border: Border.all(color: AppColors.successBorder),
+                color: AppColorScheme.primary.withOpacity(0.1),
+                border: Border.all(color: AppColorScheme.primary),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(

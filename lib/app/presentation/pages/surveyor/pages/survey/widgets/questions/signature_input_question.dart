@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:signature/signature.dart';
 
-import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
 
@@ -23,29 +23,40 @@ class SignatureInputQuestion extends StatefulWidget {
 class _SignatureInputQuestionState extends State<SignatureInputQuestion> {
   final RxBool isLocked = false.obs;
 
-  final SignatureController _signatureController = SignatureController(
-    penStrokeWidth: 3,
-    penColor: Colors.black,
-  );
+  SignatureController? _controller;
+  Brightness? _lastBrightness;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _ensureControllerForTheme();
+  }
 
-    // Escucha cada vez que termina un trazo
-    _signatureController.onDrawEnd = () async {
-      if (!_signatureController.isEmpty && !isLocked.value) {
-        await widget.controller.saveSignature(
-          widget.question,
-          _signatureController,
-        );
-        isLocked.value = true;
-      }
-    };
+  void _ensureControllerForTheme() {
+    final brightness = Theme.of(context).brightness;
+
+    if (_controller == null || _lastBrightness != brightness) {
+      final oldPoints = _controller?.points; // conserva lo dibujado
+      _controller?.dispose();
+
+      _controller = SignatureController(
+        points: oldPoints,
+        penStrokeWidth: 3,
+        penColor: brightness == Brightness.dark ? Colors.white : Colors.black,
+      )..onDrawEnd = () async {
+        if (!_controller!.isEmpty && !isLocked.value) {
+          await widget.controller.saveSignature(widget.question, _controller!);
+          isLocked.value = true;
+        }
+      };
+
+      _lastBrightness = brightness;
+      setState(() {}); // repintar con el nuevo controller
+    }
   }
 
   void _clearSignature() {
-    _signatureController.clear();
+    _controller?.clear();
     isLocked.value = false;
     widget.controller.responses.remove(widget.question.id);
     widget.controller.responses.refresh();
@@ -53,17 +64,16 @@ class _SignatureInputQuestionState extends State<SignatureInputQuestion> {
 
   @override
   void dispose() {
-    _signatureController.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return Obx(() {
       final hasSignature =
       widget.controller.responses.containsKey(widget.question.id);
-      final borderColor =
-      hasSignature ? AppColors.successBorder : AppColors.inputs;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,15 +83,18 @@ class _SignatureInputQuestionState extends State<SignatureInputQuestion> {
               Container(
                 height: 150,
                 decoration: BoxDecoration(
-                  border: Border.all(color: borderColor, width: 1.5),
-                  borderRadius: BorderRadius.circular(4),
-                  color: Colors.white,
+                  border: Border.all(
+                    color: hasSignature ? scheme.iconBackground : scheme.border,
+                    width: 1.5,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                  color: scheme.secondBackground,
                 ),
                 child: AbsorbPointer(
                   absorbing: isLocked.value,
                   child: Signature(
-                    controller: _signatureController,
-                    backgroundColor: AppColors.background,
+                    controller: _controller!,
+                    backgroundColor: scheme.secondBackground,
                   ),
                 ),
               ),
@@ -92,7 +105,7 @@ class _SignatureInputQuestionState extends State<SignatureInputQuestion> {
                   child: IconButton(
                     onPressed: _clearSignature,
                     icon: const Icon(Icons.clear, size: 20),
-                    color: Colors.grey[700],
+                    color: Colors.grey[600],
                     tooltip: 'Limpiar firma',
                   ),
                 ),

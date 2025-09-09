@@ -149,9 +149,9 @@ flutter_launcher_icons:
 # To add splash screens to your application, add a splash_screen section, like this:
 # command:  flutter pub run flutter_native_splash:create
 flutter_native_splash:
-  color: "#005C53"
+  color: "#006FD1"
   image: assets/images/splash.png
-  color_dark: "#005C53"
+  color_dark: "#0041A8"
   image_dark: assets/images/splash.png
 
   android_gravity: center
@@ -160,7 +160,7 @@ flutter_native_splash:
   android_12:
     image: assets/images/splash.png
     image_dark: assets/images/splash.png
-    icon_background_color: "#005C53"
-    icon_background_color_dark: "#005C53"
+    icon_background_color: "#006FD1"
+    icon_background_color_dark: "#0041A8"
 
   web: false

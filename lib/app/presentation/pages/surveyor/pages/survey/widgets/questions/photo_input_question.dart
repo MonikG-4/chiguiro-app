@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
-import 'package:chiguiro_front_app/core/values/app_colors.dart';
+import 'package:chiguiro_front_app/core/theme/app_colors_theme.dart';
 
 class PhotoInputQuestion extends StatefulWidget {
   final SurveyQuestion question;
@@ -87,7 +87,7 @@ class PhotoInputQuestionState extends State<PhotoInputQuestion> {
         height: 150,
         decoration: BoxDecoration(
           color: Colors.grey[100],
-          border: Border.all(color: state ? AppColors.errorBorder : Colors.grey, style: BorderStyle.solid),
+          border: Border.all(color: state ? AppColorScheme.primary : Colors.grey, style: BorderStyle.solid),
           borderRadius: BorderRadius.circular(10),
         ),
         child: const Column(
@@ -113,7 +113,7 @@ class PhotoInputQuestionState extends State<PhotoInputQuestion> {
               width: 150,
               height: 150,
               decoration: BoxDecoration(
-                border: Border.all(color: AppColors.successBorder),
+                border: Border.all(color: AppColorScheme.primary),
                 borderRadius: BorderRadius.circular(10),
                 image: DecorationImage(
                   image: FileImage(file),

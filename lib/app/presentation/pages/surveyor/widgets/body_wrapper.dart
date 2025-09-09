@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/values/app_colors.dart';
+import '../../../../../core/theme/app_colors_theme.dart';
 
 class BodyWrapper extends StatelessWidget {
   final Widget child;
@@ -36,7 +36,7 @@ class BodyWrapper extends StatelessWidget {
         ),
       ],
     );
-
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return Stack(
       children: [
         Positioned.fill(
@@ -54,8 +54,8 @@ class BodyWrapper extends StatelessWidget {
             bottom: 0,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: const BoxDecoration(
-                color: AppColors.background,
+              decoration: BoxDecoration(
+                color: scheme.secondaryText,
               ),
               child: bottomButton!,
             ),

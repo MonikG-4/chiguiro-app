@@ -1,4 +1,4 @@
-import 'package:chiguiro_front_app/core/values/app_colors.dart';
+import 'package:chiguiro_front_app/core/theme/app_colors_theme.dart';
 import 'package:flutter/material.dart';
 
 class CustomInputField<T> extends StatelessWidget {
@@ -31,12 +31,13 @@ class CustomInputField<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(color: AppColors.secondary),
+          style: TextStyle(color: scheme.secondaryText),
           textAlign: TextAlign.left,
         ),
         const SizedBox(height: 8),

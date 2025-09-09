@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../core/theme/app_colors_theme.dart';
 
 enum InputValueType { text, integer, decimal }
 
@@ -30,12 +30,12 @@ class CustomInput extends StatelessWidget {
       decoration: InputDecoration(
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(
-            color: controller.text.isNotEmpty ? AppColors.successBorder : AppColors.inputs,
+            color: controller.text.isNotEmpty ? AppColorScheme.primary : AppColorScheme.primary,
           ),
           borderRadius: BorderRadius.circular(8.0),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: AppColors.successBorder),
+          borderSide: const BorderSide(color: AppColorScheme.primary),
           borderRadius: BorderRadius.circular(8.0),
         ),
         hintText: hintText ?? _getDefaultHint(),

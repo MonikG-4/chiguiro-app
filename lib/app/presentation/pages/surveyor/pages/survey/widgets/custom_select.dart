@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../../core/theme/app_colors_theme.dart';
 import 'custom_input_select.dart';
 
 class CustomSelect extends StatelessWidget {
@@ -64,6 +65,7 @@ class CustomSelect extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 80),
       child: CustomInputSelect(
@@ -81,7 +83,7 @@ class CustomSelect extends StatelessWidget {
               child: Text(
                 value ?? label,
                 style: TextStyle(
-                  color: value != null ? Colors.black : Colors.grey,
+                  color: value != null ? scheme.onFirstBackground : Colors.grey,
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
@@ -146,7 +148,7 @@ class _CustomPopupMenuRoute<T> extends PopupRoute<T> {
                 onTap: () => Navigator.of(context).pop(item),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  color: index == selectedIndex ? Colors.grey[200] : null,
+                  color: index == selectedIndex ? AppColorScheme.primary : null,
                   child: Text(
                     item,
                     style: TextStyle(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/services/connectivity_service.dart';
-import '../../../core/values/app_colors.dart';
+import '../../../core/theme/app_colors_theme.dart';
 
 class ConnectivityBanner extends StatelessWidget {
   final ConnectivityService _connectivityService =
@@ -18,18 +18,18 @@ class ConnectivityBanner extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           margin: const EdgeInsets.only(bottom: 8.0),
           decoration: BoxDecoration(
-            color: AppColors.withOutWifiBackground,
+            color: AppColorScheme.errorBackground,
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.wifi_off, color: AppColors.withOutWifiText),
+              Icon(Icons.wifi_off, color: AppColorScheme.errorText),
               SizedBox(width: 8),
               Text(
                 'Sin conexión a internet',
                 style:
-                TextStyle(color: AppColors.withOutWifiText,
+                TextStyle(color: AppColorScheme.errorText,
                     fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),

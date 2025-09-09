@@ -6,7 +6,7 @@ class DownloadSplash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF00695C), // color de fondo
+      backgroundColor: const Color(0xFF006FD1), // color de fondo
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../../../../core/values/app_colors.dart';
+import '../../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../../domain/entities/survey_question.dart';
 import '../../../../../../controllers/survey_controller.dart';
 import '../custom_input_select.dart';
@@ -85,16 +85,16 @@ class CheckInputQuestion extends StatelessWidget {
                     Checkbox(
                       value: isSelected,
                       onChanged: (_) => toggleSelection(),
-                      activeColor: AppColors.successText,
+                      activeColor: AppColorScheme.primary,
                       fillColor: WidgetStateProperty.resolveWith<Color>(
                             (Set<WidgetState> states) {
-                          return isSelected ? AppColors.successText : Colors.transparent;
+                          return isSelected ? AppColorScheme.primary : Colors.transparent;
                         },
                       ),
                       side: WidgetStateBorderSide.resolveWith(
                             (Set<WidgetState> states) {
                           return BorderSide(
-                            color: isSelected ? AppColors.successText : Colors.grey,
+                            color: isSelected ? AppColorScheme.primary : Colors.grey,
                           );
                         },
                       ),

@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../../../../../core/theme/app_colors_theme.dart';
+
 class PermissionModal extends StatelessWidget {
   const PermissionModal({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 30),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: scheme.firstBackground,
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -31,7 +35,7 @@ class PermissionModal extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () => Get.back(result: true),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF189F8E),
+                    backgroundColor: AppColorScheme.primary,
                     minimumSize: const Size.fromHeight(48),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),
@@ -44,7 +48,7 @@ class PermissionModal extends StatelessWidget {
                   onPressed: () => Get.back(result: false),
                   child: const Text(
                     'Ahora no',
-                    style: TextStyle(color: Colors.black87),
+                    style: TextStyle(color: AppColorScheme.primary),
                   ),
                 ),
               ],
