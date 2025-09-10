@@ -72,7 +72,7 @@ class MyApp extends StatelessWidget {
       builder: (themeController) {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Chiwi Censo',
+          title: 'Chiwi',
 
           theme: AppTheme.build(Brightness.light),
           darkTheme: AppTheme.build(Brightness.dark),
