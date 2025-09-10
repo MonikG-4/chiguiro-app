@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class StorageService {
-  final Box _box;
+  final Box _box = Hive.box('settings');
 
-  StorageService(this._box);
+  StorageService();
 
   T get<T>(String key, {T? defaultValue}) {
     return _box.get(key, defaultValue: defaultValue) as T;
@@ -28,5 +30,9 @@ class StorageService {
 
   bool containsKey(String key) {
     return _box.containsKey(key);
+  }
+
+  ValueListenable<Box> listenable({List<String>? keys}) {
+    return _box.listenable(keys: keys);
   }
 }

@@ -1,5 +1,5 @@
 # Define la versión mínima de iOS (mínimo 12.0 para compatibilidad con Firebase)
-platform :ios, '12.0'
+platform :ios, '13.0'
 
 # Desactiva las estadísticas de CocoaPods para mejorar la velocidad de compilación
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -30,13 +30,15 @@ flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
-  use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
   pod 'Firebase/Analytics'
   pod 'Firebase/Messaging'
 
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
 end
 
 post_install do |installer|

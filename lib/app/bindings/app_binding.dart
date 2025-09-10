@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:hive/hive.dart'; // <-- NUEVO
 
 import '../../core/network/graphql_client_provider.dart';
 import '../../core/services/audio_service.dart';
@@ -13,7 +12,6 @@ import '../../core/services/revisit_storage_service.dart';
 import '../../core/services/sync_service.dart';
 import '../../core/services/sync_task_storage_service.dart';
 
-// NUEVOS
 import '../../core/services/storage_service.dart';
 import '../presentation/controllers/theme_controller.dart';
 
@@ -23,9 +21,11 @@ import '../presentation/controllers/session_controller.dart';
 
 class AppBinding {
   Future<void> initAsyncDependencies() async {
+    Get.put(StorageService(), permanent: true);
+
     await Get.putAsync<NotificationService>(() async {
-      final service = NotificationService();
-      await service.initialize();
+      final service = NotificationService(Get.find());
+      await service.init();
       return service;
     }, permanent: true);
 
@@ -49,14 +49,6 @@ class AppBinding {
       permanent: true,
     );
 
-    await Get.putAsync<StorageService>(() async {
-      final box = Hive.isBoxOpen('settings')
-          ? Hive.box('settings')
-          : await Hive.openBox('settings');
-      return StorageService(box);
-    }, permanent: true);
-
-    // Controller de tema (persistente)
     Get.put(ThemeController(), permanent: true);
   }
 }

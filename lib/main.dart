@@ -55,11 +55,10 @@ Future<void> _initHive() async {
     Hive.openBox<StatisticsModel>('statisticsBox'),
     Hive.openBox<SurveyorModel>('surveyorBox'),
     Hive.openBox<RevisitModel>('revisitsBox'),
-    Hive.openBox('settings'), // <— para StorageService / tema
+    Hive.openBox('settings'),
   ]);
 }
 
-/// **Clase principal de la app**
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -69,14 +68,12 @@ class MyApp extends StatelessWidget {
         ? Routes.DASHBOARD
         : Routes.LOGIN;
 
-    // Escucha cambios del ThemeController (claro/oscuro/sistema)
     return GetBuilder<ThemeController>(
       builder: (themeController) {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Chiwi Censo',
 
-          // Tema con ThemeExtension
           theme: AppTheme.build(Brightness.light),
           darkTheme: AppTheme.build(Brightness.dark),
           themeMode: themeController.themeMode.value,

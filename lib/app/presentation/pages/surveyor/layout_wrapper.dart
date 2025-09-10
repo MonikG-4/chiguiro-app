@@ -101,7 +101,6 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
     final scheme = Theme.of(context).extension<AppColorScheme>()!;
     final user = Get.find<AuthStorageService>().authResponse!;
 
@@ -114,10 +113,7 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           Scaffold(
             backgroundColor: scheme.firstBackground,
-            appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(110),
-              child: _buildAppBar(user, isIOS, scheme),
-            ),
+            appBar: _buildAppBar(user, scheme),
             body: Obx(() => pages[selectedIndex.value] ??
                 const Center(child: Text('No page found'))),
             bottomNavigationBar: SizedBox(
@@ -188,33 +184,28 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildAppBar(dynamic user, bool isIOS, AppColorScheme scheme) {
-    final top = MediaQuery.of(context).padding.top;
-
-    return Container(
-      padding: EdgeInsets.only(
-        top: top + (isIOS ? 6 : 10),
-        right: 16,
-        left: 16,
-        bottom: 12,
-      ),
-      decoration: const BoxDecoration(
-        gradient: AppColorScheme.headerGradient, // gradiente de marca
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(0)),
-      ),
-      child: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        toolbarHeight: isIOS ? 50 : kToolbarHeight,
-        centerTitle: false,
-        titleSpacing: 0,
-        title: ProfileHeader(
-          name: '${user.name} ${user.surname}',
-          role: 'Encuestador',
-          avatar: const AssetImage('assets/images/icons/user.png'),
+  PreferredSizeWidget _buildAppBar(dynamic user, AppColorScheme scheme) {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(110),
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColorScheme.headerGradient,
+        ),
+        child: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          centerTitle: false,
+          titleSpacing: 16,
+          toolbarHeight: 110,
+          title: ProfileHeader(
+            name: '${user.name} ${user.surname}',
+            role: 'Encuestador',
+            avatar: const AssetImage('assets/images/icons/user.png'),
+          ),
         ),
       ),
     );
   }
+
 }
