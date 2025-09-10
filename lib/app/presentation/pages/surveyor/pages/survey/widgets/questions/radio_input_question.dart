@@ -18,6 +18,7 @@ class RadioInputQuestion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return FormField(
       validator: controller.validatorMandatory(question),
       builder: (FormFieldState<String> state) {
@@ -61,7 +62,7 @@ class RadioInputQuestion extends StatelessWidget {
                           child: Text(
                             option.toString(),
                             style: TextStyle(
-                              color: isSelected ? Colors.black : Colors.grey,
+                              color: isSelected ? scheme.onFirstBackground : scheme.secondaryText,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),

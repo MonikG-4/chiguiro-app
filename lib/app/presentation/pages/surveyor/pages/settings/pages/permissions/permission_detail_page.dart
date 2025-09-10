@@ -43,17 +43,14 @@ class PermissionDetailPage extends StatelessWidget {
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 12),
-
             _buildOption(
               title: isGranted ? allowedTitle : deniedTitle,
               description: isGranted ? allowedDescription : deniedDescription,
               selected: true,
             ),
-
             const SizedBox(height: 24),
             const Text('Otra opción', style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 12),
-
             _buildOption(
               title: isGranted ? deniedTitle : allowedTitle,
               description: isGranted ? deniedDescription : allowedDescription,
@@ -62,7 +59,7 @@ class PermissionDetailPage extends StatelessWidget {
             const SizedBox(height: 12),
             const Text(
               'Para actualizar los permisos, '
-                  've a la configuración del dispositivo.',
+              've a la configuración del dispositivo.',
               style: TextStyle(color: Colors.grey),
             ),
           ],
@@ -70,22 +67,24 @@ class PermissionDetailPage extends StatelessWidget {
       ),
       bottomNavigationBar: SafeArea(
         minimum: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewPadding.bottom + 8,
-          left: 8,
-          right: 8,
-          top: 4,
+          bottom: MediaQuery.of(context).viewPadding.bottom +
+              24,
+          left: 16,
+          right: 16,
         ),
-        child: PrimaryButton(
-          onPressed: () async {
-            final confirmed = await Get.dialog<bool>(
-              const PermissionModal(),
-            );
-            if (confirmed == true) onOpenSettings();
-          },
-          isLoading: false,
-          textSize: 14,
-          text: 'Actualizar configuración del dispositivo',
-
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8), // extra opcional
+          child: PrimaryButton(
+            onPressed: () async {
+              final confirmed = await Get.dialog<bool>(
+                const PermissionModal(),
+              );
+              if (confirmed == true) onOpenSettings();
+            },
+            isLoading: false,
+            textSize: 14,
+            text: 'Abrir configuración',
+          ),
         ),
       ),
     );

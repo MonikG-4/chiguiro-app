@@ -45,6 +45,7 @@ class _QuestionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -58,7 +59,7 @@ class _QuestionHeader extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColorScheme.primary,
+                    color: scheme.selectBackground,
                     border: Border.all(color: AppColorScheme.primary),
                     borderRadius: BorderRadius.circular(8),
                   ),

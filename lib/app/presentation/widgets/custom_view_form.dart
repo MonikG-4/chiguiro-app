@@ -36,7 +36,7 @@ class CustomViewForm extends StatelessWidget {
                 child: SafeArea(
                   child: Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(32.0),
+                      padding: const EdgeInsets.all(24.0),
                       child: Form(
                         key: formKey,
                         child: Column(
@@ -50,13 +50,13 @@ class CustomViewForm extends StatelessWidget {
                               Text(
                                 subtitle!,
                                 style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 15.3,
                                   fontWeight: FontWeight.w400,
                                 ),
                                 textAlign: TextAlign.left,
                               ),
                             ],
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 24),
                             form,
                             if (textButton != null) ...[textButton!],
                             if (buttonText != null) ...[buttonText!],

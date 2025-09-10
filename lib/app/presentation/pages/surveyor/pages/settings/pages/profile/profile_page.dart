@@ -25,8 +25,8 @@ class ProfilePage extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 40,
-              backgroundColor: scheme.iconBackground, // acento de marca
-              child: const Icon(Icons.person, color: Colors.white, size: 48),
+              backgroundColor: scheme.secondaryText,
+              backgroundImage: const AssetImage('assets/images/icons/user.png'),
             ),
             const SizedBox(height: 24),
 
@@ -58,7 +58,6 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ------------ helpers ------------
 
   Widget _buildTextField({
     required BuildContext context,
@@ -77,10 +76,9 @@ class ProfilePage extends StatelessWidget {
       ),
       decoration: InputDecoration(
         labelText: label,
-        // Dejamos que el Theme maneje borders; solo afinamos colores del label y el fill
         labelStyle: TextStyle(color: scheme.secondaryText),
         filled: true,
-        fillColor: scheme.secondBackground, // match con tu paleta (Select)
+        fillColor: scheme.secondBackground,
         enabledBorder: _border(context),
         focusedBorder: _focusedBorder(context),
       ),
@@ -138,7 +136,7 @@ class ProfilePage extends StatelessWidget {
     final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: scheme.border.withOpacity(0.0)), // sin borde visible
+      borderSide: BorderSide(color: scheme.border.withOpacity(0.0)),
     );
   }
 

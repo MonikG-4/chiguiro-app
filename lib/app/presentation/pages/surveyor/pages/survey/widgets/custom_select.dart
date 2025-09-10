@@ -83,10 +83,10 @@ class CustomSelect extends StatelessWidget {
               child: Text(
                 value ?? label,
                 style: TextStyle(
-                  color: value != null ? scheme.onFirstBackground : Colors.grey,
+                  color: value != null ? scheme.onFirstBackground : scheme.border,
                 ),
                 overflow: TextOverflow.ellipsis,
-                maxLines: 2,
+                maxLines: 1,
               ),
             ),
           ),
@@ -128,6 +128,7 @@ class _CustomPopupMenuRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return CustomSingleChildLayout(
       delegate: _PopupMenuRouteLayout(position, showAbove),
       child: Material(
@@ -148,11 +149,16 @@ class _CustomPopupMenuRoute<T> extends PopupRoute<T> {
                 onTap: () => Navigator.of(context).pop(item),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  color: index == selectedIndex ? AppColorScheme.primary : null,
+                  color: index == selectedIndex ? AppColorScheme.primary : scheme.secondBackground,
                   child: Text(
                     item,
                     style: TextStyle(
-                      fontWeight: index == selectedIndex ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: index == selectedIndex
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: index == selectedIndex
+                          ? Colors.white
+                          : scheme.onFirstBackground,
                     ),
                   ),
                 ),

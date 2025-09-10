@@ -9,6 +9,7 @@ class Survey {
   final bool geoLocation;
   final bool voiceRecorder;
   final List<Sections> sections;
+  final String? imageUrl;
 
   Survey({
     required this.id,
@@ -18,7 +19,8 @@ class Survey {
     required this.entriesCount,
     required this.geoLocation,
     required this.voiceRecorder,
-    required this.sections
+    required this.sections,
+    required this.imageUrl
   });
 
   @override

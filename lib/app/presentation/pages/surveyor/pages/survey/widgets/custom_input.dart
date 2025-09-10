@@ -23,14 +23,16 @@ class CustomInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return TextFormField(
       controller: controller,
       keyboardType: _getKeyboardType(),
       inputFormatters: _getInputFormatters(),
       decoration: InputDecoration(
+        fillColor: scheme.firstBackground,
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(
-            color: controller.text.isNotEmpty ? AppColorScheme.primary : AppColorScheme.primary,
+            color: controller.text.isNotEmpty ? AppColorScheme.primary : scheme.border,
           ),
           borderRadius: BorderRadius.circular(8.0),
         ),

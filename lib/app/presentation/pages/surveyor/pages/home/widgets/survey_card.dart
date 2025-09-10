@@ -32,8 +32,17 @@ class SurveyCard extends StatelessWidget {
   }
 
   Widget _buildLeadingIcon() {
-    return Image.asset(
-      'assets/images/min-deporte.png',
+    return (survey.imageUrl != null && survey.imageUrl != '') ? ClipRRect(
+      borderRadius:  BorderRadius.circular(10),
+      child: Image.network(
+        survey.imageUrl!,
+        width: 60,
+        height: 60,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Icon(Icons.dashboard_sharp, size: 40),
+      ),
+    ) :  Image.asset(
+      'assets/images/icons/Encuesta2.png',
       width: 60,
       height: 60,
       errorBuilder: (_, __, ___) => const Icon(

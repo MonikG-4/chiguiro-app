@@ -27,7 +27,7 @@ class ChangePasswordPage extends GetView<HomeController> {
               Text(
                 'Nueva contraseña',
                 style: TextStyle(
-                  fontSize: 33,
+                  fontSize: 30,
                   fontWeight: FontWeight.w800,
                 ),
                 textAlign: TextAlign.left,

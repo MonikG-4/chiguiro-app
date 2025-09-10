@@ -30,6 +30,9 @@ class SurveyModel extends HiveObject {
   @HiveField(7)
   final List<SectionsModel> sections;
 
+  @HiveField(8)
+  final String? imageUrl;
+
   SurveyModel({
     required this.id,
     required this.name,
@@ -38,7 +41,8 @@ class SurveyModel extends HiveObject {
     required this.entriesCount,
     required this.geoLocation,
     required this.voiceRecorder,
-    required this.sections
+    required this.sections,
+    required this.imageUrl,
   });
 
   factory SurveyModel.fromJson(Map<String, dynamic> json) {
@@ -51,7 +55,7 @@ class SurveyModel extends HiveObject {
       geoLocation: json['geoLocation'] ?? false,
       voiceRecorder: json['voiceRecorder'] ?? false,
       sections: json['sections'] != null ? List<SectionsModel>.from(json['sections'].map((x) => SectionsModel.fromJson(x))) : [],
-
+      imageUrl: json['imageUrl'] ?? '',
     );
   }
 
@@ -66,6 +70,7 @@ class SurveyModel extends HiveObject {
       geoLocation: survey.geoLocation,
       voiceRecorder: survey.voiceRecorder,
       sections: survey.sections.map((s) => SectionsModel.fromEntity(s)).toList(),
+      imageUrl: survey.imageUrl,
     );
   }
 
@@ -79,6 +84,7 @@ class SurveyModel extends HiveObject {
       geoLocation: geoLocation,
       voiceRecorder: voiceRecorder,
       sections: sections.map((s) => s.toEntity()).toList(),
+      imageUrl: imageUrl,
     );
   }
 }

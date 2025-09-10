@@ -93,7 +93,6 @@ class _DashboardPageState extends State<DashboardPage> {
         break;
     }
 
-    // Carga dependencias del nuevo índice
     bindings[index]?.dependencies();
 
     selectedIndex.value = index;
@@ -106,7 +105,6 @@ class _DashboardPageState extends State<DashboardPage> {
     final scheme = Theme.of(context).extension<AppColorScheme>()!;
     final user = Get.find<AuthStorageService>().authResponse!;
 
-    // Importante: solo buscamos HomeController si está registrado
     final HomeController? homeCtrl =
     Get.isRegistered<HomeController>() ? Get.find<HomeController>() : null;
 
@@ -132,7 +130,6 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
 
-          // Splash de descarga (solo si el HomeController existe)
           if (homeCtrl != null)
             Obx(() {
               if (homeCtrl.isDownloadingSurveys.value &&
@@ -145,8 +142,6 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-
-  // ---------------- UI helpers ----------------
 
   Widget _buildBottomNavBar(AppColorScheme scheme) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -180,7 +175,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   Container(
                     height: 2,
                     width: 64,
-                    color: scheme.iconBackground, // rayita de selección
+                    color: scheme.iconBackground,
                   ),
                 const SizedBox(height: 6),
                 Icon(item['icon'] as IconData, size: 28),
@@ -217,6 +212,7 @@ class _DashboardPageState extends State<DashboardPage> {
         title: ProfileHeader(
           name: '${user.name} ${user.surname}',
           role: 'Encuestador',
+          avatar: const AssetImage('assets/images/icons/user.png'),
         ),
       ),
     );

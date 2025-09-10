@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../../../domain/entities/survey_responded.dart';
 
 class ResponseSurveyList extends StatelessWidget {
@@ -23,6 +24,7 @@ class ResponseSurveyList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return Obx(() {
       if (isLoadingAnswerSurvey.value) {
         return const Center(
@@ -33,8 +35,8 @@ class ResponseSurveyList extends StatelessWidget {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildHeader(),
-          const Divider(height: 2, color: Color(0xFFE3EAF3)),
+          _buildHeader(scheme),
+          Divider(height: 2, color: scheme.border),
           ListView.separated(
             physics: physics ?? const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
@@ -51,7 +53,7 @@ class ResponseSurveyList extends StatelessWidget {
   }
 
 
-  Widget _buildHeader() {
+  Widget _buildHeader(AppColorScheme scheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -62,9 +64,9 @@ class ResponseSurveyList extends StatelessWidget {
             flex: isEstado ? 2 : 3,
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: scheme.secondaryText,
                   fontSize: 14),
               textAlign: TextAlign.center,
             ),

@@ -9,6 +9,7 @@ class SurveyQuery {
           entriesCount
           geoLocation
           voiceRecorder
+          imageUrl
           sections{
             id
             name

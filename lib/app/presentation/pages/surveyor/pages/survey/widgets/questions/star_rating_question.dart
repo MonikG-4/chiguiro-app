@@ -20,6 +20,8 @@ class StarRatingQuestion extends StatelessWidget {
     final int maxStars = int.tryParse(question.anchorMax ?? '5') ?? 5;
     final int stars = maxStars - minStars + 1;
     double iconSize = (32 + (stars - 5) * (46 - 32) / (10 - 5)).clamp(32.0, 46.0);
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
+
 
     return FormField(
       validator: controller.validatorMandatory(question),
@@ -47,7 +49,7 @@ class StarRatingQuestion extends StatelessWidget {
                             constraints: const BoxConstraints(),
                             icon: Icon(
                               index < rating ? Icons.star : Icons.star_border,
-                              color: index < rating ? AppColorScheme.primary : Colors.grey,
+                              color: index < rating ? AppColorScheme.primary : scheme.border,
                               size: iconSize,
                             ),
                             onPressed: () {

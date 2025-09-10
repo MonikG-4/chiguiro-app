@@ -21,7 +21,6 @@ class SurveyPage extends GetView<SurveyController> {
   @override
   Widget build(BuildContext context) {
     _setupPopHandler(context);
-    final scheme = Theme.of(context).extension<AppColorScheme>()!;
 
     return Scaffold(
       appBar: AppBar(
@@ -62,7 +61,7 @@ class SurveyPage extends GetView<SurveyController> {
       }),
       bottomNavigationBar: Obx(() {
         return SafeArea(
-          minimum: const EdgeInsets.fromLTRB(8, 8, 8, 16),
+          minimum: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             child: PrimaryButton(
               onPressed: controller.isLoadingSendSurvey.value
                   ? null

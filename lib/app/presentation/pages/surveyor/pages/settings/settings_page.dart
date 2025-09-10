@@ -4,6 +4,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../../../core/theme/app_colors_theme.dart';
 import '../../../../controllers/settings_controller.dart';
+import '../../../../widgets/confirmation_dialog.dart';
 import '../../widgets/body_wrapper.dart';
 import '../../widgets/custom_card.dart';
 
@@ -42,7 +43,18 @@ class SettingsPage extends GetView<SettingsController> {
                 scheme: scheme,
                 icon: Icons.logout,
                 text: 'Cerrar sesión',
-                onTap: controller.logout,
+                onTap: () async {
+                  final confirmed = await Get.dialog<bool>(
+                    const ConfirmationDialog(
+                      title: 'Cerrar sesión',
+                      message: '¿Estás seguro que quieres cerrar sesión?',
+                      confirmText: 'Salir',
+                    ),
+                  );
+                  if (confirmed == true) {
+                    controller.logout();
+                  }
+                },
               ),
               const SizedBox(height: 32),
               Center(

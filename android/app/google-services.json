@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "426825613455",
-    "project_id": "com-proyen-chiguiro-app",
-    "storage_bucket": "com-proyen-chiguiro-app.firebasestorage.app"
+    "project_number": "524595739668",
+    "project_id": "chiwinotification",
+    "storage_bucket": "chiwinotification.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:426825613455:android:5716457cc59799e632b0fa",
+        "mobilesdk_app_id": "1:524595739668:android:bc620a762840e2adc53b01",
         "android_client_info": {
-          "package_name": "com.proyen.chiguiroapp"
+          "package_name": "com.proyen.chiwi"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyADq9WFhN4E4avBaFW-0A_SdBYJx6Q38cc"
+          "current_key": "AIzaSyB6RC9iuZoaRnPBHTAd89VzDdLXPrsdp28"
         }
       ],
       "services": {

@@ -4,12 +4,14 @@ class ProfileHeader extends StatelessWidget {
   final String name;
   final String role;
   final VoidCallback? onSettingsTap;
+  final ImageProvider? avatar;
 
   const ProfileHeader({
     super.key,
     required this.name,
     required this.role,
     this.onSettingsTap,
+    this.avatar,
   });
 
   @override
@@ -32,14 +34,17 @@ class ProfileHeader extends StatelessWidget {
   }
 
   Widget _buildAvatar() {
-    return const CircleAvatar(
+    return CircleAvatar(
       radius: 25,
       backgroundColor: Colors.white,
-      child: Icon(
+      backgroundImage: avatar,
+      child: avatar == null
+          ? const Icon(
         Icons.person,
         size: 40,
         color: Colors.black54,
-      ),
+      )
+          : null,
     );
   }
 

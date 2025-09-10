@@ -49,6 +49,7 @@ class ConfirmationDialog extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: scheme.onFirstBackground,
                   fontWeight: FontWeight.w800,
+                  fontSize: 20,
                 ),
               ),
             ),

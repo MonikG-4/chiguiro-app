@@ -38,13 +38,15 @@ class CustomInputSelect extends StatelessWidget {
                     ? AppColorScheme.primary
                     : (isSelected ?? false)
                         ? AppColorScheme.primary
-                        : scheme.secondaryText,
+                        : scheme.border,
           ),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: children),
+            children: children
+
+        ),
       ),
     );
   }

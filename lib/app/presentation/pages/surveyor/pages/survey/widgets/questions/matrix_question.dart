@@ -34,6 +34,7 @@ class MatrixQuestionState extends State<MatrixQuestion> {
   Widget build(BuildContext context) {
     final List<String> subQuestions = question.meta;
     final List<String> answers = question.meta2 ?? [];
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,14 +64,15 @@ class MatrixQuestionState extends State<MatrixQuestion> {
                               _handleAnswerSelection(subQuestions[subIndex], answer, state);
                             },
                             child: Card(
+                              margin: const EdgeInsets.only(right: 4),
                               color: isSelected
-                                  ? AppColorScheme.primary
-                                  : const Color(0xFFF8FAFC),
+                                  ? scheme.selectBackground
+                                  : scheme.secondBackground,
                               shape: RoundedRectangleBorder(
                                 side: BorderSide(
                                   color: isSelected
                                       ? AppColorScheme.primary
-                                      : Colors.grey[300]!,
+                                      : scheme.border,
                                 ),
                                 borderRadius: BorderRadius.circular(4.0),
                               ),
@@ -78,8 +80,14 @@ class MatrixQuestionState extends State<MatrixQuestion> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
                                   answer,
-                                  style: const TextStyle(color: Colors.black),
+                                  style: TextStyle(
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    color: isSelected
+                                        ? scheme.onFirstBackground
+                                        : scheme.secondaryText,
+                                  ),
                                 ),
+
                               ),
                             ),
                           );

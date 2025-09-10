@@ -19,6 +19,7 @@ class ScaleQuestion extends StatelessWidget {
     final int scaleMin = question.scaleMin ?? 1;
     final int scaleMax = question.scaleMax ?? 10;
     final int scaleRange = scaleMax - scaleMin + 1;
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
 
     return FormField(
       validator: controller.validatorMandatory(question),
@@ -27,24 +28,47 @@ class ScaleQuestion extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(question.anchorMin ?? ''),
-                Text(question.anchorMax ?? ''),
+                // izquierda
+                Expanded(
+                  child: Text(
+                    question.anchorMin ?? '',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // derecha
+                Expanded(
+                  child: Text(
+                    question.anchorMax ?? '',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                    textAlign: TextAlign.right,
+                  ),
+                ),
               ],
             ),
             Obx(() {
-              final int rating = controller.responses[question.id]?['value'] ?? scaleMin;
+              final int rating =
+                  controller.responses[question.id]?['value'] ?? scaleMin;
 
               return SliderTheme(
                 data: SliderTheme.of(context).copyWith(
                   activeTrackColor: AppColorScheme.primary,
-                  inactiveTrackColor: AppColorScheme.primary,
+                  inactiveTrackColor: scheme.border,
                   thumbColor: AppColorScheme.primary,
                   overlayColor: AppColorScheme.primary.withOpacity(0.2),
                   valueIndicatorColor: AppColorScheme.primary,
-                  activeTickMarkColor: AppColorScheme.primary,
+                  activeTickMarkColor: scheme.border,
                   inactiveTickMarkColor: AppColorScheme.primary,
+                  valueIndicatorTextStyle: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 child: Slider(
                   value: rating.toDouble(),

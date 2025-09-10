@@ -17,6 +17,7 @@ class HomePage extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return Obx(() => BodyWrapper(
           onRefresh: () async {
             controller.isDownloadingSurveys.value = true;
@@ -24,41 +25,40 @@ class HomePage extends GetView<HomeController> {
             controller.isDownloadingSurveys.value = false;
           },
           child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ConnectivityBanner(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SurveyDisplaySection(
-                            title: 'Formularios',
-                            surveys: controller.surveys,
-                            isResponded: false,
-                            onSurveyTap: (survey) => _redirectToSurvey(survey),
-                          ),
-                          const SizedBox(height: 8),
-                          // Si ya hay código generado, mostrar loading o contenido
-                          controller.isSurveysRespondedLoading.value
-                              ? const Padding(
-                                  padding: EdgeInsets.only(top: 20),
-                                  child: Center(
-                                      child: CircularProgressIndicator()),
-                                )
-                              : CustomCard(
-                                  children: [
-                                    SurveyDisplaySection(
-                                      title: 'Encuestas realizadas',
-                                      surveys: controller.surveysResponded,
-                                      isResponded: true,
-                                      isLoading:
-                                          controller.isSurveysRespondedLoading,
-                                    ),
-                                  ],
-                                ),
-                        ],
-                      ),
-                  ],
-                ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ConnectivityBanner(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SurveyDisplaySection(
+                    title: 'Formularios',
+                    surveys: controller.surveys,
+                    isResponded: false,
+                    onSurveyTap: (survey) => _redirectToSurvey(survey),
+                  ),
+                  const SizedBox(height: 8),
+                  // Si ya hay código generado, mostrar loading o contenido
+                  controller.isSurveysRespondedLoading.value
+                      ? const Padding(
+                          padding: EdgeInsets.only(top: 20),
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      : CustomCard(
+                          color: scheme.onFirstBackground,
+                          children: [
+                            SurveyDisplaySection(
+                              title: 'Encuestas realizadas',
+                              surveys: controller.surveysResponded,
+                              isResponded: true,
+                              isLoading: controller.isSurveysRespondedLoading,
+                            ),
+                          ],
+                        ),
+                ],
+              ),
+            ],
+          ),
         ));
   }
 

@@ -160,7 +160,7 @@ class _DateInputQuestionState extends State<DateInputQuestion> {
                 children: [
                   // Selector de día
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.21,
+                    width: MediaQuery.of(context).size.width * 0.26,
                     child: Obx(() => CustomSelect(
                       keyDropdown: dayKey,
                       value: dayText.value.isEmpty ? null : dayText.value,
@@ -183,11 +183,11 @@ class _DateInputQuestionState extends State<DateInputQuestion> {
                       },
                     )),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
 
                   // Selector de mes
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.40,
+                    width: MediaQuery.of(context).size.width * 0.35,
                     child: Obx(() => CustomSelect(
                       keyDropdown: monthKey,
                       value: monthText.value.isEmpty ? null : monthText.value,
@@ -204,7 +204,7 @@ class _DateInputQuestionState extends State<DateInputQuestion> {
                       },
                     )),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
 
                   // Selector de año
                   SizedBox(
