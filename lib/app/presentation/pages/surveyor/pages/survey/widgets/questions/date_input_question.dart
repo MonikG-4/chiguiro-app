@@ -32,8 +32,7 @@ class _DateInputQuestionState extends State<DateInputQuestion> {
   @override
   void initState() {
     super.initState();
-    final currentValue =
-    widget.controller.responses[widget.question.id]?['value'];
+    final currentValue = widget.controller.responses[widget.question.id]?['value'];
     if (currentValue is String) {
       final selectedDate = DateFormat('dd-MM-yyyy').parse(currentValue);
       _initializeDate(selectedDate);
@@ -53,12 +52,11 @@ class _DateInputQuestionState extends State<DateInputQuestion> {
   }
 
   void updateDate() {
-    // Actualizar textos aunque falte alguno
     dayText.value = selectedDay.value?.toString().padLeft(2, '0') ?? '';
-    monthText.value = selectedMonth.value != null ? getMonthName(selectedMonth.value!) : '';
+    monthText.value =
+    selectedMonth.value != null ? getMonthName(selectedMonth.value!) : '';
     yearText.value = selectedYear.value?.toString() ?? '';
 
-    // Solo si están los 3, actualiza el valor completo
     if (selectedYear.value == null ||
         selectedMonth.value == null ||
         selectedDay.value == null) return;
@@ -66,9 +64,10 @@ class _DateInputQuestionState extends State<DateInputQuestion> {
     int maxDays = getDaysInMonth(selectedYear.value!, selectedMonth.value!);
     if (selectedDay.value! > maxDays) {
       selectedDay.value = maxDays;
+      dayText.value = selectedDay.value!.toString().padLeft(2, '0');
     }
 
-    DateTime newDate = DateTime(
+    final newDate = DateTime(
       selectedYear.value!,
       selectedMonth.value!,
       selectedDay.value!,
@@ -81,7 +80,6 @@ class _DateInputQuestionState extends State<DateInputQuestion> {
     };
     widget.controller.responses.refresh();
   }
-
 
   String getMonthName(int month) {
     const months = [
@@ -123,14 +121,25 @@ class _DateInputQuestionState extends State<DateInputQuestion> {
     return months.indexOf(monthName) + 1;
   }
 
+  String? _dayValue() => dayText.value.isEmpty ? null : dayText.value;
+  String? _monthValue() => monthText.value.isEmpty ? null : monthText.value;
+  String? _yearValue() => yearText.value.isEmpty ? null : yearText.value;
+
+  List<String> _dayItems(DateTime now) => List.generate(
+    getDaysInMonth(
+      selectedYear.value ?? now.year,
+      selectedMonth.value ?? now.month,
+    ),
+        (i) => (i + 1).toString().padLeft(2, '0'),
+  );
+
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final currentYear = DateTime.now().year;
-    final years =
-    List.generate(101, (index) => (currentYear - index +5).toString());
+    final currentYear = now.year;
+    final years = List.generate(101, (i) => (currentYear - i + 5).toString());
 
-    final months = [
+    const months = [
       'Enero',
       'Febrero',
       'Marzo',
@@ -149,95 +158,112 @@ class _DateInputQuestionState extends State<DateInputQuestion> {
     final monthKey = GlobalKey();
     final yearKey = GlobalKey();
 
-      return FormField<DateTime>(
-        key: ValueKey('date_${widget.question.id}'),
-        validator: widget.controller.validatorMandatory(widget.question),
-        builder: (FormFieldState<DateTime> state) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // Selector de día
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.26,
-                    child: Obx(() => CustomSelect(
-                      keyDropdown: dayKey,
-                      value: dayText.value.isEmpty ? null : dayText.value,
-                      items: List.generate(
-                          getDaysInMonth(
-                            selectedYear.value ?? now.year,
-                            selectedMonth.value ?? now.month,
-                          ),
-                              (index) => (index + 1).toString().padLeft(2, '0')),
+    return FormField<DateTime>(
+      key: ValueKey('date_${widget.question.id}'),
+      validator: widget.controller.validatorMandatory(widget.question),
+      builder: (FormFieldState<DateTime> state) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final totalWidth = constraints.maxWidth;
+            final dayWidth = totalWidth * 0.26;
+            final monthWidth = totalWidth * 0.39;
+            final yearWidth = totalWidth * 0.30;
 
+            Widget slot({
+              required String label,
+              required GlobalKey keyDropdown,
+              required String? Function() getValue,
+              required List<String> Function() getItems,
+              required ValueChanged<String?> onSelected,
+              required double width,
+            }) {
+              return SizedBox(
+                width: width,
+                child: Obx(() {
+                  final v = getValue();
+                  final items = getItems();
+                  return CustomSelect(
+                    keyDropdown: keyDropdown,
+                    value: (v == null || v.isEmpty) ? null : v,
+                    items: items,
+                    label: label,
+                    state: state,
+                    onSelected: onSelected,
+                  );
+                }),
+              );
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    slot(
                       label: 'Día',
-                      state: state,
-                      onSelected: (String? value) {
-                        if (value != null) {
-                          selectedDay.value = int.parse(value);
+                      keyDropdown: dayKey,
+                      getValue: _dayValue,
+                      getItems: () => _dayItems(now),
+                      onSelected: (val) {
+                        if (val != null) {
+                          selectedDay.value = int.parse(val);
                           updateDate();
-                          state.didChange(widget.controller.responses[widget.question.id]?['value']);
+                          state.didChange(widget
+                              .controller.responses[widget.question.id]?['value']);
                           state.validate();
                         }
                       },
-                    )),
-                  ),
-                  const SizedBox(width: 6),
-
-                  // Selector de mes
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.35,
-                    child: Obx(() => CustomSelect(
-                      keyDropdown: monthKey,
-                      value: monthText.value.isEmpty ? null : monthText.value,
-                      items: months,
+                      width: dayWidth,
+                    ),
+                    const SizedBox(width: 6),
+                    slot(
                       label: 'Mes',
-                      state: state,
-                      onSelected: (String? value) {
-                        if (value != null) {
-                          selectedMonth.value = getMonthNumber(value);
+                      keyDropdown: monthKey,
+                      getValue: _monthValue,
+                      getItems: () => months,
+                      onSelected: (val) {
+                        if (val != null) {
+                          selectedMonth.value = getMonthNumber(val);
                           updateDate();
-                          state.didChange(widget.controller.responses[widget.question.id]?['value']);
+                          state.didChange(widget
+                              .controller.responses[widget.question.id]?['value']);
                           state.validate();
                         }
                       },
-                    )),
-                  ),
-                  const SizedBox(width: 6),
-
-                  // Selector de año
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.26,
-                    child: Obx(() => CustomSelect(
-                      keyDropdown: yearKey,
-                      value: yearText.value.isEmpty ? null : yearText.value,
-                      items: years,
+                      width: monthWidth,
+                    ),
+                    const SizedBox(width: 6),
+                    slot(
                       label: 'Año',
-                      state: state,
-                      onSelected: (String? value) {
-                        if (value != null) {
-                          selectedYear.value = int.parse(value);
+                      keyDropdown: yearKey,
+                      getValue: _yearValue,
+                      getItems: () => years,
+                      onSelected: (val) {
+                        if (val != null) {
+                          selectedYear.value = int.parse(val);
                           updateDate();
-                          state.didChange(widget.controller.responses[widget.question.id]?['value']);
+                          state.didChange(widget
+                              .controller.responses[widget.question.id]?['value']);
                           state.validate();
                         }
                       },
-                    )),
-                  ),
-                ],
-              ),
-              if (state.hasError)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Text(
-                    state.errorText!,
-                    style: const TextStyle(color: Colors.red),
-                  ),
+                      width: yearWidth,
+                    ),
+                  ],
                 ),
-            ],
-          );
-        },
-      );
+                if (state.hasError)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      state.errorText!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 }

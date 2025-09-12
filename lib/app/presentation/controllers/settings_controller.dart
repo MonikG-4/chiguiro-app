@@ -13,6 +13,10 @@ class SettingsController extends GetxController {
     Get.toNamed(Routes.CHANGE_PASSWORD);
   }
 
+  void goToAccessibility() {
+    Get.toNamed(Routes.ACCESSIBILITY);
+  }
+
   void goToPermissions() {
     Get.toNamed(Routes.PERMISSIONS);
   }

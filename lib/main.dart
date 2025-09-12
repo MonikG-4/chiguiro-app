@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hive/hive.dart';
@@ -18,9 +19,11 @@ import 'app/data/models/survey_entry_model.dart';
 import 'app/data/models/sync_task_model.dart';
 
 import 'app/presentation/controllers/session_controller.dart';
-import 'app/presentation/controllers/theme_controller.dart'; // <— NUEVO
+import 'app/presentation/controllers/text_scale_controller.dart';
+import 'app/presentation/controllers/theme_controller.dart';
 import 'app/routes/app_routes.dart';
-import 'core/theme/app_theme.dart'; // usa AppTheme.build(...)
+import 'core/theme/app_colors_theme.dart';
+import 'core/theme/app_theme.dart';
 import 'core/values/routes.dart';
 
 void main() async {
@@ -59,6 +62,7 @@ Future<void> _initHive() async {
   ]);
 }
 
+/// **Clase principal de la app**
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -70,25 +74,56 @@ class MyApp extends StatelessWidget {
 
     return GetBuilder<ThemeController>(
       builder: (themeController) {
-        return GetMaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Chiwi',
+        return GetBuilder<TextScaleController>(
+          builder: (textScaleController) {
+            return GetMaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'Chiwi',
 
-          theme: AppTheme.build(Brightness.light),
-          darkTheme: AppTheme.build(Brightness.dark),
-          themeMode: themeController.themeMode.value,
+              theme: AppTheme.build(Brightness.light),
+              darkTheme: AppTheme.build(Brightness.dark),
+              themeMode: themeController.themeMode.value,
 
-          defaultTransition: Transition.fade,
-          initialRoute: initialRoute,
-          getPages: AppPages.routes,
+              defaultTransition: Transition.fade,
+              initialRoute: initialRoute,
+              getPages: AppPages.routes,
 
-          locale: const Locale('es', 'ES'),
-          supportedLocales: const [Locale('es', 'ES')],
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
+              locale: const Locale('es', 'ES'),
+              supportedLocales: const [Locale('es', 'ES')],
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+
+              builder: (context, child) {
+                final brightness = Theme.of(context).brightness;
+                final scheme = Theme.of(context).extension<AppColorScheme>()!;
+
+                final overlayStyle = SystemUiOverlayStyle(
+                  statusBarColor: Colors.transparent,
+                  statusBarIconBrightness: brightness == Brightness.dark
+                      ? Brightness.light
+                      : Brightness.dark,
+                  systemNavigationBarColor: scheme.firstBackground,
+                  systemNavigationBarIconBrightness:
+                      brightness == Brightness.dark
+                          ? Brightness.light
+                          : Brightness.dark,
+                );
+
+                return AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: overlayStyle,
+                  child: MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      textScaleFactor: textScaleController.factor,
+                    ),
+                    child: child!,
+                  ),
+                );
+              },
+            );
+          },
         );
       },
     );

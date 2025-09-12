@@ -80,7 +80,7 @@ class RadioInputQuestion extends StatelessWidget {
                           (Set<WidgetState> states) {
                             return isSelected
                                 ? AppColorScheme.primary
-                                : Colors.grey;
+                                : scheme.border;
                           },
                         ),
                       ),

@@ -13,6 +13,7 @@ import '../../core/services/sync_service.dart';
 import '../../core/services/sync_task_storage_service.dart';
 
 import '../../core/services/storage_service.dart';
+import '../presentation/controllers/text_scale_controller.dart';
 import '../presentation/controllers/theme_controller.dart';
 
 import '../data/repositories/survey_repository.dart';
@@ -50,5 +51,6 @@ class AppBinding {
     );
 
     Get.put(ThemeController(), permanent: true);
+    Get.put(TextScaleController(), permanent: true);
   }
 }

@@ -128,10 +128,10 @@ class SurveyPage extends GetView<SurveyController> {
                   margin: const EdgeInsets.symmetric(vertical: 8.0),
                   padding: const EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
-                    color: scheme.sectionBg,
+                    color: scheme.sectionBackground.withOpacity(0.6),
                     borderRadius: BorderRadius.circular(8.0),
                     border: Border.all(
-                      color: scheme.sectionBorder,
+                      color: scheme.sectionBackground,
                       width: 1.2,
                     ),
                   ),
@@ -139,13 +139,13 @@ class SurveyPage extends GetView<SurveyController> {
                     children: [
                       RichText(
                         textAlign: TextAlign.center,
-                        text: parseSimpleHtml(section.name),
+                        text: parseSimpleHtml(section.name, scheme: scheme),
                       ),
                       const SizedBox(height: 8.0),
                       if (section.description != null)
                         RichText(
                           textAlign: TextAlign.center,
-                          text: parseSimpleHtml(section.description!),
+                          text: parseSimpleHtml(section.description!, scheme: scheme),
                         ),
 
                     ],
@@ -172,13 +172,13 @@ class SurveyPage extends GetView<SurveyController> {
     );
   }
 
-  TextSpan parseSimpleHtml(String html, {TextStyle? baseStyle}) {
+  TextSpan parseSimpleHtml(String html, {required AppColorScheme scheme, TextStyle? baseStyle}) {
     final document = html_parser.parse(html);
     final body = document.body;
 
     return _parseNode(
       body!,
-      baseStyle ?? const TextStyle(fontSize: 16, color: Colors.black),
+      baseStyle ?? TextStyle(fontSize: 16, color: scheme.onFirstBackground),
     );
   }
 

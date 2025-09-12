@@ -16,6 +16,7 @@ class Routes {
   static const FORGOT_PASSWORD = '/forgot-password';
   static const CHANGE_PASSWORD = '/change-password';
   static const PROFILE = '/profile';
+  static const ACCESSIBILITY = '/accessibility';
   static const PERMISSIONS = '/permissions';
   static const PERMISSION_DETAIL = '/permission-detail';
 

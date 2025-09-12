@@ -3,37 +3,37 @@ import 'package:flutter/material.dart';
 @immutable
 class AppColorScheme extends ThemeExtension<AppColorScheme> {
   // FONDOS
-  final Color firstBackground;        // Cultured / Rich Black → Background (scaffold)
-  final Color secondBackground;       // Alice Blue / Dark Gunmetal → Cards
-  final Color selectBackground;       // LightSteelBlue → Select / inputs filled
+  final Color firstBackground;
+  final Color secondBackground;
+  final Color selectBackground;
 
   // TEXTO
-  final Color onFirstBackground;      // Texto principal sobre fondo
-  final Color secondaryText;          // Slate Gray → Secondary_Letter
-  final Color questionText;           // Charcoal Blue (light) / Light Slate Gray (dark) → Question_Letter
+  final Color onFirstBackground;
+  final Color secondaryText;
+  final Color questionText;
 
   // ACCENTOS/BOTONES
-  final Color firstButtonBackground;  // Bright Blue → Primary
-  final Color secondButtonBackground; // Cobalt Blue → Secondary
-  final Color iconBackground;         // Bright Blue → Acento para íconos/seleccionados
+  final Color firstButtonBackground;
+  final Color secondButtonBackground;
+  final Color iconBackground;
 
   // BORDES
-  final Color border;                 // Light Slate Gray (light) / Charcoal Blue (dark)
+  final Color border;
 
   //Secciones
-  final Color sectionBg;
+  final Color sectionBackground;
   final Color sectionBorder;
   final Color sectionText;
 
-  // ====== Colores globales, no dependen del modo ======
+  // ====== Colores globales, no dependen del tema ======
   static const Color focusBorder   = Color(0xFF030303);
   static const Color primary = Color(0xFF006FD1);
 
-  // Indicadores / estados (puedes aplicar .withOpacity() en UI)
-  static const Color indicator1    = Color(0xFF57E9B4); // Aquamarine – Indicator
-  static const Color indicator2    = Color(0xFFE9A257); // Earth Yellow – Indicator 2
+  // Indicadores
+  static const Color indicator1    = Color(0xFF57E9B4);
+  static const Color indicator2    = Color(0xFFE9A257);
 
-  static const Color infoBackground     = Color(0xFFB3D3EE); // LightSteelBlue
+  static const Color infoBackground     = Color(0xFFB3D3EE);
   static const Color successBackground  = Color(0xFF57E9B4);
   static const Color warningBackground  = Color(0xFFE9A257);
   static const Color errorBackground    = Color(0xFFFFF1F2);
@@ -43,7 +43,7 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
   static const Color warningText = Color(0xFF92400E);
   static const Color errorText       = Color(0xFFEF4444);
 
-  // Gradiente de header (mismo para ambos modos)
+  // Gradiente de header
   static const LinearGradient headerGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -61,7 +61,7 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
     required this.border,
     required this.secondaryText,
     required this.questionText,
-    required this.sectionBg,
+    required this.sectionBackground,
     required this.sectionBorder,
     required this.sectionText,
   });
@@ -93,7 +93,7 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
       border: border ?? this.border,
       secondaryText: secondaryText ?? this.secondaryText,
       questionText: questionText ?? this.questionText,
-      sectionBg: sectionBg ?? this.sectionBg,
+      sectionBackground: sectionBg ?? this.sectionBackground,
       sectionBorder: sectionBorder ?? this.sectionBorder,
       sectionText: sectionText ?? this.sectionText,
     );
@@ -113,52 +113,52 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
       border: Color.lerp(border, other.border, t)!,
       secondaryText: Color.lerp(secondaryText, other.secondaryText, t)!,
       questionText: Color.lerp(questionText, other.questionText, t)!,
-      sectionBg: Color.lerp(sectionBg, other.sectionBg, t)!,
+      sectionBackground: Color.lerp(sectionBackground, other.sectionBackground, t)!,
       sectionBorder: Color.lerp(sectionBorder, other.sectionBorder, t)!,
       sectionText: Color.lerp(sectionText, other.sectionText, t)!,
     );
   }
 
-  // =================== LIGHT (según tus tarjetas) ===================
+  // =================== LIGHT  ===================
   static const AppColorScheme light = AppColorScheme(
-    firstBackground: Color(0xFFF9FAFC), // Cultured – Background
-    secondBackground: Color(0xFFEEF4F8), // Alice Blue – Cards
-    selectBackground: Color(0x1A006FD1), // LightSteelBlue – Select
+    firstBackground: Color(0xFFF9FAFC),
+    secondBackground: Color(0xFFEEF4F8),
+    selectBackground: Color(0x1A006FD1),
 
-    onFirstBackground: Color(0xFF111827), // texto principal
-    secondaryText: Color(0xFF748299),     // Slate Gray – Secondary_Letter
-    questionText: Color(0xFF334155),      // Charcoal Blue – Question_Letter
+    onFirstBackground: Color(0xFF111827),
+    secondaryText: Color(0xFF748299),
+    questionText: Color(0xFF334155),
 
-    firstButtonBackground: Color(0xFF006FD1), // Bright Blue – Primary
-    secondButtonBackground: Color(0xFF0041A8), // Cobalt Blue – Secundary
-    iconBackground: Color(0xFF006FD1), // acento
+    firstButtonBackground: Color(0xFF006FD1),
+    secondButtonBackground: Color(0xFF0041A8),
+    iconBackground: Color(0xFF006FD1),
 
     border: Color(0xFFCBD5E1), // Light Slate Gray
 
-    sectionBg: Color(0xFFEDE9FE),        // lila claro (background sección)
-    sectionBorder: Color(0xFFDDD6FE),    // borde
-    sectionText: Color(0xFF1E293B),      // tu primary text
+    sectionBackground: Color(0xFFE7DFC6),
+    sectionBorder: Color(0xFFDDD6FE),
+    sectionText: Color(0xFF1E293B),
 
   );
 
-  // =================== DARK (según tus tarjetas) ====================
+  // =================== DARK  ====================
   static const AppColorScheme dark = AppColorScheme(
-    firstBackground: Color(0xFF111827), // Rich Black – Background
-    secondBackground: Color(0xFF161D2C), // Dark Gunmetal – Cards
-    selectBackground: Color(0x3D006FD1), // LightSteelBlue – Select (mantienes mismo)
+    firstBackground: Color(0xFF111827),
+    secondBackground: Color(0xFF161D2C),
+    selectBackground: Color(0x3D006FD1),
 
-    onFirstBackground: Color(0xFFF9FAFC), // texto principal claro
-    secondaryText: Color(0xFF748299),     // Slate Gray – Secondary_Letter
-    questionText: Color(0xFFCBD5E1),      // Light Slate Gray – Question_Letter
+    onFirstBackground: Color(0xFFF9FAFC),
+    secondaryText: Color(0xFF748299),
+    questionText: Color(0xFFCBD5E1),
 
-    firstButtonBackground: Color(0xFF006FD1), // Bright Blue – Primary
-    secondButtonBackground: Color(0xFF0041A8), // Cobalt Blue – Secundary
+    firstButtonBackground: Color(0xFF006FD1),
+    secondButtonBackground: Color(0xFF0041A8),
     iconBackground: Color(0xFF006FD1),
 
-    border: Color(0xFF334155), // Charcoal Blue
+    border: Color(0xFF475569),
 
-    sectionBg: Color(0xFF241F3D),        // morado petróleo (card de sección)
-    sectionBorder: Color(0xFF3C3562),    // borde sutil
-    sectionText: Color(0xFFEDE9FE),      // lavanda claro (títulos)
+    sectionBackground: Color(0xFF816C61),
+    sectionBorder: Color(0xFFFE7D0B),
+    sectionText: Color(0xFFEDE9FE),
   );
 }

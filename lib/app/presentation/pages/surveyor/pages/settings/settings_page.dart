@@ -33,6 +33,13 @@ class SettingsPage extends GetView<SettingsController> {
                 text: 'Cambiar contraseña',
                 onTap: controller.goToChangePassword,
               ),
+
+              _buildOptionTile(
+                scheme: scheme,
+                icon: Icons.public,
+                text: 'Accesibilidad',
+                onTap: controller.goToAccessibility,
+              ),
               _buildOptionTile(
                 scheme: scheme,
                 icon: Icons.shield_outlined,
@@ -99,9 +106,13 @@ class SettingsPage extends GetView<SettingsController> {
             children: [
               Icon(icon, size: 32, color: scheme.secondaryText),
               const SizedBox(width: 12),
-              Text(
-                text,
-                style: TextStyle(fontSize: 15, color: scheme.secondaryText),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(fontSize: 15, color: scheme.secondaryText),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),

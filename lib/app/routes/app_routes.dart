@@ -12,6 +12,7 @@ import '../presentation/pages/surveyor/layout_wrapper.dart';
 import '../presentation/pages/surveyor/pages/home/home_page.dart';
 import '../presentation/pages/login/login_page.dart';
 import '../presentation/pages/surveyor/pages/pendingSurveys/pending_surveys_page.dart';
+import '../presentation/pages/surveyor/pages/settings/pages/accessibility/accessibility_page.dart';
 import '../presentation/pages/surveyor/pages/settings/pages/changePassword/change_password_page.dart';
 import '../presentation/pages/surveyor/pages/settings/pages/permissions/permission_detail_wrapper.dart';
 import '../presentation/pages/surveyor/pages/settings/pages/permissions/permissions_page.dart';
@@ -72,6 +73,10 @@ class AppPages {
     GetPage(
       name: Routes.PROFILE,
       page: () => const ProfilePage(),
+    ),
+    GetPage(
+      name: Routes.ACCESSIBILITY,
+      page: () => const AccessibilityPage (),
     ),
     GetPage(
       name: Routes.PERMISSIONS,

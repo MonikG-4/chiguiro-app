@@ -96,7 +96,7 @@ class CheckInputQuestion extends StatelessWidget {
                       side: WidgetStateBorderSide.resolveWith(
                             (Set<WidgetState> states) {
                           return BorderSide(
-                            color: isSelected ? AppColorScheme.primary : Colors.grey,
+                            color: isSelected ? AppColorScheme.primary : scheme.border,
                           );
                         },
                       ),

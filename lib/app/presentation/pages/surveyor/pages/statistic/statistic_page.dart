@@ -22,8 +22,7 @@ class StatisticPage extends GetView<StatisticController> {
       return BodyWrapper(
         onRefresh: () async {
           await controller.fetchStatistics();
-          await controller
-              .fetchPendingCount(); // <- actualiza el contador local
+          await controller.fetchPendingCount();
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,11 +34,9 @@ class StatisticPage extends GetView<StatisticController> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-
-            // ====== GRID 2x2 con "Guardadas localmente" primero ======
             Obx(() {
               final data = controller.statistics.value;
-              final pending = controller.pendingCount.value; // <- reactivo
+              final pending = controller.pendingCount.value;
 
               if (controller.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
@@ -55,7 +52,6 @@ class StatisticPage extends GetView<StatisticController> {
                   return Wrap(
                     spacing: 8,
                     children: [
-                      // 1) Guardadas localmente
                       SizedBox(
                         width: cardWidth,
                         child: _StatCard(
@@ -64,8 +60,6 @@ class StatisticPage extends GetView<StatisticController> {
                           value: '$pending',
                         ),
                       ),
-
-                      // 2) Encuestas realizadas
                       SizedBox(
                         width: cardWidth,
                         child: _StatCard(
@@ -74,8 +68,6 @@ class StatisticPage extends GetView<StatisticController> {
                           value: '${data.entries}',
                         ),
                       ),
-
-                      // 3) Tasa de finalización
                       SizedBox(
                         width: cardWidth,
                         child: _StatCard(
@@ -84,8 +76,6 @@ class StatisticPage extends GetView<StatisticController> {
                           value: '${data.completedPercent.toStringAsFixed(0)}%',
                         ),
                       ),
-
-                      // 4) Duración promedio
                       SizedBox(
                         width: cardWidth,
                         child: _StatCard(
@@ -100,10 +90,7 @@ class StatisticPage extends GetView<StatisticController> {
                 },
               );
             }),
-
             const SizedBox(height: 16),
-
-            // ====== Gráfica ======
             if (controller.statistics.value != null &&
                 controller.statistics.value!.days.isNotEmpty)
               CustomCard(
@@ -121,7 +108,13 @@ class StatisticPage extends GetView<StatisticController> {
                             color: Colors.white, size: 20),
                       ),
                       const SizedBox(width: 8),
-                      const Text('Respuestas en el tiempo'),
+                      const Expanded(
+                        child: Text(
+                          'Respuestas en el tiempo',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),

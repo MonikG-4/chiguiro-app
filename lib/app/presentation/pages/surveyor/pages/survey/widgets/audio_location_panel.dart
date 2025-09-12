@@ -75,8 +75,8 @@ class _LocationBadge extends StatelessWidget {
       height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: bg,
-        border: Border.all(color: AppColorScheme.successText),
+        color: Color(0xFF31E981).withOpacity(0.1),
+        border: Border.all( color: Color(0xFF31E981)),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -85,7 +85,7 @@ class _LocationBadge extends StatelessWidget {
           const Icon(
             Icons.location_on_outlined,
             size: 20,
-            color: AppColorScheme.successText,
+            color: Color(0xFF31E981),
           ),
           if (expanded) ...[
             const SizedBox(width: 8),

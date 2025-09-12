@@ -98,7 +98,8 @@ class _QuestionHeader extends StatelessWidget {
               TextSpan(
                 text: 'P${question.sort} ',
                 style: const TextStyle(
-                    fontWeight: FontWeight.w600, color: AppColorScheme.primary),
+                    fontWeight: FontWeight.w600, color: AppColorScheme.primary
+                ),
               ),
               TextSpan(
                 text: question.question,
@@ -112,7 +113,13 @@ class _QuestionHeader extends StatelessWidget {
 
         if (question.description != null && question.description!.isNotEmpty) ...[
           const SizedBox(height: 12),
-          Text(question.description!),
+          Text(
+            question.description!,
+            style: TextStyle(
+              fontSize: 14,
+              color: scheme.questionText,
+            ),
+          ),
         ],
       ],
     );
