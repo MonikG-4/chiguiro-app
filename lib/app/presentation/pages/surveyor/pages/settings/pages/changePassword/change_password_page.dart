@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../../controllers/home_controller.dart';
+import '../../../../../../controllers/settings_controller.dart';
 import '../../../../../../widgets/bottom_pages.dart';
 import '../../../../../../widgets/custom_text_button_redirect.dart';
 import '../../../../../../widgets/custom_view_form.dart';
 import '../../../../../../widgets/primary_button.dart';
 import 'widgets/change_password_form.dart';
 
-class ChangePasswordPage extends GetView<HomeController> {
+class ChangePasswordPage extends GetView<SettingsController> {
   const ChangePasswordPage({super.key});
 
   @override

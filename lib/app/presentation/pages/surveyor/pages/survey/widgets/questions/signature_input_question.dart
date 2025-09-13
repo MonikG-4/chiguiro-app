@@ -36,7 +36,7 @@ class _SignatureInputQuestionState extends State<SignatureInputQuestion> {
     final brightness = Theme.of(context).brightness;
 
     if (_controller == null || _lastBrightness != brightness) {
-      final oldPoints = _controller?.points; // conserva lo dibujado
+      final oldPoints = _controller?.points;
       _controller?.dispose();
 
       _controller = SignatureController(
@@ -44,14 +44,14 @@ class _SignatureInputQuestionState extends State<SignatureInputQuestion> {
         penStrokeWidth: 3,
         penColor: brightness == Brightness.dark ? Colors.white : Colors.black,
       )..onDrawEnd = () async {
-        if (!_controller!.isEmpty && !isLocked.value) {
+        if (_controller!.isNotEmpty && !isLocked.value) {
           await widget.controller.saveSignature(widget.question, _controller!);
           isLocked.value = true;
         }
       };
 
       _lastBrightness = brightness;
-      setState(() {}); // repintar con el nuevo controller
+      setState(() {});
     }
   }
 

@@ -19,68 +19,57 @@ class SurveyWithoutResponsesPage extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          color: scheme.firstBackground,
-        ),
-        child: SingleChildScrollView(
-            padding: const EdgeInsets.all(32.0),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height -
-                    MediaQuery.of(context).padding.vertical,
-              ),
-              child: IntrinsicHeight(
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 35),
-                    Image.asset(
-                      'assets/images/Encuesta.png',
-                      width: 242,
-                      height: 193,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Responde tu primera encuesta',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Aún no tienes encuestas respondidas, ¡responde tu primera encuesta!',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: scheme.onFirstBackground.withOpacity(0.75),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 64),
-                    PrimaryButton(
-                      onPressed: () => Get.offNamed(
-                        Routes.SURVEY,
-                        arguments: {
-                          'survey': survey,
-                        },
-                      ),
-                      isLoading: false,
-                      text: 'Iniciar encuesta',
-                    ),
-                    const SizedBox(height: 16),
-                    CustomTextButtonRedirect(
-                      onPressed: () => Get.offAllNamed(Routes.DASHBOARD),
-                      label: 'Volver al inicio',
-                    ),
-                  ],
-                ),
-              ),
+        width: double.infinity,
+        height: double.infinity,
+        color: scheme.firstBackground,
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/Encuesta.png',
+              width: 242,
+              height: 193,
             ),
-          ),
+            const SizedBox(height: 16),
+            const Text(
+              'Responde tu primera encuesta',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Aún no tienes encuestas respondidas, ¡responde tu primera encuesta!',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+                color: scheme.onFirstBackground.withOpacity(0.75),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 64),
+            PrimaryButton(
+              onPressed: () => Get.offNamed(
+                Routes.SURVEY,
+                arguments: {
+                  'survey': survey,
+                },
+              ),
+              isLoading: false,
+              text: 'Iniciar encuesta',
+            ),
+            const SizedBox(height: 16),
+            CustomTextButtonRedirect(
+              onPressed: () => Get.offAllNamed(Routes.DASHBOARD),
+              label: 'Volver al inicio',
+            ),
+          ],
         ),
+      ),
     );
   }
 }

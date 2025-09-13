@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
+import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -21,7 +22,6 @@ import '../../../core/utils/message_handler.dart';
 import '../../../core/utils/snackbar_message_model.dart';
 import '../../../core/values/location.dart';
 import '../../../core/values/routes.dart';
-import '../../data/models/revisit_model.dart';
 import '../../data/models/survey_entry_model.dart';
 import '../../data/models/sync_task_model.dart';
 import '../../domain/entities/block_code.dart';
@@ -43,9 +43,6 @@ class SurveyController extends GetxController {
 
   final survey = Rx<Survey?>(null);
   final sections = <Sections>[].obs;
-  final homeCode = RxnString();
-
-  final revisit = Rxn<RevisitModel>();
 
   final responses = <String, dynamic>{}.obs;
   final hiddenQuestions = <String>{}.obs;
@@ -73,8 +70,6 @@ class SurveyController extends GetxController {
     _storageService ??= Get.find<AuthStorageService>();
 
     survey.value = Get.arguments?['survey'];
-    homeCode.value = Get.arguments?['homeCode'];
-    revisit.value = Get.arguments?['revisit'];
 
     if (idSurveyor.value == 0) {
       final auth = _storageService?.authResponse;
@@ -226,24 +221,41 @@ class SurveyController extends GetxController {
     }
   }
 
-  Future<void> saveSignature(SurveyQuestion question, SignatureController signatureController) async {
-    if (signatureController.isNotEmpty) {
-      final Uint8List? data = await signatureController.toPngBytes();
-      if (data != null) {
-        final directory = await getTemporaryDirectory();
-        final path = '${directory.path}/signature_${question.id}.png';
-        final file = File(path);
-        await file.writeAsBytes(data);
+  Future<void> saveSignature(
+      SurveyQuestion question,
+      SignatureController signatureController,
+      ) async {
+    if (!signatureController.isNotEmpty) return;
 
-        responses[question.id] = {
-          'question': question.question,
-          'type': question.type,
-          'value': <File>[file], // igual que con foto
-        };
-        responses.refresh();
-      }
-    }
+    final isDark = Get.isDarkMode;
+    final signatureImage = await signatureController.toImage();
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, signatureImage!.width.toDouble(), signatureImage.height.toDouble()),
+      Paint()..color = isDark ? Colors.black : Colors.white,
+    );
+
+    canvas.drawImage(signatureImage, Offset.zero, Paint());
+
+    final finalImage = await recorder
+        .endRecording()
+        .toImage(signatureImage.width, signatureImage.height);
+
+    final byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    final file = File('${(await getTemporaryDirectory()).path}/signature_${question.id}.png')
+      ..writeAsBytesSync(byteData!.buffer.asUint8List());
+
+    responses[question.id] = {
+      'question': question.question,
+      'type': question.type,
+      'value': <File>[file],
+    };
+    responses.refresh();
   }
+
 
   Future<void> _loadSurveyData() async {
     if (survey.value != null) {
@@ -384,16 +396,10 @@ class SurveyController extends GetxController {
       isLoadingSendSurvey.value = false;
       Get.until((route) => route.settings.name != Routes.SURVEY);
 
-      if (revisit.value != null) {
-        Get.toNamed(
-          Routes.REVISIT_DETAIL,
-          arguments: revisit.value,
-        );
-      } else {
-        Get.toNamed(
-          Routes.DASHBOARD,
-        );
-      }
+      Get.toNamed(
+        Routes.DASHBOARD,
+      );
+
     }
   }
 
@@ -411,7 +417,6 @@ class SurveyController extends GetxController {
       int projectId, int pollsterId, String? audioBase64) async {
 
     return SurveyEntryModel(
-      homeCode: homeCode.value ?? '',
       projectId: projectId,
       pollsterId: pollsterId,
       audio: audioBase64,
@@ -420,9 +425,6 @@ class SurveyController extends GetxController {
       longitude: _locationService?.cachedPosition?.longitude.toString(),
       startedOn: timeAnswerStart.value.toIso8601String(),
       finishedOn: DateTime.now().toIso8601String(),
-      comments: revisit.value?.reason,
-      revisit: revisit.value != null,
-
     );
   }
 

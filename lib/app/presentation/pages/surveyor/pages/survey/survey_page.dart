@@ -22,46 +22,55 @@ class SurveyPage extends GetView<SurveyController> {
   Widget build(BuildContext context) {
     _setupPopHandler(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () async {
-            final confirmed = await _showExitConfirmationDialog(context);
-            if (confirmed) {
-              Get.back();
-            }
-          },
-        ),
-        title: Obx(() => Text(controller.survey.value?.name ?? 'Encuesta')),
-      ),
-      body: Obx(() {
-        if (controller.isLoadingQuestion.value) {
-          return const Center(child: CircularProgressIndicator());
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        final confirmed = await _showExitConfirmationDialog(context);
+        if (confirmed) {
+          Get.back();
         }
-
-        if (controller.sections.isEmpty) {
-          return const Center(child: Text('No hay secciones disponibles'));
-        }
-
-        return Padding(
-          padding: const EdgeInsets.only(top: 5.0),
-          child: Stack(
-            children: [
-              if (controller.isVoiceRecorder.value || controller.isGeoLocation.value)
-                AudioLocationPanel(
-                  showLocation: controller.survey.value?.geoLocation ?? false,
-                  showAudioRecorder: controller.survey.value?.voiceRecorder ?? false,
-                ),
-              _buildQuestionsForm(context),
-              _buildProgressBar(),
-            ],
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              final confirmed = await _showExitConfirmationDialog(context);
+              if (confirmed) {
+                Get.back();
+              }
+            },
           ),
-        );
-      }),
-      bottomNavigationBar: Obx(() {
-        return SafeArea(
-          minimum: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          title: Obx(() => Text(controller.survey.value?.name ?? 'Encuesta')),
+        ),
+        body: Obx(() {
+          if (controller.isLoadingQuestion.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (controller.sections.isEmpty) {
+            return const Center(child: Text('No hay secciones disponibles'));
+          }
+
+          return Padding(
+            padding: const EdgeInsets.only(top: 5.0),
+            child: Stack(
+              children: [
+                if (controller.isVoiceRecorder.value || controller.isGeoLocation.value)
+                  AudioLocationPanel(
+                    showLocation: controller.survey.value?.geoLocation ?? false,
+                    showAudioRecorder: controller.survey.value?.voiceRecorder ?? false,
+                  ),
+                _buildQuestionsForm(context),
+                _buildProgressBar(),
+              ],
+            ),
+          );
+        }),
+        bottomNavigationBar: Obx(() {
+          return SafeArea(
+            minimum: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             child: PrimaryButton(
               onPressed: controller.isLoadingSendSurvey.value
                   ? null
@@ -69,9 +78,9 @@ class SurveyPage extends GetView<SurveyController> {
               isLoading: controller.isLoadingSendSurvey.value,
               text: 'Enviar Encuesta',
             ),
-        );
-      }),
-
+          );
+        }),
+      ),
     );
   }
 

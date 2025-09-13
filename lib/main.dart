@@ -7,7 +7,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'app/bindings/app_binding.dart';
 import 'app/data/models/jumper_model.dart';
-import 'app/data/models/revisit_model.dart';
 import 'app/data/models/sections_model.dart';
 import 'app/data/models/statistic_day_model.dart';
 import 'app/data/models/survey_model.dart';
@@ -21,7 +20,7 @@ import 'app/data/models/sync_task_model.dart';
 import 'app/presentation/controllers/session_controller.dart';
 import 'app/presentation/controllers/text_scale_controller.dart';
 import 'app/presentation/controllers/theme_controller.dart';
-import 'app/routes/app_routes.dart';
+import 'app/routes/app_pages.dart';
 import 'core/theme/app_colors_theme.dart';
 import 'core/theme/app_theme.dart';
 import 'core/values/routes.dart';
@@ -48,7 +47,6 @@ Future<void> _initHive() async {
   Hive.registerAdapter(SurveyQuestionModelAdapter());
   Hive.registerAdapter(JumperModelAdapter());
   Hive.registerAdapter(SectionsModelAdapter());
-  Hive.registerAdapter(RevisitModelAdapter());
 
   await Future.wait([
     Hive.openBox('authBox'),
@@ -57,7 +55,6 @@ Future<void> _initHive() async {
     Hive.openBox<SurveyRespondedModel>('surveysRespondedBox'),
     Hive.openBox<StatisticsModel>('statisticsBox'),
     Hive.openBox<SurveyorModel>('surveyorBox'),
-    Hive.openBox<RevisitModel>('revisitsBox'),
     Hive.openBox('settings'),
   ]);
 }

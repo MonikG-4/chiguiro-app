@@ -9,7 +9,6 @@ import '../../domain/entities/survey.dart';
 import '../../domain/entities/survey_responded.dart';
 import '../../domain/entities/surveyor.dart';
 import '../../domain/repositories/i_home_repository.dart';
-import '../graphql/mutations/password_mutations.dart';
 import '../graphql/queries/survey_query.dart';
 import '../graphql/queries/survey_responded_query.dart';
 import '../graphql/queries/surveyor_query.dart';
@@ -23,19 +22,6 @@ class HomeRepository extends BaseRepository implements IHomeRepository {
   final LocalStorageService _localStorageService = Get.find();
 
   HomeRepository();
-
-  @override
-  Future<Either<Failure, bool>> changePassword(
-      int pollsterId, String password) async {
-    return safeApiCall<bool>(
-      request: () => _graphqlService.mutate(
-        document: PasswordMutations.pollsterChangePassword,
-        variables: {"id": pollsterId, "password": password},
-      ),
-      onSuccess: (data) => data['pollsterChangePassword'] == null,
-      dataKey: 'pollsterChangePassword',
-    );
-  }
 
   @override
   Future<Either<Failure, List<Survey>>> fetchSurveys(int surveyorId,
@@ -91,13 +77,12 @@ class HomeRepository extends BaseRepository implements IHomeRepository {
   }
 
   @override
-  Future<Either<Failure, List<SurveyResponded>>> fetchSurveyResponded(
-      String homeCode, int surveyorId) async {
+  Future<Either<Failure, List<SurveyResponded>>> fetchSurveyResponded(int surveyorId) async {
     return safeApiCallWithCache<List<SurveyResponded>>(
       request: () => _graphqlService.query(
         document: SurveyRespondedQuery.pollsterStatisticHome,
         variables: {
-          'homeCode': homeCode,
+          'homeCode': '',
           'pollsterId': surveyorId,
         },
       ),

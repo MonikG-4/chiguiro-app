@@ -18,9 +18,7 @@ class HomePage extends GetView<HomeController> {
     final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return Obx(() => BodyWrapper(
           onRefresh: () async {
-            controller.isDownloadingSurveys.value = true;
             await controller.refreshAllData(forceServer: true);
-            controller.isDownloadingSurveys.value = false;
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,7 +34,6 @@ class HomePage extends GetView<HomeController> {
                     onSurveyTap: (survey) => _redirectToSurvey(survey),
                   ),
                   const SizedBox(height: 8),
-                  // Si ya hay código generado, mostrar loading o contenido
                   controller.isSurveysRespondedLoading.value
                       ? const Padding(
                           padding: EdgeInsets.only(top: 20),
@@ -66,7 +63,6 @@ class HomePage extends GetView<HomeController> {
         Routes.SURVEY,
         arguments: {
           'survey': survey,
-          'homeCode': controller.homeCode.value,
         },
       )?.then((_) => controller.refreshAllData(all: false));
     } else {
@@ -74,7 +70,6 @@ class HomePage extends GetView<HomeController> {
         Routes.SURVEY_WITHOUT_RESPONSE,
         arguments: {
           'survey': survey,
-          'homeCode': controller.homeCode.value,
         },
       )?.then((_) => controller.refreshAllData(all: false));
     }

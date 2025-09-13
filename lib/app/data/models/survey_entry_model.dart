@@ -4,41 +4,33 @@ part 'survey_entry_model.g.dart';
 
 @HiveType(typeId: 1)
 class SurveyEntryModel {
-  @HiveField(0)
-  final String homeCode;
 
-  @HiveField(1)
+  @HiveField(0)
   final int projectId;
 
-  @HiveField(2)
+  @HiveField(1)
   final int pollsterId;
 
-  @HiveField(3)
+  @HiveField(2)
   final String? audio;
 
-  @HiveField(4)
+  @HiveField(3)
   final List<Map<String, dynamic>> answers;
 
-  @HiveField(5)
+  @HiveField(4)
   final String? latitude;
 
-  @HiveField(6)
+  @HiveField(5)
   final String? longitude;
 
-  @HiveField(7)
+  @HiveField(6)
   final String startedOn;
 
-  @HiveField(8)
+  @HiveField(7)
   final String finishedOn;
 
-  @HiveField(9)
-  final String? comments;
-
-  @HiveField(10)
-  final bool? revisit;
 
   SurveyEntryModel({
-    required this.homeCode,
     required this.projectId,
     required this.pollsterId,
     this.audio,
@@ -47,13 +39,10 @@ class SurveyEntryModel {
     this.longitude,
     required this.startedOn,
     required this.finishedOn,
-    this.comments,
-    this.revisit,
   });
 
   factory SurveyEntryModel.fromJson(Map<String, dynamic> json) {
     return SurveyEntryModel(
-      homeCode: json['homeCode'],
       projectId: json['projectId'],
       pollsterId: json['pollsterId'],
       audio: json['audioBase64'],
@@ -62,14 +51,11 @@ class SurveyEntryModel {
       longitude: json['longitude'],
       startedOn: json['startedOn'],
       finishedOn: json['finishedOn'],
-      comments: json['comments'],
-      revisit: json['revisit'],
     );
   }
 
   factory SurveyEntryModel.fromMap(Map<String, dynamic> map) {
     return SurveyEntryModel(
-      homeCode: map['homeCode'],
       projectId: map['projectId'],
       pollsterId: map['pollsterId'],
       audio: map['audio'],
@@ -78,14 +64,11 @@ class SurveyEntryModel {
       longitude: map['longitude'],
       startedOn: map['startedOn'],
       finishedOn: map['finishedOn'],
-      comments: map['comments'],
-      revisit: map['revisit'],
     );
   }
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{
-      'homeCode': homeCode,
       'projectId': projectId,
       'pollsterId': pollsterId,
       'answers': answers,
@@ -94,8 +77,6 @@ class SurveyEntryModel {
       if (audio != null && audio!.isNotEmpty) 'audio': audio,
       if (latitude != null && latitude!.isNotEmpty) 'latitude': latitude,
       if (longitude != null && longitude!.isNotEmpty) 'longitude': longitude,
-      if (comments != null && comments!.isNotEmpty) 'comments': comments,
-      if (revisit != null) 'revisit': revisit,
     };
 
     return data;

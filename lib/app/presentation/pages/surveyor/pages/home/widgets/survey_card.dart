@@ -15,10 +15,7 @@ class SurveyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).extension<AppColorScheme>()!;
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      color: scheme.secondBackground,
       child: InkWell(
         onTap: onTap,
         child: ListTile(

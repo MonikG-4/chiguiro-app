@@ -21,15 +21,10 @@ class SessionController extends GetxController {
     isAuthenticated.value = _cacheStorageService.isAuthenticated;
   }
 
-  void handleSessionExpired() {
-    _cacheStorageService.clearData();
-    _localStorageService.clearAll();
-    Get.offAllNamed(Routes.LOGIN);
-  }
-
-  void logout() async {
-    _cacheStorageService.clearData();
+  Future<void> logout() async {
+    await _cacheStorageService.clearData();
     await _localStorageService.clearAll();
     Get.offAllNamed(Routes.LOGIN);
   }
+
 }

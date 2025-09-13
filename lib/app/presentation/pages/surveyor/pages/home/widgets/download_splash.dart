@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../../core/theme/app_colors_theme.dart';
+
 class DownloadSplash extends StatelessWidget {
   const DownloadSplash({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1E293B),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -20,9 +21,9 @@ class DownloadSplash extends StatelessWidget {
                   child: CircularProgressIndicator(
                     strokeWidth: 4,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.white.withOpacity(0.8),
+                      Theme.of(context).extension<AppColorScheme>()!.onFirstBackground,
                     ),
-                    backgroundColor: Colors.white.withOpacity(0.3),
+                    backgroundColor: Theme.of(context).extension<AppColorScheme>()!.onFirstBackground.withOpacity(0.3),
                   ),
                 ),
                 SizedBox(
@@ -34,11 +35,7 @@ class DownloadSplash extends StatelessWidget {
                     height: 60,
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Icon(
-                        Icons.app_registration,
-                        size: 40,
-                        color: Color(0xFF00695C),
-                      );
+                      return const Icon(Icons.app_registration, size: 40);
                     },
                   ),
                 ),
@@ -52,7 +49,6 @@ class DownloadSplash extends StatelessWidget {
                   Text(
                     'Espera un momento...',
                     style: TextStyle(
-                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
                     ),
@@ -61,7 +57,6 @@ class DownloadSplash extends StatelessWidget {
                   Text(
                     'Se están descargando encuestas. Si sales ahora, no podrás acceder a ellas.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white),
                   ),
                 ],
               ),

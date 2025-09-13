@@ -46,13 +46,42 @@ class _QuestionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).extension<AppColorScheme>()!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (question.type == 'Location')
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    if (question.mandatory)
+                      const TextSpan(
+                        text: '* ',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    TextSpan(
+                      text: 'P${question.sort} ',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColorScheme.primary,
+                      ),
+                    ),
+                    TextSpan(
+                      text: question.question,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                softWrap: true,
+                overflow: TextOverflow.visible,
+              ),
+            ),
+
+            if (question.type == 'Location') ...[
+              const SizedBox(width: 8),
               InkWell(
                 onTap: () => controller.getLocation(question),
                 borderRadius: BorderRadius.circular(8),
@@ -83,32 +112,7 @@ class _QuestionHeader extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-
-        const SizedBox(height: 4),
-
-        Text.rich(
-          TextSpan(
-            children: [
-              if (question.mandatory)
-                const TextSpan(
-                  text: '* ',
-                  style: TextStyle(color: Colors.red),
-                ),
-              TextSpan(
-                text: 'P${question.sort} ',
-                style: const TextStyle(
-                    fontWeight: FontWeight.w600, color: AppColorScheme.primary
-                ),
-              ),
-              TextSpan(
-                text: question.question,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-          softWrap: true,
-          overflow: TextOverflow.visible,
+          ],
         ),
 
         if (question.description != null && question.description!.isNotEmpty) ...[
@@ -123,7 +127,6 @@ class _QuestionHeader extends StatelessWidget {
         ],
       ],
     );
-
   }
 }
 
