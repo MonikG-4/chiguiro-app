@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 
-/// Callback con prioridad para eventos de conectividad
 class CallbackEntry {
   final int priority;
   final Future<void> Function() callback;
@@ -13,7 +13,6 @@ class CallbackEntry {
   const CallbackEntry(this.priority, this.callback, [this.id]);
 }
 
-/// Servicio de conectividad simplificado
 class ConnectivityService extends GetxService with WidgetsBindingObserver {
   static const _retryDelay = Duration(milliseconds: 800);
   static const _checkUrl = 'https://www.google.com';
@@ -23,8 +22,8 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
 
   final RxBool _isOnline = true.obs;
   final Completer<void> _initCompleter = Completer<void>();
-  final List<CallbackEntry> _onConnectedCallbacks = [];
-  final List<CallbackEntry> _onDisconnectedCallbacks = [];
+  final _onConnectedCallbacks = <CallbackEntry>[];
+  final _onDisconnectedCallbacks = <CallbackEntry>[];
 
   StreamSubscription<List<ConnectivityResult>>? _subscription;
   Timer? _debounceTimer;
@@ -66,7 +65,7 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
 
     try {
       final hasBasicConnectivity = !results.contains(ConnectivityResult.none);
-      bool hasInternet = false;
+      var hasInternet = false;
 
       if (hasBasicConnectivity) {
         hasInternet = await _checkInternet();
@@ -79,7 +78,6 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
 
       if (_isOnline.value != hasInternet) {
         _isOnline.value = hasInternet;
-
         await _runCallbacks(hasInternet);
       }
     } finally {
@@ -87,28 +85,32 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
     }
   }
 
+  /// 🔍 Valida acceso real a internet
   Future<bool> _checkInternet() async {
     try {
-      final response = await http.head(
-        Uri.parse(_checkUrl),
-      ).timeout(const Duration(seconds: 3));
+      // 1️⃣ Chequeo rápido con DNS lookup (mejor en iOS)
+      final result = await InternetAddress.lookup('example.com')
+          .timeout(const Duration(seconds: 2));
+      if (result.isEmpty || result.first.rawAddress.isEmpty) return false;
 
-      print('HEAD status: ${response.statusCode}');
+      // 2️⃣ HEAD a Google (confirma salida real)
+      final response = await _httpClient
+          .head(Uri.parse(_checkUrl))
+          .timeout(const Duration(seconds: 3));
+
       return response.statusCode >= 200 && response.statusCode < 400;
     } catch (e) {
-      print('Check internet failed: $e');
+      Get.log('Check internet failed: $e', isError: true);
       return false;
     }
   }
 
   Future<void> _runCallbacks(bool isConnected) async {
-    final callbacks = isConnected ? _onConnectedCallbacks : _onDisconnectedCallbacks;
+    final callbacks =
+    isConnected ? _onConnectedCallbacks : _onDisconnectedCallbacks;
     if (callbacks.isEmpty) return;
 
-    final sorted = List<CallbackEntry>.from(callbacks)
-      ..sort((a, b) => a.priority.compareTo(b.priority));
-
-    for (final entry in sorted) {
+    for (final entry in [...callbacks]..sort((a, b) => a.priority.compareTo(b.priority))) {
       try {
         await entry.callback();
       } catch (e) {
@@ -117,10 +119,8 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
     }
   }
 
-  /// Espera a que el servicio esté listo
   Future<void> waitForInit() => _initCompleter.future;
 
-  /// Fuerza verificación de conectividad
   Future<bool> forceCheck() async {
     await waitForInit();
     final result = await _connectivity.checkConnectivity();
@@ -131,34 +131,29 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-
-    // Forzar verificación cuando la app vuelve al foreground
     if (state == AppLifecycleState.resumed) {
-      // Pequeño delay para que la red se estabilice
-      Future.delayed(const Duration(milliseconds: 500), () {
-        forceCheck();
-      });
+      Future.delayed(const Duration(milliseconds: 500), forceCheck);
     }
   }
 
-  /// Espera conexión estable
-  Future<bool> waitForConnection([Duration timeout = const Duration(milliseconds: 500)]) async {
+  Future<bool> waitForConnection(
+      [Duration timeout = const Duration(milliseconds: 500)]) async {
     await waitForInit();
     if (isOnline) return true;
 
     final completer = Completer<bool>();
     Timer? timer;
-    StreamSubscription? sub;
+    late final StreamSubscription sub;
 
     timer = Timer(timeout, () {
-      sub?.cancel();
+      sub.cancel();
       if (!completer.isCompleted) completer.complete(false);
     });
 
     sub = _isOnline.listen((connected) {
       if (connected) {
         timer?.cancel();
-        sub?.cancel();
+        sub.cancel();
         if (!completer.isCompleted) completer.complete(true);
       }
     });
@@ -166,15 +161,13 @@ class ConnectivityService extends GetxService with WidgetsBindingObserver {
     return completer.future;
   }
 
-  /// Registra callback con prioridad
-  void addCallback(bool onConnected, Future<void> Function() callback, {int priority = 0, String? id}) {
+  void addCallback(bool onConnected, Future<void> Function() callback,
+      {int priority = 0, String? id}) {
     final list = onConnected ? _onConnectedCallbacks : _onDisconnectedCallbacks;
-
     if (id != null) list.removeWhere((e) => e.id == id);
     list.add(CallbackEntry(priority, callback, id));
   }
 
-  /// Remueve callback por ID
   void removeCallback(bool onConnected, String id) {
     final list = onConnected ? _onConnectedCallbacks : _onDisconnectedCallbacks;
     list.removeWhere((e) => e.id == id);
