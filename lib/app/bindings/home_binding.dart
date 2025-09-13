@@ -8,6 +8,6 @@ class HomeBinding extends Bindings {
   @override
   void dependencies() {
     Get.put<IHomeRepository>( HomeRepository());
-    Get.put(HomeController(Get.find<IHomeRepository>()) , permanent: true);
+    Get.lazyPut<HomeController>(() => HomeController(Get.find<IHomeRepository>()) , fenix: true);
   }
 }

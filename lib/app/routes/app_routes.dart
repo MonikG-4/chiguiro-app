@@ -76,7 +76,7 @@ class AppPages {
     ),
     GetPage(
       name: Routes.ACCESSIBILITY,
-      page: () => const AccessibilityPage (),
+      page: () => const AccessibilityPage(),
     ),
     GetPage(
       name: Routes.PERMISSIONS,

@@ -3,7 +3,6 @@ import 'package:hive/hive.dart';
 
 import '../../app/domain/entities/auth_response.dart';
 
-// this is not a cache storage service .. is a auth service ...
 class AuthStorageService extends GetxService {
   final _authStorage = Rx<AuthResponse?>(null);
   final _authToken = Rx<String?>(null);

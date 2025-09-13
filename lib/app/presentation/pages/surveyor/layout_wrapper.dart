@@ -33,35 +33,44 @@ class _DashboardPageState extends State<DashboardPage> {
   final RxInt selectedIndex = 0.obs;
   int lastIndex = 0;
 
-  // Páginas por índice
-  final pages = <int, Widget>{
-    0: const HomePage(),
-    1: const StatisticPage(),
-    2: const PendingSurveysPage(),
-    3: const SettingsPage(),
-  };
-
-  // Items de navegación
-  final navItems = [
-    {'icon': Icons.home_outlined, 'label': 'Inicio'},
-    {'icon': Icons.stacked_bar_chart_outlined, 'label': 'Estadísticas'},
-    {'icon': Icons.cloud_upload_outlined, 'label': 'En cola'},
-    {'icon': Icons.settings_outlined, 'label': 'Ajustes'},
-  ];
-
-  // Bindings por índice
-  final bindings = <int, Bindings>{
+  final Map<int, Bindings> _bindings = {
     0: HomeBinding(),
     1: StatisticBinding(),
     2: PendingSurveyBinding(),
     3: SettingsBinding(),
   };
 
+  late final Map<int, WidgetBuilder> _pageBuilders = {
+    0: (_) => const HomePage(),
+    1: (_) => const StatisticPage(),
+    2: (_) => const PendingSurveysPage(),
+    3: (_) => const SettingsPage(),
+  };
+
+  void _disposeTab(int index) {
+    void _deleteIf<T>() {
+      if (Get.isRegistered<T>()) Get.delete<T>(force: true);
+    }
+
+    switch (index) {
+      case 0: _deleteIf<HomeController>(); break;
+      case 1: _deleteIf<StatisticController>(); break;
+      case 2: _deleteIf<PendingSurveyController>(); break;
+      case 3: _deleteIf<SettingsController>(); break;
+      default: break;
+    }
+  }
+
+  void _cleanupAll() {
+    for (final i in [0, 1, 2, 3]) {
+      _disposeTab(i);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    // Cargamos la primera pestaña
-    bindings[0]?.dependencies();
+    _bindings[0]?.dependencies();
   }
 
   Future<bool> _onWillPop() async {
@@ -71,41 +80,34 @@ class _DashboardPageState extends State<DashboardPage> {
         confirmText: 'Salir',
       ),
     );
+    if (confirmed == true) {
+      _cleanupAll();
+      Get.closeAllSnackbars();
+    }
     return confirmed ?? false;
   }
 
   void _onTabSelected(int index) {
     if (index == selectedIndex.value) return;
 
-    // Limpia el controller del índice anterior (si existe)
-    switch (lastIndex) {
-      case 0:
-        if (Get.isRegistered<HomeController>()) Get.delete<HomeController>();
-        break;
-      case 1:
-        if (Get.isRegistered<StatisticController>()) Get.delete<StatisticController>();
-        break;
-      case 2:
-        if (Get.isRegistered<PendingSurveyController>()) Get.delete<PendingSurveyController>();
-        break;
-      case 3:
-        if (Get.isRegistered<SettingsController>()) Get.delete<SettingsController>();
-        break;
-    }
+    _disposeTab(lastIndex);
 
-    bindings[index]?.dependencies();
+    _bindings[index]?.dependencies();
 
     selectedIndex.value = index;
     lastIndex = index;
   }
 
   @override
+  void dispose() {
+    _cleanupAll();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).extension<AppColorScheme>()!;
     final user = Get.find<AuthStorageService>().authResponse!;
-
-    final HomeController? homeCtrl =
-    Get.isRegistered<HomeController>() ? Get.find<HomeController>() : null;
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -114,8 +116,12 @@ class _DashboardPageState extends State<DashboardPage> {
           Scaffold(
             backgroundColor: scheme.firstBackground,
             appBar: _buildAppBar(user, scheme),
-            body: Obx(() => pages[selectedIndex.value] ??
-                const Center(child: Text('No page found'))),
+            body: Obx(() {
+              final builder = _pageBuilders[selectedIndex.value];
+              return builder != null
+                  ? builder(context)
+                  : const Center(child: Text('No page found'));
+            }),
             bottomNavigationBar: SizedBox(
               height: 80,
               child: Obx(() => MediaQuery.removePadding(
@@ -126,14 +132,16 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
 
-          if (homeCtrl != null)
-            Obx(() {
-              if (homeCtrl.isDownloadingSurveys.value &&
-                  homeCtrl.connectivityService.isOnline) {
-                return const Positioned.fill(child: DownloadSplash());
-              }
+          Obx(() {
+            if (!Get.isRegistered<HomeController>()) {
               return const SizedBox.shrink();
-            }),
+            }
+            final homeCtrl = Get.find<HomeController>();
+            final show = homeCtrl.isDownloadingSurveys.value &&
+                homeCtrl.connectivityService.isOnline;
+            return show ? const Positioned.fill(child: DownloadSplash())
+                : const SizedBox.shrink();
+          }),
         ],
       ),
     );
@@ -146,7 +154,9 @@ class _DashboardPageState extends State<DashboardPage> {
       decoration: BoxDecoration(
         color: scheme.firstBackground,
         border: Border(
-          top: BorderSide(color: scheme.border.withOpacity(isDark ? 0.30 : 0.55)),
+          top: BorderSide(
+            color: scheme.border.withOpacity(isDark ? 0.30 : 0.55),
+          ),
         ),
       ),
       child: BottomNavigationBar(
@@ -156,30 +166,29 @@ class _DashboardPageState extends State<DashboardPage> {
         currentIndex: selectedIndex.value,
         selectedItemColor: scheme.iconBackground,
         unselectedItemColor: scheme.secondaryText.withOpacity(0.70),
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 11),
+        selectedLabelStyle:
+        const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        unselectedLabelStyle:
+        const TextStyle(fontWeight: FontWeight.normal, fontSize: 11),
         onTap: _onTabSelected,
-        items: List.generate(navItems.length, (index) {
-          final item = navItems[index];
-          final isSelected = selectedIndex.value == index;
-
-          return BottomNavigationBarItem(
-            icon: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                if (isSelected)
-                  Container(
-                    height: 2,
-                    width: 64,
-                    color: scheme.iconBackground,
-                  ),
-                const SizedBox(height: 6),
-                Icon(item['icon'] as IconData, size: 28),
-              ],
-            ),
-            label: item['label'] as String,
-          );
-        }),
+        items: const [
+          BottomNavigationBarItem(
+            icon: _NavIcon(icon: Icons.home_outlined),
+            label: 'Inicio',
+          ),
+          BottomNavigationBarItem(
+            icon: _NavIcon(icon: Icons.stacked_bar_chart_outlined),
+            label: 'Estadísticas',
+          ),
+          BottomNavigationBarItem(
+            icon: _NavIcon(icon: Icons.cloud_upload_outlined),
+            label: 'En cola',
+          ),
+          BottomNavigationBarItem(
+            icon: _NavIcon(icon: Icons.settings_outlined),
+            label: 'Ajustes',
+          ),
+        ],
       ),
     );
   }
@@ -207,5 +216,26 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
+}
 
+class _NavIcon extends StatelessWidget {
+  final IconData icon;
+  const _NavIcon({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).extension<AppColorScheme>()!;
+    final bnc = context.findAncestorWidgetOfExactType<BottomNavigationBar>();
+    final selectedIndex = (bnc?.currentIndex ?? 0);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        if (DefaultTextStyle.of(context).style.fontWeight == FontWeight.bold)
+          Container(height: 2, width: 64, color: scheme.iconBackground),
+        const SizedBox(height: 6),
+        Icon(icon, size: 28),
+      ],
+    );
+  }
 }
