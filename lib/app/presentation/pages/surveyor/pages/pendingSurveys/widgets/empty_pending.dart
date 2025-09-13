@@ -8,25 +8,27 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).extension<AppColorScheme>()!;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 70),
-        child: Column(
-          children: [
-            const Icon(Icons.access_time_rounded,
-                size: 92, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text('Encuestas pendientes',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(
-              'Aquí se guardarán las encuestas que no pudieron enviarse por falta de conexión. '
-                  'Se enviarán automáticamente al reconectarte o puedes subirlas manualmente con el botón.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: scheme.secondaryText, height: 1.35),
-            ),
-          ],
-        ),
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: scheme.firstBackground,
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Icon(Icons.access_time_rounded, size: 92, color: Colors.grey),
+          const SizedBox(height: 48),
+          const Text('Encuestas pendientes',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text(
+            'Aquí se guardarán las encuestas que no pudieron enviarse por falta de conexión. '
+            'Se enviarán automáticamente al reconectarte o puedes subirlas manualmente con el botón.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: scheme.secondaryText, height: 1.35),
+          ),
+        ],
       ),
     );
   }

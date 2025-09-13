@@ -225,28 +225,35 @@ class SurveyController extends GetxController {
       SurveyQuestion question,
       SignatureController signatureController,
       ) async {
-    if (!signatureController.isNotEmpty) return;
+    if (signatureController.isEmpty) return;
 
-    final isDark = Get.isDarkMode;
     final signatureImage = await signatureController.toImage();
+    if (signatureImage == null) return;
 
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
 
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, signatureImage!.width.toDouble(), signatureImage.height.toDouble()),
-      Paint()..color = isDark ? Colors.black : Colors.white,
+      Rect.fromLTWH(0, 0, signatureImage.width.toDouble(), signatureImage.height.toDouble()),
+      Paint()..color = Colors.white,
     );
 
-    canvas.drawImage(signatureImage, Offset.zero, Paint());
+    canvas.drawImage(
+      signatureImage,
+      Offset.zero,
+      Paint()..colorFilter = const ui.ColorFilter.mode(Colors.black, BlendMode.srcIn),
+    );
 
     final finalImage = await recorder
         .endRecording()
         .toImage(signatureImage.width, signatureImage.height);
 
     final byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
-    final file = File('${(await getTemporaryDirectory()).path}/signature_${question.id}.png')
-      ..writeAsBytesSync(byteData!.buffer.asUint8List());
+    if (byteData == null) return;
+
+    final file = File(
+      '${(await getTemporaryDirectory()).path}/signature_${question.id}.png',
+    )..writeAsBytesSync(byteData.buffer.asUint8List());
 
     responses[question.id] = {
       'question': question.question,
@@ -255,6 +262,7 @@ class SurveyController extends GetxController {
     };
     responses.refresh();
   }
+
 
 
   Future<void> _loadSurveyData() async {
