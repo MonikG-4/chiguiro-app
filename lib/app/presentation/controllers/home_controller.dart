@@ -66,12 +66,12 @@ class HomeController extends GetxController {
   Future<void> _initializeDashboard() async {
     try {
       connectivityService.addCallback(true, priority: 2, () async {
-        await refreshAllData(forceServer: true);
+        refreshAllData();
       }, id: 'dashboard_surveyor');
 
       MessageHandler.setupSnackbarListener(message);
 
-      await refreshAllData(forceServer: true);
+      refreshAllData();
     } catch (e) {
       print('Error initializing dashboard: $e');
     }
