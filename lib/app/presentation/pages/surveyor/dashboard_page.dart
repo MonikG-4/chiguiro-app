@@ -100,7 +100,6 @@ class _DashboardPageState extends State<DashboardPage> {
     final homeCtrl = Get.find<HomeController>();
 
     return Obx(() {
-      // 👇 Mostrar splash cuando fetchSurveys está corriendo
       if (homeCtrl.isSurveysLoading.value) {
         return const DownloadSplash();
       }

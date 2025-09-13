@@ -66,7 +66,7 @@ class HomeController extends GetxController {
   Future<void> _initializeDashboard() async {
     try {
       connectivityService.addCallback(true, priority: 2, () async {
-        refreshAllData();
+        await refreshAllData(forceServer: true);
       }, id: 'dashboard_surveyor');
 
       MessageHandler.setupSnackbarListener(message);
