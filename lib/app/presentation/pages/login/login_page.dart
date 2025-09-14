@@ -26,7 +26,7 @@ class LoginPage extends GetView<AuthController> {
           alignment: Alignment.centerLeft,
           child: Column(
             children: [
-            SizedBox(height: 69),
+            SizedBox(height: 40),
             Text(
               'Ingresar',
               style: TextStyle(

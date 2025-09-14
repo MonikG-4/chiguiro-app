@@ -25,7 +25,7 @@ class ForgotPasswordPage extends GetView<AuthController> {
           alignment: Alignment.centerLeft,
           child: Column(
             children: [
-              SizedBox(height: 69),
+              SizedBox(height: 40),
               Text(
                 '¿Olvidaste la contraseña?',
                 style: TextStyle(
