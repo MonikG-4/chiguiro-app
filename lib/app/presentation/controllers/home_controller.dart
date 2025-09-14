@@ -159,7 +159,7 @@ class HomeController extends GetxController {
         await Future.delayed(const Duration(seconds: 1));
       }
       if (survey.voiceRecorder == true && !audioPermissionRequested) {
-        await _audioService.requestAudioPermission();
+        await _audioService.requestPermission();
         audioPermissionRequested = true;
         await Future.delayed(const Duration(seconds: 1));
       }

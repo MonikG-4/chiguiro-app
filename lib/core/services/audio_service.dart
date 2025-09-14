@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:get/get.dart';
@@ -11,16 +12,16 @@ import '../utils/message_handler.dart';
 import '../utils/snackbar_message_model.dart';
 
 class AudioService extends GetxService {
-  final FlutterSoundRecorder _audioRecorder = FlutterSoundRecorder();
+  final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
 
-  final RxBool isRecording = false.obs;
-  final RxBool isInitialized = false.obs;
-  final RxString recordingPath = ''.obs;
-  final RxInt recordingDuration = 0.obs;
+  final isRecording = false.obs;
+  final isInitialized = false.obs;
+  final recordingPath = ''.obs;
+  final recordingDuration = 0.obs;
+  final amplitude = 0.0.obs;
+  final message = Rx<SnackbarMessage>(SnackbarMessage());
+
   Timer? _timer;
-  final RxDouble amplitude = 0.0.obs;
-
-  final Rx<SnackbarMessage> message = Rx<SnackbarMessage>(SnackbarMessage());
 
   @override
   Future<void> onInit() async {
@@ -28,54 +29,39 @@ class AudioService extends GetxService {
     MessageHandler.setupSnackbarListener(message);
   }
 
-  Future<bool> requestAudioPermission() async {
-    return await _checkPermission();
-  }
-
-  Future<bool> _checkPermission() async {
-    PermissionStatus status = await Permission.microphone.status;
-
-    if (status.isDenied) {
-      status = await Permission.microphone.request();
-    }
+  Future<bool> requestPermission() async {
+    var status = await Permission.microphone.status;
+    if (status.isDenied) status = await Permission.microphone.request();
 
     if (status.isPermanentlyDenied) {
       await _showSettingsDialog('micrófono');
       return false;
     }
-
     return status.isGranted || status.isLimited;
   }
 
-
-  Future<void> _initializeRecorder() async {
+  Future<void> initialize() async {
     if (isInitialized.value) return;
+    if (!await requestPermission()) return;
 
     try {
-      await _audioRecorder.openRecorder();
+      await _recorder.openRecorder();
       isInitialized.value = true;
-    } catch (e) {
-      message.update((val) {
-        val?.title = 'Servicio de audio';
-        val?.message = 'No se pudo inicializar el grabador';
-        val?.state = 'error';
-      });
+    } catch (_) {
+      _showError('No se pudo inicializar el grabador');
     }
   }
 
   Future<void> startRecording() async {
-    if (!isInitialized.value) {
-      await requestAudioPermission();
-      await _initializeRecorder();
-    }
-
     if (isRecording.value) return;
+    await initialize();
+    if (!isInitialized.value) return;
 
     try {
       final tempDir = await getTemporaryDirectory();
       final path = '${tempDir.path}/audio_record.aac';
 
-      await _audioRecorder.startRecorder(
+      await _recorder.startRecorder(
         toFile: path,
         codec: Codec.aacADTS,
         bitRate: 128000,
@@ -86,52 +72,40 @@ class AudioService extends GetxService {
       isRecording.value = true;
       recordingDuration.value = 0;
 
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _timer?.cancel();
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
         recordingDuration.value++;
       });
-    } catch (e) {
-      message.update((val) {
-        val?.title = 'Servicio de audio';
-        val?.message = 'No se pudo iniciar la grabación';
-        val?.state = 'error';
-      });
+    } catch (_) {
+      _showError('No se pudo iniciar la grabación');
     }
   }
 
   Future<String?> stopRecording() async {
-    if (!isRecording.value) {
-      return null;
-    }
+    if (!isRecording.value) return null;
 
     try {
-      final path = await _audioRecorder.stopRecorder();
+      final path = await _recorder.stopRecorder();
       isRecording.value = false;
-
       _timer?.cancel();
 
       if (path != null) {
         final file = File(path);
-        final bytes = await file.readAsBytes();
-        final base64String = base64Encode(bytes);
-
-        return base64String;
+        return base64Encode(await file.readAsBytes());
       }
-    } catch (e) {
-      message.update((val) {
-        val?.title = 'Servicio de audio';
-        val?.message = 'No se pudo detener la grabación';
-        val?.state = 'error';
-      });
+    } catch (_) {
+      _showError('No se pudo detener la grabación');
     }
     return null;
   }
 
-  Future<void> _showSettingsDialog(String permissionType) async {
+  Future<void> _showSettingsDialog(String type) async {
     await Get.dialog(
       AlertDialog(
-        title: Text('Permiso de $permissionType requerido'),
+        title: Text('Permiso de $type requerido'),
         content: Text(
-            'Debes habilitar el acceso a tu $permissionType desde la configuración para continuar.'),
+          'Debes habilitar el acceso a tu $type desde la configuración para continuar.',
+        ),
         actions: [
           TextButton(
             onPressed: () async {
@@ -146,9 +120,25 @@ class AudioService extends GetxService {
     );
   }
 
+  void _showError(String msg) {
+    message.update((val) {
+      val?.title = 'Servicio de audio';
+      val?.message = msg;
+      val?.state = 'error';
+    });
+  }
+
   @override
-  void onClose() async {
-    await _audioRecorder.closeRecorder();
+  Future<void> onClose() async {
+    _timer?.cancel();
+    if (_recorder.isStopped) {
+      await _recorder.closeRecorder();
+    } else {
+      try {
+        await _recorder.stopRecorder();
+        await _recorder.closeRecorder();
+      } catch (_) {}
+    }
     super.onClose();
   }
 }

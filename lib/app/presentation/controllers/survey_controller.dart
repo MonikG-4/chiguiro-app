@@ -106,24 +106,37 @@ class SurveyController extends GetxController {
 
     if (survey.value?.geoLocation == true) {
       final hasLocationPermission =
-          await _locationService?.requestLocationPermission();
+      await _locationService?.requestLocationPermission();
       if (!hasLocationPermission!) {
         _showMessage(
-            'Permisos necesarios',
-            'Esta encuesta requiere acceso a tu ubicación. Por favor, otorga los permisos necesarios.',
-            'warning');
+          'Permisos necesarios',
+          'Esta encuesta requiere acceso a tu ubicación. Por favor, otorga los permisos necesarios.',
+          'warning',
+        );
         permissionsGranted = false;
       }
     }
 
     if (survey.value?.voiceRecorder == true) {
-      final hasAudioPermission = await _audioService?.requestAudioPermission();
+      final hasAudioPermission = await _audioService?.requestPermission();
       if (!hasAudioPermission!) {
         _showMessage(
-            'Permisos necesarios',
-            'Esta encuesta requiere acceso a tu micrófono. Por favor, otorga los permisos necesarios.',
-            'warning');
+          'Permisos necesarios',
+          'Esta encuesta requiere acceso a tu micrófono. Por favor, otorga los permisos necesarios.',
+          'warning',
+        );
         permissionsGranted = false;
+      } else {
+        try {
+          await _audioService?.initialize();
+        } catch (e) {
+          _showMessage(
+            'Error de audio',
+            'No se pudo inicializar el servicio de audio en este dispositivo.',
+            'error',
+          );
+          permissionsGranted = false;
+        }
       }
     }
 

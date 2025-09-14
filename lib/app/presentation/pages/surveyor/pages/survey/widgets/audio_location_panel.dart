@@ -75,8 +75,8 @@ class _LocationBadge extends StatelessWidget {
       height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: Color(0xFF31E981).withOpacity(0.1),
-        border: Border.all( color: Color(0xFF31E981)),
+        color: const Color(0xFF31E981).withOpacity(0.1),
+        border: Border.all( color: const Color(0xFF31E981)),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -104,8 +104,6 @@ class _LocationBadge extends StatelessWidget {
       ),
     );
 
-    // Si expanded es true, el padre ya envuelve con Expanded. Aquí devolvemos tal cual.
-    // Si es compacta, tampoco necesitamos Expanded aquí.
     return box;
   }
 }
@@ -155,7 +153,7 @@ class _RecorderPill extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Obx(() {
                     return CustomPaint(
-                      size: const Size(double.infinity as double, 22),
+                      size: const Size(double.infinity, 22),
                       painter: _BarsWavePainter(amplitude: audio.amplitude.value),
                     );
                   }),
