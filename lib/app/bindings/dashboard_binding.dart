@@ -10,7 +10,6 @@ import '../domain/repositories/i_settings_repository.dart';
 import '../domain/repositories/i_statistic_repository.dart';
 import '../presentation/controllers/home_controller.dart';
 import '../presentation/controllers/pending_survey_controller.dart';
-import '../presentation/controllers/permissions_controller.dart';
 import '../presentation/controllers/settings_controller.dart';
 import '../presentation/controllers/statistic_controller.dart';
 
@@ -26,8 +25,5 @@ class DashboardBinding extends Bindings {
     Get.lazyPut<PendingSurveyController>(() => PendingSurveyController(Get.find()));
     Get.lazyPut<StatisticController>(() => StatisticController(Get.find(), Get.find()));
     Get.lazyPut<SettingsController>(() => SettingsController(Get.find()));
-
-    Get.lazyPut(() => SettingsController(Get.find()));
-    Get.lazyPut(() => PermissionsController());
   }
 }

@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../../core/values/routes.dart';
 import '../bindings/auth_binding.dart';
 import '../bindings/dashboard_binding.dart';
+import '../bindings/permission_binding.dart';
 import '../bindings/survey_binding.dart';
 import '../presentation/pages/forgotPassword/forgot_password_page.dart';
 import '../presentation/pages/surveyor/dashboard_page.dart';
@@ -84,6 +85,7 @@ class AppPages {
     GetPage(
       name: Routes.PERMISSIONS,
       page: () => const PermissionsPage(),
+      binding: PermissionBinding(),
     ),
     GetPage(
       name: Routes.PERMISSION_DETAIL,

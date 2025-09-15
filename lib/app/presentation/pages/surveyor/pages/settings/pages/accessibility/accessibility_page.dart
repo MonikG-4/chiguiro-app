@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../../../../../../../../core/theme/app_colors_theme.dart';
 import 'widgets/theme_mode_selector.dart';
@@ -14,13 +13,6 @@ class AccessibilityPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Accesibilidad'),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-          ),
-          onPressed: () => Get.back(),
-          tooltip: 'Volver',
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
