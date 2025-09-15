@@ -87,6 +87,8 @@ class PermissionDetailPage extends StatelessWidget {
             final confirmed = await Get.dialog<bool>(
               ConfirmationDialog(
                 title: 'Actualizar configuración del dispositivo',
+                centerTitle: true,
+                showActions: false,
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -110,7 +112,6 @@ class PermissionDetailPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
                   ],
                 ),
               ),

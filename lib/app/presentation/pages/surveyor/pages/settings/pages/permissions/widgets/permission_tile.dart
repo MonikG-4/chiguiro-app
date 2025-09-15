@@ -44,7 +44,7 @@ class PermissionTile extends StatelessWidget {
                   color: status ? Colors.green : Colors.grey,
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Colors.black),
+              const Icon(Icons.chevron_right),
             ],
           ),
         ),
