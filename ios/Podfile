@@ -54,8 +54,8 @@ post_install do |installer|
         # dart: Permiso de microfono
         'PERMISSION_MICROPHONE=1',
         # dart: Permiso de ubicacion
-        'PERMISSION_LOCATION=1',
-        'PERMISSION_LOCATION_WHENINUSE=0',
+        'PERMISSION_LOCATION=0',
+        'PERMISSION_LOCATION_WHENINUSE=1',
         # dart: Permiso de camara
         'PERMISSION_CAMERA=1',
       ]
